@@ -1,6 +1,6 @@
 // MP Walkthrough — minimal offline-first service worker.
 // Bump CACHE_VERSION whenever index.html/icons change so every phone picks up the update.
-var CACHE_VERSION = 'mp-walk-v6';
+var CACHE_VERSION = 'mp-walk-v7';
 var PRECACHE = [
   './',
   './index.html',

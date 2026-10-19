@@ -2,7 +2,29 @@ CHANGELOG - MP Walkthrough & Shift Report
 ==========================================
 History of changes since the original Gemini-generated prototype HTML.
 
-v6 (current) - "Midnight" visual redesign + field filters
+v7 (current) - Design-token system (Radix Colors + Open Props + Apple HIG)
+------------------------------------------------------------------
+- Replaced the hand-picked palette with Radix Colors dark scales
+  (MIT, github.com/radix-ui/colors): 12-step scales for surfaces,
+  accent, and all 5 status hues; solid left-edge status rails, status
+  badges on step-9 solids, all colored TEXT on contrast-guaranteed
+  step-11 tones (fixes WCAG AA failures of the previous palette).
+- Open Props (MIT, github.com/argyleink/open-props) adopted:
+  dark-mode shadow/elevation tokens (incl. inner top highlight),
+  easing curves + durations, prefers-reduced-motion guard.
+- Apple HIG craft pass: color-scheme dark (dark keyboard + native
+  controls), iOS segmented-control styling for the cable scope row,
+  iOS Settings-style section headers (13px/600 + count), concentric
+  radii, press states with brightness dip at 120ms.
+- "Stamp landed" glow: tapping a side now fires a 550ms glow ring in
+  the status color (the tap feels alive).
+- Hall progress bar replaced with an SVG progress ring + % counter
+  (Apple/Lightning guidance: rings read as scoreboard, bars as
+  loading).
+- Dock glass recipe per backdrop-filter guidance (blur 20 /
+  saturate 180%), toast and undo restyled to tokens.
+
+v6 - "Midnight" visual redesign + field filters
 ------------------------------------------------------------------
 - Full visual overhaul: deeper midnight palette, frosted-glass header
   and bottom dock, pill-style hall tabs, status cards with colored
