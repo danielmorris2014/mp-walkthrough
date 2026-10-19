@@ -20,7 +20,7 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   html { -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0; padding: 0 0 calc(78px + env(safe-area-inset-bottom)) 0;
+    margin: 0; padding: 0 0 calc(168px + env(safe-area-inset-bottom)) 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.35;
   }
@@ -169,8 +169,22 @@
   .mp-hung   { background: var(--s-hung); color: #04291a; }
   .mp-remed  { background: var(--s-remed); color: #fff; }
 
+  .bottom-stack { position: fixed; bottom: 0; left: 0; right: 0; z-index: 60; }
+  .status-dock {
+    background: rgba(10, 16, 28, 0.98); border-top: 1px solid var(--border);
+    padding: 7px 10px 4px 10px;
+    padding-top: calc(7px + env(safe-area-inset-top) * 0);
+  }
+  .dock-label {
+    font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px;
+    color: var(--muted); margin: 1px 0 4px 0;
+  }
+  .dock-brush { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 6px; }
+  .dock-scope { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .dock-brush .brush-btn { padding: 9px 1px; font-size: 11px; min-height: 40px; border-radius: 9px; }
+  .dock-scope .scope-btn { padding: 7px 1px; font-size: 11px; min-height: 34px; }
+
   .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
     background: #0d1526; border-top: 1px solid var(--border);
     display: grid; grid-template-columns: repeat(4, 1fr);
     padding: 5px 6px calc(5px + env(safe-area-inset-bottom));
@@ -210,7 +224,7 @@
     font-size: 12.5px; border-left: 3px solid var(--accent);
   }
   .toast {
-    position: fixed; bottom: calc(86px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+    position: fixed; bottom: calc(175px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
     background: #10b981; color: #04291a; font-weight: 800; padding: 9px 17px; border-radius: 999px;
     font-size: 13px; display: none; z-index: 100; max-width: 90vw; text-align: center;
   }
@@ -252,28 +266,6 @@
 
   <!-- ===================== WALKTHROUGH ===================== -->
   <div id="panel-walk" class="panel active">
-    <div class="sticky-controls">
-      <div class="ctrl-label">
-        <span>1 &middot; Status stamp</span>
-        <span id="activeBrushLabel" style="color:var(--accent)">Ran &amp; Hung &bull; All cables</span>
-      </div>
-      <div class="brush-grid">
-        <button class="brush-btn b-hung active" onclick="setBrush('hung')">Ran &amp; Hung</button>
-        <button class="brush-btn b-ran" onclick="setBrush('ran')">Ran (Pulled)</button>
-        <button class="brush-btn b-prog" onclick="setBrush('prog')">In Progress</button>
-        <button class="brush-btn b-staged" onclick="setBrush('staged')">Staged</button>
-        <button class="brush-btn b-remed" onclick="setBrush('remed')">Remediation</button>
-        <button class="brush-btn b-none" onclick="setBrush('none')">Clear</button>
-      </div>
-      <div class="ctrl-label"><span>2 &middot; What a tap applies to</span></div>
-      <div class="scope-grid">
-        <button class="scope-btn active" id="sc-ALL" onclick="setScope('ALL')">ALL 3 CABLES</button>
-        <button class="scope-btn" id="sc-F144" onclick="setScope('F144')">144F</button>
-        <button class="scope-btn" id="sc-OCS" onclick="setScope('OCS')">OCS</button>
-        <button class="scope-btn" id="sc-CAT6" onclick="setScope('CAT6')">Copper</button>
-      </div>
-    </div>
-
     <div class="stat-bar" id="hallStats"></div>
     <div class="cable-stats" id="cableStats"></div>
 
@@ -402,6 +394,21 @@
     </div>
 
     <div class="card">
+      <div class="card-title">Night rollover &mdash; everything vs. changes</div>
+      <div class="muted" id="baselineInfo" style="margin-bottom:8px;"></div>
+      <div class="batch-row">
+        <select id="reportScope" onchange="renderReport()" style="flex:1; min-width:150px;">
+          <option value="all">Report shows: everything</option>
+          <option value="changes">Report shows: only changes since baseline</option>
+        </select>
+        <button class="btn btn-secondary" onclick="saveBaseline()">Save tonight as baseline</button>
+      </div>
+      <div class="batch-row" style="margin-top:6px;">
+        <button class="btn btn-ghost" onclick="clearBaseline()">Clear baseline</button>
+      </div>
+    </div>
+
+    <div class="card">
       <div class="card-title">Backup &amp; restore</div>
       <div class="muted" style="margin-bottom:8px;">Do a backup after each shift. The share sheet saves a small file to Files/iCloud &mdash; that file is your real safety net.</div>
       <div class="batch-row">
@@ -426,12 +433,31 @@
 <div class="toast" id="toast"></div>
 <textarea id="copyFallback" aria-hidden="true" tabindex="-1"></textarea>
 
-<nav class="bottom-nav">
-  <button class="nav-btn active" onclick="switchTab('walk', this)"><span>&#129524;</span><span>Walkthrough</span></button>
-  <button class="nav-btn" onclick="switchTab('crew', this)"><span>&#128119;</span><span>Crew</span></button>
-  <button class="nav-btn" onclick="switchTab('blockers', this)"><span>&#128679;</span><span>Blockers</span></button>
-  <button class="nav-btn" onclick="switchTab('report', this)"><span>&#128196;</span><span>Report</span></button>
-</nav>
+<div class="bottom-stack">
+  <div class="status-dock">
+    <div class="dock-label"><span id="activeBrushLabel" style="color:var(--accent)">Stamps: Ran &amp; Hung &bull; All cables</span></div>
+    <div class="dock-brush">
+      <button class="brush-btn b-hung active" onclick="setBrush('hung')">Hung</button>
+      <button class="brush-btn b-ran" onclick="setBrush('ran')">Ran</button>
+      <button class="brush-btn b-prog" onclick="setBrush('prog')">In&nbsp;Prog</button>
+      <button class="brush-btn b-staged" onclick="setBrush('staged')">Staged</button>
+      <button class="brush-btn b-remed" onclick="setBrush('remed')">Remed</button>
+      <button class="brush-btn b-none" onclick="setBrush('none')">Clear</button>
+    </div>
+    <div class="dock-scope">
+      <button class="scope-btn active" id="sc-ALL" onclick="setScope('ALL')">All cables</button>
+      <button class="scope-btn" id="sc-F144" onclick="setScope('F144')">144F</button>
+      <button class="scope-btn" id="sc-OCS" onclick="setScope('OCS')">OCS</button>
+      <button class="scope-btn" id="sc-CAT6" onclick="setScope('CAT6')">Copper</button>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab('walk', this)"><span>&#129524;</span><span>Walkthrough</span></button>
+    <button class="nav-btn" onclick="switchTab('crew', this)"><span>&#128119;</span><span>Crew</span></button>
+    <button class="nav-btn" onclick="switchTab('blockers', this)"><span>&#128679;</span><span>Blockers</span></button>
+    <button class="nav-btn" onclick="switchTab('report', this)"><span>&#128196;</span><span>Report</span></button>
+  </nav>
+</div>
 
 <div class="overlay" id="onboarding" style="display:none;">
   <div class="overlay-card">
@@ -503,6 +529,7 @@ function defaultState() {
     ].map(function (n) { return { name: n, active: true }; }),
     blockers: [],
     history: [],
+    baseline: null,
     halls: {}
   };
   s.halls['CB5_DH1'] = makeHall('CB5_DH1', 'CB5 DH1', 26, [
@@ -562,7 +589,7 @@ function saveState() {
   }
 }
 function snapshotCore() {
-  return JSON.stringify({ halls: state.halls, crewPool: state.crewPool, blockers: state.blockers, meta: state.meta, history: state.history });
+  return JSON.stringify({ halls: state.halls, crewPool: state.crewPool, blockers: state.blockers, meta: state.meta, history: state.history, baseline: state.baseline });
 }
 function pushUndo() {
   undoStack.push(snapshotCore());
@@ -574,6 +601,7 @@ function doUndo() {
   var snap = JSON.parse(undoStack.pop());
   state.halls = snap.halls; state.crewPool = snap.crewPool;
   state.blockers = snap.blockers; state.meta = snap.meta; state.history = snap.history;
+  if ('baseline' in snap) state.baseline = snap.baseline;
   saveState(); updateUndoBtn(); renderAll();
   showToast('Undone');
 }
@@ -1071,6 +1099,29 @@ function sideOverall(seg, cableFilter) {
   if (cableFilter) return seg[cableFilter];
   return (seg.F144 === seg.OCS && seg.OCS === seg.CAT6) ? seg.F144 : 'MIXED';
 }
+// A mixed cable side shows up ONCE in the report: grouped under its main
+// (majority) status, with the odd cables called out in the parentheses.
+function mixedBase(seg) {
+  var counts = {};
+  CABLES.forEach(function (c) { counts[seg[c]] = (counts[seg[c]] || 0) + 1; });
+  var keys = Object.keys(counts);
+  var base = keys[0];
+  keys.forEach(function (k) {
+    var ko = STATUS_ORDER.indexOf(k), bo = STATUS_ORDER.indexOf(base);
+    if (counts[k] > counts[base] || (counts[k] === counts[base] && ko > bo)) base = k;
+  });
+  if (base === 'none') {
+    var maxK = null;
+    keys.forEach(function (k) {
+      if (k !== 'none' && (maxK === null || STATUS_ORDER.indexOf(k) > STATUS_ORDER.indexOf(maxK))) maxK = k;
+    });
+    if (maxK) base = maxK;
+  }
+  var others = CABLES.filter(function (c) { return seg[c] !== base; }).map(function (c) {
+    return CABLE_LABEL[c] + (seg[c] === 'none' ? ' not started' : ' ' + STATUS_META[seg[c]].report.toLowerCase());
+  });
+  return { base: base, desc: others.join(', ') };
+}
 // Returns [{status, tokens}] for one hall at all statuses.
 // splitAnd=true (formal template) splits "A11–B11 & A13–B13" into two tokens.
 function hallStatusLines(hall, cableFilter, style, splitAnd) {
@@ -1093,13 +1144,14 @@ function hallStatusLines(hall, cableFilter, style, splitAnd) {
     runsOf(rem11).forEach(function (run) { tokens.push.apply(tokens, fmt11(run, style)); });
     runsOf(rem13).forEach(function (run) { tokens.push.apply(tokens, fmt13(run, style)); });
 
-    // Mixed sides (no cable filter): "511 (144F/OCS)" tokens for cables matching this status.
+    // Mixed sides: one token at the side's majority status, e.g. "1311 (Copper ran)".
     if (!cableFilter) {
       Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
         ['11', '13'].forEach(function (side) {
-          if (sideOverall(hall.rows[r][side], null) === 'MIXED') {
-            var hit = CABLES.filter(function (c) { return hall.rows[r][side][c] === target; });
-            if (hit.length) tokens.push(r + side + ' (' + hit.map(function (c) { return CABLE_LABEL[c]; }).join('/') + ')');
+          var seg = hall.rows[r][side];
+          if (sideOverall(seg, null) === 'MIXED') {
+            var mb = mixedBase(seg);
+            if (mb.base === target) tokens.push(r + side + ' (' + mb.desc + ')');
           }
         });
       });
@@ -1113,8 +1165,8 @@ function hallSentences(hall, cableFilter, style) {
     return joinList(l.tokens) + ' \u2013 ' + STATUS_META[l.status].report + '.';
   });
 }
-function activeHallNames() {
-  return Object.values(state.halls)
+function activeHallNames(halls) {
+  return Object.values(halls || state.halls)
     .filter(function (h) {
       var any = false;
       Object.keys(h.rows).forEach(function (r) {
@@ -1132,6 +1184,62 @@ function hallBlock(hall) {
   if (sents.length) lines.push(hall.name + ' ' + sents.join('   '));
   (hall.notes || []).forEach(function (n) { lines.push(hall.name + ' ' + n); });
   return lines;
+}
+
+/* ---------------- night rollover / changes-only ---------------- */
+function saveBaseline() {
+  pushUndo();
+  var halls = {};
+  Object.keys(state.halls).forEach(function (hid) {
+    var h = state.halls[hid];
+    halls[hid] = { rows: JSON.parse(JSON.stringify(h.rows)) };
+  });
+  state.baseline = { date: new Date().toLocaleDateString('en-US'), halls: halls };
+  saveState();
+  renderBaselineInfo(); renderReport();
+  showToast('Baseline saved — reports can now show changes since ' + state.baseline.date);
+}
+function clearBaseline() {
+  if (!state.baseline) return;
+  if (!confirm('Clear the baseline? Reports go back to always showing everything.')) return;
+  pushUndo();
+  state.baseline = null;
+  saveState();
+  renderBaselineInfo(); renderReport();
+}
+function renderBaselineInfo() {
+  var el = document.getElementById('baselineInfo');
+  var sel = document.getElementById('reportScope');
+  if (sel) sel.disabled = !state.baseline;
+  if (!el) return;
+  el.textContent = state.baseline
+    ? 'Baseline saved ' + state.baseline.date + '. "Only changes" reports show just the rows that moved since then.'
+    : 'Reports always show the full current state of every hall. After you send tonight\u2019s report, tap the button below to snapshot it \u2014 then tomorrow you can choose to report only what changed.';
+}
+// Changes-only view: a synthetic copy of the halls where sides that did not
+// move at all read as "none"; sides that moved keep their full current state
+// (so a partially-moved side still reads cleanly). The normal report engine
+// then sees only tonight's movement.
+function effectiveHalls() {
+  var sel = document.getElementById('reportScope');
+  var mode = sel ? sel.value : 'all';
+  if (mode !== 'changes' || !state.baseline) return state.halls;
+  var out = {};
+  Object.keys(state.halls).forEach(function (hid) {
+    var h = state.halls[hid];
+    var b = (state.baseline.halls[hid] && state.baseline.halls[hid].rows) || {};
+    var rows = {};
+    Object.keys(h.rows).forEach(function (r) {
+      rows[r] = {};
+      ['11', '13'].forEach(function (s) {
+        var was = (b[r] && b[r][s]) ? b[r][s] : { F144: 'none', OCS: 'none', CAT6: 'none' };
+        var moved = CABLES.some(function (c) { return h.rows[r][s][c] !== was[c]; });
+        rows[r][s] = moved ? JSON.parse(JSON.stringify(h.rows[r][s])) : emptySide();
+      });
+    });
+    out[hid] = { id: h.id, name: h.name, maxRow: h.maxRow, groups: h.groups, notes: h.notes, rows: rows };
+  });
+  return out;
 }
 
 /* ---------------- formal (Team update) template helpers ---------------- */
@@ -1202,6 +1310,7 @@ function buildReport(style) {
   var activeCrew = state.crewPool.filter(function (c) { return c.active; }).map(function (c) { return c.name; });
   var spCount = parseInt(m.spCount, 10) || activeCrew.length;
   var mpCount = parseInt(m.mpCount, 10) || 0;
+  var hallsNow = effectiveHalls();
   var out = '';
 
   if (style === 'formal') {
@@ -1212,7 +1321,7 @@ function buildReport(style) {
     out += 'Personnel Count: MP \u2013 ' + mpCount + ' | SP \u2013 ' + spCount + '\n\n';
     out += 'Work Performed\n';
     var blocks = [];
-    Object.values(state.halls).forEach(function (h) {
+    Object.values(hallsNow).forEach(function (h) {
       var b = formalHallBlock(h);
       if (b.length) blocks.push(b.join('\n'));
     });
@@ -1227,7 +1336,7 @@ function buildReport(style) {
     out += 'Shift Time: ' + (m.shiftTime || '') + '\n';
     out += 'Personnel Count: MP ' + mpCount + ', SP ' + spCount + (activeCrew.length ? ' (' + activeCrew.join(', ') + ')' : '') + '\n\n';
     out += 'Work Completed:\nMP:\n';
-    Object.values(state.halls).forEach(function (h) {
+    Object.values(hallsNow).forEach(function (h) {
       hallBlock(h).forEach(function (l) { out += l + '\n'; });
     });
     out += '\nSP:\n' + ((m.spWorkNotes || '').trim() || 'None') + '\n\n';
@@ -1237,12 +1346,12 @@ function buildReport(style) {
   }
 
   else if (style === 'crew') {
-    var locs = activeHallNames().join(', ') || 'n/a';
+    var locs = activeHallNames(hallsNow).join(', ') || 'n/a';
     out += 'Company/Crew: Midpoint (MP)\n';
     out += 'Headcount: ' + mpCount + '\n';
     out += 'Location: ' + locs + '\n';
     out += 'Work Completed:\n';
-    Object.values(state.halls).forEach(function (h) {
+    Object.values(hallsNow).forEach(function (h) {
       hallBlock(h).forEach(function (l) { out += l + '\n'; });
     });
     out += '\nCompany/Crew: ServicePoint (SP)\n';
@@ -1256,7 +1365,7 @@ function buildReport(style) {
     out += '2 overlapping 12 hour shifts ' + (m.shiftTime || '') + '\n';
     out += 'Personnel Count: ' + (mpCount + spCount) + '\n\n';
     out += 'Work areas completed:\n';
-    Object.values(state.halls).forEach(function (h) {
+    Object.values(hallsNow).forEach(function (h) {
       var hasAny = false;
       var cableLines = [];
       CABLES.forEach(function (c) {
@@ -1278,6 +1387,7 @@ function buildReport(style) {
   return out;
 }
 function renderReport() {
+  renderBaselineInfo();
   document.getElementById('reportOutput').textContent = buildReport(document.getElementById('reportStyle').value);
 }
 

@@ -31,9 +31,9 @@ INSTALL ON YOUR IPHONE (one time, needs service/Wi-Fi)
 ----------------------------------------------------
 EVERY NIGHT (30 seconds)
 ----------------------------------------------------
-1. Walk the halls. Pick a status (Ran & Hung, Ran, In Progress,
-   Staged, Remediation, Clear) and a cable scope (All / 144F / OCS /
-   Copper) at the top, then tap:
+1. Walk the halls. Pick a status (Hung, Ran, In Prog, Staged, Remed,
+   Clear) and a cable scope (All / 144F / OCS / Copper) in the bar
+   docked at the BOTTOM of the screen, then tap:
    - a SIDE card  -> stamps that whole side
    - the AISLE number -> stamps both sides
    - a small pill (144F / OCS / CAT6) -> stamps just that cable
@@ -47,6 +47,11 @@ EVERY NIGHT (30 seconds)
 4. Report tab: "Team update (clean)" is the polished format; the
    other styles (quick nightly, crew table, boss roll-up) are still
    in the dropdown. Copy or Share, send it.
+   NIGHT ROLLOVER: reports normally show the full current state of
+   every hall (cumulative). After you send tonight's report, tap
+   "Save tonight as baseline". From then on the dropdown lets you
+   generate "only changes since baseline" - just the rows that moved
+   tonight. Both modes always available; your choice each night.
 5. Tap "Save to history" if you want it archived in the app.
 6. Tap "Backup now" before you go home. Save the file to Files/iCloud.
 
