@@ -1256,51 +1256,85 @@ function polishSentence(t) {
   if (!/[.!?]$/.test(t)) t += '.';
   return t;
 }
-function formalizeNote(n) {
+var CABLE_SHORT = { F144: '144F', OCS: 'OCS', CAT6: 'CAT6' };
+function cableNamesAnd(cables) {
+  return formalJoin(cables.map(function (c) { return CABLE_SHORT[c]; }));
+}
+// "CAT6 ran; 144F and OCS staged" — most advanced cables first.
+function mixedDesc2(seg) {
+  var groups = [];
+  REPORT_STATUS_ORDER.forEach(function (st) {
+    var cs = CABLES.filter(function (c) { return seg[c] === st; });
+    if (cs.length) groups.push(cableNamesAnd(cs) + ' ' + STATUS_META[st].report.toLowerCase());
+  });
+  var noneC = CABLES.filter(function (c) { return seg[c] === 'none'; });
+  if (noneC.length) groups.push(cableNamesAnd(noneC) + ' not started');
+  return groups.join('; ');
+}
+// Formal notes: "Remediation – rest" -> plain sentence;
+// "HAC 17, Rows 33–36 – Staged (8 hrs)" -> "HAC 17, Rows 33–36: Staged (8 hrs)."
+function formalizeNote2(n) {
   var t = (n || '').trim();
-  if (!t) return t;
-  var m = t.match(/^(Ran and hung|Ran|In progress|Staged|Remediation)\s*[\u2013-]\s*(.+)$/i);
-  if (m) {
-    var canon = null;
+  if (!t) return '';
+  var lead = t.match(/^(Ran and hung|Ran|In progress|Staged|Remediation)\s*[\u2013-]\s*(.+)$/i);
+  if (lead) return polishSentence(lead[2]);
+  var trail = t.match(/^(.+?)\s*[\u2013-]\s*(Ran and hung|Ran|In progress|Staged|Remediation)\b\s*(\([^)]*\))?\s*\.?\s*$/i);
+  if (trail) {
+    var word = null;
     Object.keys(STATUS_META).forEach(function (k) {
-      if (STATUS_META[k].report.toLowerCase() === m[1].toLowerCase()) canon = STATUS_META[k].report;
+      if (STATUS_META[k].report.toLowerCase() === trail[2].toLowerCase()) word = STATUS_META[k].report;
     });
-    if (canon) return canon + ': ' + polishSentence(m[2]);
-  }
-  // "HAC 17, Rows 33–36 – Staged (8 hrs per person)" -> "Staged: HAC 17, Rows 33–36 (8 hrs per person)"
-  var m2 = t.match(/^(.+?)\s*[\u2013-]\s*(Ran and hung|Ran|In progress|Staged|Remediation)\b\s*(\([^)]*\))?\s*\.?\s*$/i);
-  if (m2) {
-    var canon2 = null;
-    Object.keys(STATUS_META).forEach(function (k) {
-      if (STATUS_META[k].report.toLowerCase() === m2[2].toLowerCase()) canon2 = STATUS_META[k].report;
-    });
-    if (canon2) return canon2 + ': ' + polishSentence(m2[1] + (m2[3] ? ' ' + m2[3] : ''));
+    if (word) {
+      var paren = trail[3] ? ' ' + trail[3].replace(/\.$/, '') : '';
+      return trail[1].replace(/[.;,]+$/, '') + ': ' + word + paren + '.';
+    }
   }
   return polishSentence(t);
 }
-function formalHallBlock(hall) {
-  var sl = hallStatusLines(hall, null, numStyle(), true);
-  var notes = (hall.notes || []).map(formalizeNote);
-  if (!sl.length && !notes.length) return [];
-  var lines = ['MP | ' + hall.name, ''];
-  sl.forEach(function (l) {
-    lines.push(STATUS_META[l.status].report + ': ' + formalJoin(l.tokens) + '.');
-    lines.push('');
+// Team-update lines for one hall: uniform runs first ("tokens: Status."),
+// then mixed sides as their own lines, then notes.
+function formalHallLines2(hall) {
+  var style = numStyle();
+  var out = [];
+  REPORT_STATUS_ORDER.forEach(function (target) {
+    var q11 = [], q13 = [];
+    Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
+      if (sideOverall(hall.rows[r]['11'], null) === target) q11.push(r);
+      if (sideOverall(hall.rows[r]['13'], null) === target) q13.push(r);
+    });
+    if (!q11.length && !q13.length) return;
+    var tokens = [];
+    var bothSet = {};
+    q11.forEach(function (r) { if (q13.indexOf(r) !== -1) bothSet[r] = true; });
+    var bothRows = Object.keys(bothSet).map(Number).sort(function (a, b) { return a - b; });
+    runsOf(bothRows).forEach(function (run) { tokens.push.apply(tokens, fmtBoth(run, style, true)); });
+    runsOf(q11.filter(function (r) { return !bothSet[r]; })).forEach(function (run) { tokens.push.apply(tokens, fmt11(run, style)); });
+    runsOf(q13.filter(function (r) { return !bothSet[r]; })).forEach(function (run) { tokens.push.apply(tokens, fmt13(run, style)); });
+    if (tokens.length) out.push(formalJoin(tokens) + ': ' + STATUS_META[target].report + '.');
   });
-  notes.forEach(function (n) { lines.push(n); lines.push(''); });
-  lines.pop();
-  return lines;
+  var mixed = [];
+  Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
+    ['11', '13'].forEach(function (side) {
+      var seg = hall.rows[r][side];
+      if (sideOverall(seg, null) === 'MIXED') mixed.push({ r: r, side: side, base: mixedBase(seg).base, seg: seg });
+    });
+  });
+  mixed.sort(function (a, b) {
+    var d = REPORT_STATUS_ORDER.indexOf(a.base) - REPORT_STATUS_ORDER.indexOf(b.base);
+    return d !== 0 ? d : (a.r - b.r || (a.side < b.side ? -1 : 1));
+  });
+  mixed.forEach(function (mx) { out.push(mx.r + mx.side + ': ' + mixedDesc2(mx.seg) + '.'); });
+  (hall.notes || []).forEach(function (n) { var ln = formalizeNote2(n); if (ln) out.push(ln); });
+  return out;
 }
 function blockersFormal() {
-  if (!state.blockers.length) return 'Blockers\n\nNone.';
+  if (!state.blockers.length) return 'Blockers\nNone.';
   var dates = state.blockers.map(function (b) { return b.date; });
   var allSame = dates.every(function (d) { return d === dates[0]; });
-  var lines = [allSame ? 'Blockers \u2013 ' + dates[0] : 'Blockers', ''];
+  var lines = [allSame ? 'Blockers \u2013 ' + dates[0] : 'Blockers'];
   state.blockers.forEach(function (b) {
     lines.push((b.hall ? b.hall + ': ' : '') + polishSentence(b.text));
-    lines.push('');
   });
-  lines.pop();
   return lines.join('\n');
 }
 
@@ -1314,21 +1348,21 @@ function buildReport(style) {
   var out = '';
 
   if (style === 'formal') {
-    out += 'Team,\n\nPlease see the shift update below.\n\n';
-    out += 'Shift Summary\n\n';
+    out += 'Team,\nPlease see the shift update below.\n';
+    out += 'Shift Summary\n';
     out += 'Superintendent on Site: ' + (m.supers || '') + '\n';
     out += 'Shift Time: ' + (m.shiftTime || '') + '\n';
-    out += 'Personnel Count: MP \u2013 ' + mpCount + ' | SP \u2013 ' + spCount + '\n\n';
+    out += 'Personnel Count: MP \u2013 ' + mpCount + ' | SP \u2013 ' + spCount + '\n';
     out += 'Work Performed\n';
     var blocks = [];
     Object.values(hallsNow).forEach(function (h) {
-      var b = formalHallBlock(h);
-      if (b.length) blocks.push(b.join('\n'));
+      var hl = formalHallLines2(h);
+      if (hl.length) blocks.push('MP | ' + h.name + '\n' + hl.join('\n'));
     });
-    if (blocks.length) out += '\n' + blocks.join('\n\n') + '\n';
-    out += '\nSP\n\n' + ((m.spWorkNotes || '').trim() || 'None.') + '\n';
-    out += '\n' + blockersFormal() + '\n';
-    out += '\nAreas of Concern\n\n' + ((m.areasOfConcern || '').trim() || 'None') + '\n';
+    if (blocks.length) out += blocks.join('\n') + '\n';
+    out += 'SP\n' + ((m.spWorkNotes || '').trim() || 'None.') + '\n';
+    out += blockersFormal() + '\n';
+    out += 'Areas of Concern\n' + ((m.areasOfConcern || '').trim() || 'None') + '\n';
   }
 
   else if (style === 'mine') {
