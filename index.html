@@ -578,6 +578,7 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
+var APP_VERSION = 'v9';
 var CABLES = ['F144', 'OCS', 'CAT6'];
 var CABLE_LABEL = { F144: '144F', OCS: 'OCS', CAT6: 'Copper' };
 var STATUS_ORDER = ['none', 'staged', 'prog', 'ran', 'hung', 'remed'];
@@ -693,7 +694,7 @@ function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     var t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    document.getElementById('saveIndicator').textContent = 'Offline \u2022 saved ' + t;
+    document.getElementById('saveIndicator').textContent = APP_VERSION + ' \u2022 saved ' + t;
   } catch (e) {
     document.getElementById('saveIndicator').textContent = 'WARNING: could not save!';
   }
@@ -1738,6 +1739,14 @@ function renderAll() {
   } catch (e) {}
   if ('serviceWorker' in navigator &&
       (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    // When a new version finishes downloading, tell it to activate now and
+    // reload once - so a single reopen with signal is enough to update.
+    var refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (refreshing) return;
+      refreshing = true;
+      location.reload();
+    });
     navigator.serviceWorker.register('./sw.js').then(function (reg) {
       // iOS checks for updates lazily - nudge it every time the app is reopened.
       document.addEventListener('visibilitychange', function () {
@@ -1748,7 +1757,8 @@ function renderAll() {
         if (!nw) return;
         nw.addEventListener('statechange', function () {
           if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-            showToast('Update installed \u2014 close the app fully and reopen');
+            showToast('Update installed \u2014 applying');
+            try { nw.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
           }
         });
       });
