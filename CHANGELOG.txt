@@ -2,7 +2,23 @@ CHANGELOG - MP Walkthrough & Shift Report
 ==========================================
 History of changes since the original Gemini-generated prototype HTML.
 
-v7 (current) - Design-token system (Radix Colors + Open Props + Apple HIG)
+v14 (current) - The rhythm & safety package (9 improvements)
+------------------------------------------------------------------
+- "End of night" button: archives the report, saves the baseline,
+  then offers Copy report / Backup file in one overlay.
+- Backup nag: tracks last backup; amber reminder + dot on the Report
+  tab when missing or 3+ nights old.
+- Screen Wake Lock (guarded; toggle in Preferences) - keeps the
+  screen awake while the app is open where iOS allows it.
+- Crew list edit mode: remove names (Edit button on Crew tab).
+- Blocker date hidden by default (assumes today; "Date: today"
+  button reveals the field for backdating).
+- Report history collapses to the last 3 nights with "Show all".
+- Sign-off line setting appended to the Team update.
+- New graphite app icon (double-check mark, white + green).
+- Text size setting (Normal/Large) in Preferences.
+
+v13 - Simplify pass
 ------------------------------------------------------------------
 - Replaced the hand-picked palette with Radix Colors dark scales
   (MIT, github.com/radix-ui/colors): 12-step scales for surfaces,

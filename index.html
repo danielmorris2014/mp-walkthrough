@@ -284,7 +284,24 @@
     background: none; border: none; color: var(--muted); display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 2px; font-size: 9.5px; font-weight: 800;
     letter-spacing: 0.3px; padding: 5px 2px; border-radius: 10px; cursor: pointer; min-height: 48px;
+    position: relative;
   }
+  .navdot { position: absolute; top: 5px; right: calc(50% - 17px); width: 8px; height: 8px; border-radius: 999px; background: var(--amber-9); display: none; }
+  .navdot.show { display: block; }
+  .backup-status { font-size: 11px; margin-top: 7px; color: var(--muted); }
+  .backup-status.stale { color: var(--amber-11); font-weight: 700; }
+  .crew-chip .chip-x { margin-left: 8px; color: #fda4af; font-weight: 900; }
+  body.text-large { font-size: 16px; }
+  body.text-large .side-id { font-size: 17px; }
+  body.text-large .side-status-badge { font-size: 11.5px; }
+  body.text-large .mini-pill { font-size: 10px; }
+  body.text-large .btn { font-size: 14px; }
+  body.text-large select, body.text-large input[type="text"], body.text-large input[type="number"], body.text-large textarea { font-size: 16px; }
+  body.text-large .pod-header { font-size: 14.5px; }
+  body.text-large .stat-num { font-size: 17px; }
+  body.text-large .muted { font-size: 12.5px; }
+  #nightChecklist { padding-left: 20px; margin: 8px 0; font-size: 13px; color: #c3d0e6; }
+  #nightChecklist li { margin-bottom: 6px; }
   .nav-btn.active { color: var(--slate-12); background: rgba(255,255,255,0.07); }
   .nav-ico { width: 21px; height: 21px; }
   .nav-ico svg { width: 100%; height: 100%; display: block; }
@@ -430,13 +447,31 @@
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
         <label style="font-size:11px; color:var(--muted); font-weight:700;">SP CREW ON SHIFT (tap to toggle):</label>
-        <button class="btn btn-secondary" style="padding:4px 9px; font-size:11px; min-height:30px;" onclick="addCrewMember()">+ Name</button>
+        <span style="display:flex; gap:5px;">
+          <button class="btn btn-secondary" style="padding:4px 9px; font-size:11px; min-height:30px;" onclick="addCrewMember()">+ Name</button>
+          <button class="btn btn-secondary" id="crewEditBtn" style="padding:4px 9px; font-size:11px; min-height:30px;" onclick="toggleCrewEdit()">Edit</button>
+        </span>
       </div>
       <div class="chip-wrap" id="crewChips"></div>
     </div>
     <div class="card">
       <div class="card-title">ServicePoint (SP) work notes &mdash; goes in report</div>
       <textarea id="spWorkNotes" rows="5" oninput="saveMeta()"></textarea>
+    </div>
+    <div class="card">
+      <div class="card-title">Preferences</div>
+      <div class="form-field" style="margin-bottom:10px;">
+        <label>Sign-off line (bottom of the Team update)</label>
+        <input type="text" id="signature" placeholder="e.g. Daniel Morris - Superintendent, Midpoint" oninput="savePrefs()">
+      </div>
+      <div class="batch-row" style="justify-content:space-between; margin-bottom:8px;">
+        <span class="muted">Text size</span>
+        <button class="btn btn-secondary" id="textSizeBtn" onclick="cycleTextSize()">Normal</button>
+      </div>
+      <div class="batch-row" style="justify-content:space-between;">
+        <span class="muted">Keep screen awake while open</span>
+        <button class="btn btn-secondary" id="wakeBtn" onclick="toggleWake()">On</button>
+      </div>
     </div>
   </div>
 
@@ -445,7 +480,8 @@
     <div class="card">
       <div class="card-title">Blockers / issues</div>
       <div class="batch-row" style="margin-bottom:9px;">
-        <input type="text" id="blockerDate" style="width:104px;" placeholder="MM/DD/YYYY">
+        <button class="btn btn-secondary" id="datePickBtn" onclick="showDatePicker()" style="min-height:40px;">Date: today</button>
+        <input type="text" id="blockerDate" style="width:104px; display:none;" placeholder="MM/DD/YYYY">
         <select id="blockerHall" style="width:118px;"></select>
         <input type="text" id="blockerText" placeholder="What is blocking work" style="flex:1; min-width:130px;">
         <button class="btn" onclick="addBlocker()">+ Add</button>
@@ -486,7 +522,8 @@
         </div>
       </div>
       <div class="batch-row" style="margin-bottom:10px;">
-        <button class="btn" onclick="copyReport()">Copy</button>
+        <button class="btn" onclick="endOfNight()">End of night</button>
+        <button class="btn btn-secondary" onclick="copyReport()">Copy</button>
         <button class="btn btn-secondary" onclick="shareReport()">Share</button>
         <button class="btn btn-secondary" onclick="saveReportToHistory()">Save to history</button>
       </div>
@@ -511,6 +548,7 @@
     <div class="card">
       <div class="card-title">Backup &amp; restore</div>
       <div class="muted" style="margin-bottom:8px;">Do a backup after each shift. The share sheet saves a small file to Files/iCloud &mdash; that file is your real safety net.</div>
+      <div id="backupStatus" class="backup-status"></div>
       <div class="batch-row">
         <button class="btn" onclick="doBackup()">Backup now</button>
         <button class="btn btn-secondary" onclick="document.getElementById('restoreFile').click()">Restore from file</button>
@@ -532,6 +570,18 @@
 
 <div class="toast" id="toast"></div>
 <textarea id="copyFallback" aria-hidden="true" tabindex="-1"></textarea>
+
+<div class="overlay" id="nightOverlay" style="display:none;">
+  <div class="overlay-card">
+    <h2>Wrap the night?</h2>
+    <ul id="nightChecklist"></ul>
+    <div class="batch-row" style="margin-top:12px;">
+      <button class="btn" onclick="copyReport()">Copy report</button>
+      <button class="btn btn-secondary" onclick="doBackup()">Backup file</button>
+    </div>
+    <button class="btn btn-ghost" style="width:100%; margin-top:8px;" onclick="closeNightOverlay()">Done</button>
+  </div>
+</div>
 
 <div class="bottom-stack">
   <div class="status-dock">
@@ -555,7 +605,7 @@
     <button class="nav-btn active" onclick="switchTab('walk', this)"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/></svg></span><span>Walkthrough</span></button>
     <button class="nav-btn" onclick="switchTab('crew', this)"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg></span><span>Crew</span></button>
     <button class="nav-btn" onclick="switchTab('blockers', this)"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span><span>Blockers</span></button>
-    <button class="nav-btn" onclick="switchTab('report', this)"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span><span>Report</span></button>
+    <button class="nav-btn" onclick="switchTab('report', this)"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span><span>Report</span><span class="navdot" id="backupDot"></span></button>
   </nav>
 </div>
 
@@ -580,7 +630,7 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v13';
+var APP_VERSION = 'v14';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -640,7 +690,7 @@ function defaultState() {
     version: 1,
     activeHall: 'CB5_DH1',
     brush: 'hung', scope: 'ALL',
-    settings: { onboarded: false, numStyle: 'short', orientation: 'h11' },
+    settings: { onboarded: false, numStyle: 'short', orientation: 'h11', signature: '', textSize: 'normal', wakeLock: true, lastBackup: 0 },
     meta: {
       supers: 'Chris Dickman, Daniel Morris',
       shiftTime: '2:00 PM – 2:00 AM',
@@ -1118,16 +1168,29 @@ function renderCrewPanel() {
   state.crewPool.forEach(function (member, i) {
     var d = document.createElement('div');
     d.className = 'crew-chip' + (member.active ? ' active' : '');
-    d.textContent = (member.active ? '\u2713 ' : '') + member.name;
+    d.textContent = (member.active && !crewEditing ? '\u2713 ' : '') + member.name;
+    if (crewEditing) {
+      var x = document.createElement('span');
+      x.className = 'chip-x';
+      x.textContent = '\u2715';
+      d.appendChild(x);
+    }
     d.onclick = function () {
+      if (crewEditing) { removeCrewMember(i); return; }
       pushUndo();
       member.active = !member.active;
-      state.meta.spCount = state.crewPool.filter(function (x) { return x.active; }).length;
+      state.meta.spCount = state.crewPool.filter(function (x2) { return x2.active; }).length;
       saveState(); renderCrewPanel();
     };
     cw.appendChild(d);
   });
-  renderBlockers(); renderHistory();
+  var sig = document.getElementById('signature');
+  if (sig && document.activeElement !== sig) sig.value = state.settings.signature || '';
+  var tsb = document.getElementById('textSizeBtn');
+  if (tsb) tsb.textContent = state.settings.textSize === 'large' ? 'Large' : 'Normal';
+  var wb = document.getElementById('wakeBtn');
+  if (wb) wb.textContent = state.settings.wakeLock ? 'On' : 'Off';
+  renderBlockers(); renderHistory(); renderBackupStatus();
 }
 function saveMeta() {
   state.meta.supers = document.getElementById('supers').value;
@@ -1148,13 +1211,16 @@ function addCrewMember() {
   saveState(); renderCrewPanel();
 }
 function addBlocker() {
-  var d = document.getElementById('blockerDate').value.trim() || new Date().toLocaleDateString('en-US');
+  var dEl = document.getElementById('blockerDate');
+  var d = (dEl.style.display !== 'none' && dEl.value.trim()) ? dEl.value.trim() : new Date().toLocaleDateString('en-US');
   var t = document.getElementById('blockerText').value.trim();
   if (!t) return;
   pushUndo();
   var hallSel = document.getElementById('blockerHall');
   state.blockers.push({ date: d, hall: hallSel ? hallSel.value : '', text: t });
   document.getElementById('blockerText').value = '';
+  dEl.style.display = 'none';
+  document.getElementById('datePickBtn').style.display = '';
   saveState(); renderBlockers();
 }
 function removeBlocker(i) {
@@ -1328,8 +1394,102 @@ function hallBlock(hall) {
   return lines;
 }
 
-/* ---------------- night rollover / changes-only ---------------- */
-function saveBaseline() {
+/* ---------------- end of night ---------------- */
+function endOfNight() {
+  pushUndo();
+  var style = document.getElementById('reportStyle');
+  var txt = buildReport(style.value);
+  state.history.unshift({ ts: Date.now(), label: style.options[style.selectedIndex].text + ' (end of night)', text: txt });
+  if (state.history.length > 100) state.history.pop();
+  saveBaseline(true);
+  saveState(); renderCrewPanel(); renderReport();
+  document.getElementById('nightChecklist').innerHTML =
+    '<li>Report archived to history \u2713</li>' +
+    '<li>Baseline saved \u2014 tomorrow can show changes-only \u2713</li>' +
+    '<li>Now: copy the report, send it, and save a backup file.</li>';
+  document.getElementById('nightOverlay').style.display = 'flex';
+}
+function closeNightOverlay() {
+  document.getElementById('nightOverlay').style.display = 'none';
+  showToast('Night wrapped \u2014 get home safe');
+}
+
+/* ---------------- backup nag ---------------- */
+function renderBackupStatus() {
+  var el = document.getElementById('backupStatus');
+  var dot = document.getElementById('backupDot');
+  if (!el) return;
+  var nights = state.settings.lastBackup ? Math.floor((Date.now() - state.settings.lastBackup) / 86400000) : -1;
+  var stale = nights < 0 || nights >= 3;
+  if (nights < 0) el.textContent = 'No backup saved yet \u2014 do one tonight.';
+  else if (nights < 1) el.textContent = 'Backed up today \u2713';
+  else el.textContent = 'Last backup: ' + nights + ' night' + (nights === 1 ? '' : 's') + ' ago' + (stale ? ' \u2014 back up tonight' : '');
+  el.className = 'backup-status' + (stale ? ' stale' : '');
+  if (dot) dot.classList.toggle('show', stale);
+}
+
+/* ---------------- wake lock ---------------- */
+var wakeSentinel = null;
+function requestWake() {
+  if (!state.settings.wakeLock || !('wakeLock' in navigator) || document.visibilityState !== 'visible') return;
+  try {
+    navigator.wakeLock.request('screen').then(function (s) { wakeSentinel = s; }, function () {});
+  } catch (e) {}
+}
+function toggleWake() {
+  state.settings.wakeLock = !state.settings.wakeLock;
+  var b = document.getElementById('wakeBtn');
+  if (b) b.textContent = state.settings.wakeLock ? 'On' : 'Off';
+  saveState();
+  if (state.settings.wakeLock) requestWake();
+  else if (wakeSentinel) { try { wakeSentinel.release().catch(function () {}); } catch (e) {} wakeSentinel = null; }
+}
+
+/* ---------------- preferences ---------------- */
+function savePrefs() {
+  state.settings.signature = document.getElementById('signature').value;
+  saveState();
+}
+function cycleTextSize() {
+  state.settings.textSize = state.settings.textSize === 'normal' ? 'large' : 'normal';
+  applyTextSize(); saveState();
+}
+function applyTextSize() {
+  document.body.classList.toggle('text-large', state.settings.textSize === 'large');
+  var b = document.getElementById('textSizeBtn');
+  if (b) b.textContent = state.settings.textSize === 'large' ? 'Large' : 'Normal';
+}
+
+/* ---------------- crew edit ---------------- */
+var crewEditing = false;
+function toggleCrewEdit() {
+  crewEditing = !crewEditing;
+  var b = document.getElementById('crewEditBtn');
+  if (b) b.textContent = crewEditing ? 'Done' : 'Edit';
+  renderCrewPanel();
+}
+function removeCrewMember(i) {
+  pushUndo();
+  state.crewPool.splice(i, 1);
+  state.meta.spCount = state.crewPool.filter(function (x) { return x.active; }).length;
+  saveState(); renderCrewPanel();
+  showToast('Removed');
+}
+
+/* ---------------- blocker date ---------------- */
+function showDatePicker() {
+  document.getElementById('blockerDate').style.display = '';
+  document.getElementById('datePickBtn').style.display = 'none';
+  document.getElementById('blockerDate').focus();
+}
+
+/* ---------------- history collapse ---------------- */
+var historyExpanded = false;
+function toggleHistoryAll() {
+  historyExpanded = !historyExpanded;
+  renderHistory();
+}
+function saveBaseline(quiet) {
   pushUndo();
   var halls = {};
   Object.keys(state.halls).forEach(function (hid) {
@@ -1339,7 +1499,7 @@ function saveBaseline() {
   state.baseline = { date: new Date().toLocaleDateString('en-US'), halls: halls };
   saveState();
   renderBaselineInfo(); renderReport();
-  showToast('Baseline saved — reports can now show changes since ' + state.baseline.date);
+  if (!quiet) showToast('Baseline saved \u2014 reports can now show changes since ' + state.baseline.date);
 }
 function clearBaseline() {
   if (!state.baseline) return;
@@ -1505,6 +1665,9 @@ function buildReport(style) {
     out += 'SP\n' + ((m.spWorkNotes || '').trim() || 'None.') + '\n';
     out += blockersFormal() + '\n';
     out += 'Areas of Concern\n' + ((m.areasOfConcern || '').trim() || 'None') + '\n';
+    if (state.settings.signature && state.settings.signature.trim()) {
+      out += '\n' + state.settings.signature.trim() + '\n';
+    }
   }
 
   else if (style === 'mine') {
@@ -1564,6 +1727,7 @@ function buildReport(style) {
 }
 function renderReport() {
   renderBaselineInfo();
+  renderBackupStatus();
   document.getElementById('reportOutput').textContent = buildReport(document.getElementById('reportStyle').value);
 }
 
@@ -1609,15 +1773,22 @@ function saveReportToHistory() {
 function renderHistory() {
   var el = document.getElementById('historyList');
   if (!el) return;
-  if (!state.history.length) { el.innerHTML = '<div class="muted">No saved reports yet. Generate one and tap "Save to history".</div>'; return; }
-  el.innerHTML = state.history.map(function (h, i) {
+  if (!state.history.length) { el.innerHTML = '<div class="muted">No saved reports yet. Generate one and tap "Save to history" — or use "End of night".</div>'; return; }
+  var shown = historyExpanded ? state.history : state.history.slice(0, 3);
+  var html = shown.map(function (h, i) {
+    var realIdx = state.history.indexOf(h);
     var d = new Date(h.ts);
     var when = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return '<details class="hist-entry"><summary>' + escapeHtml(when) + ' — ' + escapeHtml(h.label) + '</summary>' +
       '<div class="hist-body"><pre class="report-pre" style="max-height:260px; overflow:auto;">' + escapeHtml(h.text) + '</pre>' +
-      '<div class="batch-row"><button class="btn" onclick="copySomething(state.history[' + i + '].text, \'Copied\')">Copy</button>' +
-      '<button class="btn btn-danger" onclick="removeHistory(' + i + ')">Delete</button></div></div></details>';
+      '<div class="batch-row"><button class="btn" onclick="copySomething(state.history[' + realIdx + '].text, \'Copied\')">Copy</button>' +
+      '<button class="btn btn-danger" onclick="removeHistory(' + realIdx + ')">Delete</button></div></div></details>';
   }).join('');
+  if (state.history.length > 3) {
+    html += '<button class="btn btn-ghost" style="width:100%;" onclick="toggleHistoryAll()">' +
+      (historyExpanded ? 'Show recent only' : 'Show all ' + state.history.length + ' nights') + '</button>';
+  }
+  el.innerHTML = html;
 }
 function removeHistory(i) {
   pushUndo();
@@ -1629,6 +1800,9 @@ function dateStamp() {
   return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
 }
 function doBackup() {
+  state.settings.lastBackup = Date.now();
+  saveState();
+  renderBackupStatus();
   var payload = { app: 'mp-walkthrough', version: 1, exported: new Date().toISOString(), state: state };
   var json = JSON.stringify(payload);
   var fname = 'walkthrough-backup-' + dateStamp() + '.json';
@@ -1720,6 +1894,11 @@ function renderAll() {
   sel.addEventListener('change', function () { state.settings.numStyle = sel.value; saveState(); });
   updateBrushLabel();
   updateUndoBtn();
+  applyTextSize();
+  requestWake();
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') requestWake();
+  });
   renderAll();
   if (!state.settings.onboarded) document.getElementById('onboarding').style.display = 'flex';
   try {

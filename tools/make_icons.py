@@ -1,55 +1,60 @@
 # Generates the PWA icons (no dependencies, pure Python).
-# Design: dark navy square with three rounded "cable tray tier" bars
-# (green = ran & hung, amber = in progress, sky = staged).
+# v14 design: graphite "job site" mark - two bold check marks
+# (white + green) on a near-black rounded square, matching the
+# Graphite Pro theme. "Ran and hung" reads as a double-check.
 import zlib, struct, os
 
 OUT = os.path.join(os.path.dirname(__file__), '..', 'icons')
-
-BG    = (13, 20, 34)     # #0d1422
-BARS  = [(16, 185, 129), (245, 158, 11), (56, 189, 248)]  # green, amber, sky
+BG = (14, 15, 17)        # #0e0f11 graphite
+WHITE = (237, 238, 240)  # slate-12
+GREEN = (48, 164, 108)   # green-9 #30a46c
 
 def clamp(x):
     return 0 if x < 0 else (255 if x > 255 else int(x))
 
-def rounded_rect_sdf(px, py, x0, y0, x1, y1, r):
-    # distance from (px,py) to rounded rectangle (negative inside)
-    cx = max(x0 + r, min(px, x1 - r))
-    cy = max(y0 + r, min(py, y1 - r))
-    dx, dy = px - cx, py - cy
-    return (dx * dx + dy * dy) ** 0.5 - r
+# check mark strokes as polylines (in 512-space), [points, color, width]
+STROKES = [
+    ([(96, 268), (212, 384), (436, 150)], WHITE, 46),
+    ([(296, 316), (382, 402), (540, 236)], GREEN, 46),
+]
+
+def seg_dist(px, py, ax, ay, bx, by):
+    abx, aby = bx - ax, by - ay
+    t = 0.0 if (abx == 0 and aby == 0) else max(0.0, min(1.0, ((px - ax) * abx + (py - ay) * aby) / (abx * abx + aby * aby)))
+    cx, cy = ax + t * abx, ay + t * aby
+    return ((px - cx) ** 2 + (py - cy) ** 2) ** 0.5
+
+def stroke_dist(px, py, pts):
+    d = None
+    for i in range(len(pts) - 1):
+        s = seg_dist(px, py, pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1])
+        if d is None or s < d:
+            d = s
+    return d
 
 def render(size):
     S = 4  # supersample
     W = size * S
+    scale = W / 640.0  # strokes defined in 640-space for margin room
     px = bytearray(W * W * 3)
-    # bar geometry (in fraction of canvas)
-    mx = 0.18            # side margin
-    bar_h = 0.135        # bar height
-    gap = 0.075
-    top0 = 0.5 - (3 * bar_h + 2 * gap) / 2
-    rows = []
-    for i in range(3):
-        y0 = top0 + i * (bar_h + gap)
-        rows.append((mx * W, y0 * W, (1 - mx) * W, (y0 + bar_h) * W, 0.32 * bar_h * W))
-    r2 = 9  # corner radius of whole icon (mostly cosmetic; iOS masks its own)
     for y in range(W):
         for x in range(W):
             r, g, b = BG
-            # icon corner rounding (transparent-ish -> just keep bg, iOS masks)
-            for (bx0, by0, bx1, by1, br) in rows:
-                d = rounded_rect_sdf(x + 0.5, y + 0.5, bx0, by0, bx1, by1, br)
-                if d <= -S:  # fully inside bar
-                    r, g, b = BARS[rows.index((bx0, by0, bx1, by1, br))]
+            # rounded-square silhouette: fill whole square; iOS masks corners itself.
+            for (pts, color, width) in STROKES:
+                scaled = [(p[0] * scale, p[1] * scale) for p in pts]
+                w2 = width * scale / 2.0
+                d = stroke_dist(x + 0.5, y + 0.5, scaled) - w2
+                if d <= -S:
+                    r, g, b = color
                     break
-                if -S < d < S:  # edge -> antialias
+                if -S < d < S:
                     a = max(0.0, min(1.0, 0.5 - d / S))
-                    br_, bg_, bb_ = BARS[rows.index((bx0, by0, bx1, by1, br))]
-                    r = clamp(r * (1 - a) + br_ * a)
-                    g = clamp(g * (1 - a) + bg_ * a)
-                    b = clamp(b * (1 - a) + bb_ * a)
+                    r = clamp(r * (1 - a) + color[0] * a)
+                    g = clamp(g * (1 - a) + color[1] * a)
+                    b = clamp(b * (1 - a) + color[2] * a)
             i3 = (y * W + x) * 3
             px[i3], px[i3 + 1], px[i3 + 2] = r, g, b
-    # downsample
     out = bytearray(size * size * 3)
     for y in range(size):
         for x in range(size):
