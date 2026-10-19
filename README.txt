@@ -37,11 +37,16 @@ EVERY NIGHT (30 seconds)
    - a SIDE card  -> stamps that whole side
    - the AISLE number -> stamps both sides
    - a small pill (144F / OCS / CAT6) -> stamps just that cable
+   "Rotate Row View" (above the grid) flips the rows to match how you
+   are facing: 11-left / 13-left horizontal, or vertical with either
+   side on top. It remembers your choice.
    Made a mistake? Tap UNDO (top right) - keeps the last 60 actions.
 2. Crew tab: toggle who is on shift (SP count updates itself).
-3. Blockers tab: add dated blockers + concerns + tasks for tomorrow.
-4. Report tab: pick a style (My nightly report / Crew table / Boss
-   roll-up), tap Copy or Share, send it.
+3. Blockers tab: add dated blockers (pick the hall for a clean
+   "CB5 DH1: ..." line in the Team update) + concerns + tasks.
+4. Report tab: "Team update (clean)" is the polished format; the
+   other styles (quick nightly, crew table, boss roll-up) are still
+   in the dropdown. Copy or Share, send it.
 5. Tap "Save to history" if you want it archived in the app.
 6. Tap "Backup now" before you go home. Save the file to Files/iCloud.
 

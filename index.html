@@ -121,6 +121,9 @@
     font-size: 10.5px; font-weight: 800; color: var(--muted); padding: 2px 0 6px 0;
   }
   .aisle-row { display: grid; grid-template-columns: 1fr 58px 1fr; gap: 7px; margin-bottom: 8px; align-items: stretch; }
+  .aisle-row.vert { grid-template-columns: 1fr; gap: 5px; }
+  .aisle-row.vert .row-center-pill { flex-direction: row; justify-content: center; gap: 7px; padding: 6px 4px; }
+  .aisle-legend.vert { grid-template-columns: 1fr; gap: 2px; }
   .row-center-pill {
     background: var(--card); border: 1px solid var(--border); border-radius: 11px;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -303,11 +306,11 @@
 
     <div id="hallEditor" style="display:none;"></div>
 
-    <div class="aisle-legend">
-      <div>&#9664; 11 SIDE (X01–X11)</div>
-      <div>AISLE</div>
-      <div>13 SIDE (X13–X22) &#9654;</div>
+    <div class="batch-row" style="justify-content:space-between; margin-bottom:6px;">
+      <span class="muted" id="orientLabel">Row view</span>
+      <button class="btn btn-secondary" style="padding:5px 10px; font-size:11px; min-height:32px;" onclick="cycleOrientation()">Rotate Row View</button>
     </div>
+    <div class="aisle-legend" id="aisleLegend"></div>
     <div id="walkGrid"></div>
   </div>
 
@@ -350,8 +353,9 @@
     <div class="card">
       <div class="card-title">Blockers / issues</div>
       <div class="batch-row" style="margin-bottom:9px;">
-        <input type="text" id="blockerDate" style="width:110px;" placeholder="MM/DD/YYYY">
-        <input type="text" id="blockerText" placeholder="What is blocking work" style="flex:1; min-width:140px;">
+        <input type="text" id="blockerDate" style="width:104px;" placeholder="MM/DD/YYYY">
+        <select id="blockerHall" style="width:118px;"></select>
+        <input type="text" id="blockerText" placeholder="What is blocking work" style="flex:1; min-width:130px;">
         <button class="btn" onclick="addBlocker()">+ Add</button>
       </div>
       <div id="blockerList"></div>
@@ -374,7 +378,8 @@
         <div class="form-field">
           <label>Report style</label>
           <select id="reportStyle" onchange="renderReport()">
-            <option value="mine">My nightly report</option>
+            <option value="formal">Team update (clean)</option>
+            <option value="mine">My quick nightly report</option>
             <option value="crew">Crew / table style</option>
             <option value="boss">Boss roll-up (by hall &amp; cable)</option>
           </select>
@@ -482,7 +487,7 @@ function defaultState() {
     version: 1,
     activeHall: 'CB5_DH1',
     brush: 'hung', scope: 'ALL',
-    settings: { onboarded: false, numStyle: 'short' },
+    settings: { onboarded: false, numStyle: 'short', orientation: 'h11' },
     meta: {
       supers: 'Chris Dickman, Daniel Morris',
       shiftTime: '2:00 PM – 2:00 AM',
@@ -673,9 +678,56 @@ function renderHallTabs() {
   wrap.appendChild(add);
 }
 
+/* ---------------- row orientation ---------------- */
+var ORIENTS = [
+  { id: 'h11', label: 'Horizontal \u00b7 11 left' },
+  { id: 'h13', label: 'Horizontal \u00b7 13 left' },
+  { id: 'v11', label: 'Vertical \u00b7 11 top' },
+  { id: 'v13', label: 'Vertical \u00b7 13 top' }
+];
+function orientInfo() {
+  var id = state.settings.orientation || 'h11';
+  var label = ORIENTS[0].label;
+  ORIENTS.forEach(function (o) { if (o.id === id) label = o.label; });
+  return { id: id, label: label, vert: id.charAt(0) === 'v', first: (id === 'h13' || id === 'v13') ? '13' : '11' };
+}
+function cycleOrientation() {
+  var cur = orientInfo().id;
+  var idx = 0;
+  ORIENTS.forEach(function (o, i) { if (o.id === cur) idx = i; });
+  state.settings.orientation = ORIENTS[(idx + 1) % ORIENTS.length].id;
+  saveState();
+  renderWalk();
+}
+function sideLabel(side, pos) {
+  var range = side === '11' ? 'X01\u2013X11' : 'X13\u2013X22';
+  var txt = side + ' SIDE (' + range + ')';
+  if (pos === 'left') return '\u25c0 ' + txt;
+  if (pos === 'right') return txt + ' \u25b6';
+  if (pos === 'top') return '\u25b2 ' + txt;
+  return txt + ' \u25bc';
+}
+function renderLegend() {
+  var info = orientInfo();
+  var el = document.getElementById('aisleLegend');
+  if (el) {
+    var other = info.first === '11' ? '13' : '11';
+    if (info.vert) {
+      el.className = 'aisle-legend vert';
+      el.innerHTML = '<div>' + sideLabel(info.first, 'top') + '</div><div>AISLE</div><div>' + sideLabel(other, 'bottom') + '</div>';
+    } else {
+      el.className = 'aisle-legend';
+      el.innerHTML = '<div>' + sideLabel(info.first, 'left') + '</div><div>AISLE</div><div>' + sideLabel(other, 'right') + '</div>';
+    }
+  }
+  var lbl = document.getElementById('orientLabel');
+  if (lbl) lbl.textContent = 'Row view: ' + info.label;
+}
+
 function renderWalk() {
   var hall = state.halls[state.activeHall];
   if (!hall) { state.activeHall = Object.keys(state.halls)[0]; hall = state.halls[state.activeHall]; }
+  renderLegend();
 
   // notes
   var nw = document.getElementById('notesWrap');
@@ -727,13 +779,15 @@ function renderWalk() {
       '</div>';
     grid.appendChild(ph);
 
+    var info = orientInfo();
     existing.forEach(function (r) {
       var rowEl = document.createElement('div');
-      rowEl.className = 'aisle-row';
-      rowEl.innerHTML = buildSideHtml(hall, r, '11') +
+      rowEl.className = 'aisle-row' + (info.vert ? ' vert' : '');
+      var other = info.first === '11' ? '13' : '11';
+      rowEl.innerHTML = buildSideHtml(hall, r, info.first) +
         '<div class="row-center-pill" onclick="tapBoth(' + r + ')">' +
         '<span class="row-num">R' + r + '</span><span class="row-both-hint">BOTH</span></div>' +
-        buildSideHtml(hall, r, '13');
+        buildSideHtml(hall, r, other);
       grid.appendChild(rowEl);
     });
   });
@@ -928,7 +982,8 @@ function addBlocker() {
   var t = document.getElementById('blockerText').value.trim();
   if (!t) return;
   pushUndo();
-  state.blockers.push({ date: d, text: t });
+  var hallSel = document.getElementById('blockerHall');
+  state.blockers.push({ date: d, hall: hallSel ? hallSel.value : '', text: t });
   document.getElementById('blockerText').value = '';
   saveState(); renderBlockers();
 }
@@ -939,9 +994,18 @@ function removeBlocker(i) {
 }
 function renderBlockers() {
   var el = document.getElementById('blockerList');
+  var sel = document.getElementById('blockerHall');
+  if (sel) {
+    var prev = sel.value;
+    sel.innerHTML = '<option value="">No hall</option>' + Object.values(state.halls).map(function (h) {
+      return '<option value="' + escapeAttr(h.name) + '">' + escapeHtml(h.name) + '</option>';
+    }).join('');
+    sel.value = prev || '';
+  }
   if (!el) return;
   el.innerHTML = state.blockers.length ? state.blockers.map(function (b, i) {
-    return '<div class="note-item" style="border-left-color:var(--s-remed);"><span><strong>' + escapeHtml(b.date) + '</strong> – ' + escapeHtml(b.text) + '</span>' +
+    var hallTag = b.hall ? '<span style="color:var(--accent); font-weight:800;">' + escapeHtml(b.hall) + '</span> ' : '';
+    return '<div class="note-item" style="border-left-color:var(--s-remed);"><span>' + hallTag + '<strong>' + escapeHtml(b.date) + '</strong> – ' + escapeHtml(b.text) + '</span>' +
       '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:28px;" onclick="removeBlocker(' + i + ')">\u2715</button></div>';
   }).join('') : '<div class="muted">No blockers added.</div>';
 }
@@ -984,13 +1048,17 @@ function fmt13(run, style) {
   for (var r = run.a; r <= run.b; r++) out.push(style === 'full' ? (r + '13–' + r + '22') : (r + '13'));
   return out;
 }
-function fmtBoth(run, style) {
+function fmtBoth(run, style, splitAnd) {
   var out = [];
   if (style === 'plain') {
     out.push(run.a === run.b ? ('Row ' + run.a + ' (both sides)') : ('Rows ' + run.a + '–' + run.b + ' (both sides)'));
     return out;
   }
-  if (run.b - run.a >= 3) { out.push(run.a + '11–' + run.b + '11 & ' + run.a + '13–' + run.b + '13'); return out; }
+  if (run.b - run.a >= 3) {
+    if (splitAnd) { out.push(run.a + '11–' + run.b + '11'); out.push(run.a + '13–' + run.b + '13'); }
+    else out.push(run.a + '11–' + run.b + '11 & ' + run.a + '13–' + run.b + '13');
+    return out;
+  }
   for (var r = run.a; r <= run.b; r++) out.push(r + '11–' + r + '13');
   return out;
 }
@@ -1003,8 +1071,9 @@ function sideOverall(seg, cableFilter) {
   if (cableFilter) return seg[cableFilter];
   return (seg.F144 === seg.OCS && seg.OCS === seg.CAT6) ? seg.F144 : 'MIXED';
 }
-// Returns array of sentence strings for one hall at all statuses.
-function hallSentences(hall, cableFilter, style) {
+// Returns [{status, tokens}] for one hall at all statuses.
+// splitAnd=true (formal template) splits "A11–B11 & A13–B13" into two tokens.
+function hallStatusLines(hall, cableFilter, style, splitAnd) {
   var out = [];
   REPORT_STATUS_ORDER.forEach(function (target) {
     if (target === 'none') return;
@@ -1018,7 +1087,7 @@ function hallSentences(hall, cableFilter, style) {
     var bothSet = {};
     q11.forEach(function (r) { if (q13.indexOf(r) !== -1) bothSet[r] = true; });
     var bothRows = Object.keys(bothSet).map(Number).sort(function (a, b) { return a - b; });
-    runsOf(bothRows).forEach(function (run) { tokens.push.apply(tokens, fmtBoth(run, style)); });
+    runsOf(bothRows).forEach(function (run) { tokens.push.apply(tokens, fmtBoth(run, style, splitAnd)); });
     var rem11 = q11.filter(function (r) { return !bothSet[r]; });
     var rem13 = q13.filter(function (r) { return !bothSet[r]; });
     runsOf(rem11).forEach(function (run) { tokens.push.apply(tokens, fmt11(run, style)); });
@@ -1035,9 +1104,14 @@ function hallSentences(hall, cableFilter, style) {
         });
       });
     }
-    if (tokens.length) out.push(joinList(tokens) + ' – ' + STATUS_META[target].report + '.');
+    if (tokens.length) out.push({ status: target, tokens: tokens });
   });
   return out;
+}
+function hallSentences(hall, cableFilter, style) {
+  return hallStatusLines(hall, cableFilter, style).map(function (l) {
+    return joinList(l.tokens) + ' \u2013 ' + STATUS_META[l.status].report + '.';
+  });
 }
 function activeHallNames() {
   return Object.values(state.halls)
@@ -1060,6 +1134,68 @@ function hallBlock(hall) {
   return lines;
 }
 
+/* ---------------- formal (Team update) template helpers ---------------- */
+function formalJoin(tokens) {
+  if (!tokens.length) return '';
+  if (tokens.length === 1) return tokens[0];
+  if (tokens.length === 2) return tokens[0] + ' and ' + tokens[1];
+  return tokens.slice(0, -1).join(', ') + ', and ' + tokens[tokens.length - 1];
+}
+function polishSentence(t) {
+  t = (t || '').trim();
+  if (!t) return t;
+  t = t.charAt(0).toUpperCase() + t.slice(1);
+  if (!/[.!?]$/.test(t)) t += '.';
+  return t;
+}
+function formalizeNote(n) {
+  var t = (n || '').trim();
+  if (!t) return t;
+  var m = t.match(/^(Ran and hung|Ran|In progress|Staged|Remediation)\s*[\u2013-]\s*(.+)$/i);
+  if (m) {
+    var canon = null;
+    Object.keys(STATUS_META).forEach(function (k) {
+      if (STATUS_META[k].report.toLowerCase() === m[1].toLowerCase()) canon = STATUS_META[k].report;
+    });
+    if (canon) return canon + ': ' + polishSentence(m[2]);
+  }
+  // "HAC 17, Rows 33–36 – Staged (8 hrs per person)" -> "Staged: HAC 17, Rows 33–36 (8 hrs per person)"
+  var m2 = t.match(/^(.+?)\s*[\u2013-]\s*(Ran and hung|Ran|In progress|Staged|Remediation)\b\s*(\([^)]*\))?\s*\.?\s*$/i);
+  if (m2) {
+    var canon2 = null;
+    Object.keys(STATUS_META).forEach(function (k) {
+      if (STATUS_META[k].report.toLowerCase() === m2[2].toLowerCase()) canon2 = STATUS_META[k].report;
+    });
+    if (canon2) return canon2 + ': ' + polishSentence(m2[1] + (m2[3] ? ' ' + m2[3] : ''));
+  }
+  return polishSentence(t);
+}
+function formalHallBlock(hall) {
+  var sl = hallStatusLines(hall, null, numStyle(), true);
+  var notes = (hall.notes || []).map(formalizeNote);
+  if (!sl.length && !notes.length) return [];
+  var lines = ['MP | ' + hall.name, ''];
+  sl.forEach(function (l) {
+    lines.push(STATUS_META[l.status].report + ': ' + formalJoin(l.tokens) + '.');
+    lines.push('');
+  });
+  notes.forEach(function (n) { lines.push(n); lines.push(''); });
+  lines.pop();
+  return lines;
+}
+function blockersFormal() {
+  if (!state.blockers.length) return 'Blockers\n\nNone.';
+  var dates = state.blockers.map(function (b) { return b.date; });
+  var allSame = dates.every(function (d) { return d === dates[0]; });
+  var lines = [allSame ? 'Blockers \u2013 ' + dates[0] : 'Blockers', ''];
+  state.blockers.forEach(function (b) {
+    lines.push((b.hall ? b.hall + ': ' : '') + polishSentence(b.text));
+    lines.push('');
+  });
+  lines.pop();
+  return lines.join('\n');
+}
+
 /* ---------------- report templates ---------------- */
 function buildReport(style) {
   var m = state.meta;
@@ -1068,10 +1204,28 @@ function buildReport(style) {
   var mpCount = parseInt(m.mpCount, 10) || 0;
   var out = '';
 
-  if (style === 'mine') {
+  if (style === 'formal') {
+    out += 'Team,\n\nPlease see the shift update below.\n\n';
+    out += 'Shift Summary\n\n';
+    out += 'Superintendent on Site: ' + (m.supers || '') + '\n';
+    out += 'Shift Time: ' + (m.shiftTime || '') + '\n';
+    out += 'Personnel Count: MP \u2013 ' + mpCount + ' | SP \u2013 ' + spCount + '\n\n';
+    out += 'Work Performed\n';
+    var blocks = [];
+    Object.values(state.halls).forEach(function (h) {
+      var b = formalHallBlock(h);
+      if (b.length) blocks.push(b.join('\n'));
+    });
+    if (blocks.length) out += '\n' + blocks.join('\n\n') + '\n';
+    out += '\nSP\n\n' + ((m.spWorkNotes || '').trim() || 'None.') + '\n';
+    out += '\n' + blockersFormal() + '\n';
+    out += '\nAreas of Concern\n\n' + ((m.areasOfConcern || '').trim() || 'None') + '\n';
+  }
+
+  else if (style === 'mine') {
     out += 'Superintendent on site: ' + (m.supers || '') + '\n';
     out += 'Shift Time: ' + (m.shiftTime || '') + '\n';
-    out += 'Personnel Count: MP ' + mpCount + ', SP ' + spCount + ' (' + activeCrew.join(', ') + ')\n\n';
+    out += 'Personnel Count: MP ' + mpCount + ', SP ' + spCount + (activeCrew.length ? ' (' + activeCrew.join(', ') + ')' : '') + '\n\n';
     out += 'Work Completed:\nMP:\n';
     Object.values(state.halls).forEach(function (h) {
       hallBlock(h).forEach(function (l) { out += l + '\n'; });
