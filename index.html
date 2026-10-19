@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MP Walk">
+<meta name="theme-color" content="#0b1120">
+<title>MP Walkthrough &amp; Shift Report</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+  :root {
+    --bg: #0b1120; --card: #151f32; --card-alt: #1e293b; --border: #334155;
+    --text: #f8fafc; --muted: #94a3b8; --accent: #38bdf8;
+    --s-staged: #2563eb; --s-prog: #f59e0b; --s-ran: #9333ea; --s-hung: #10b981; --s-remed: #ef4444;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; padding: 0 0 calc(78px + env(safe-area-inset-bottom)) 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.35;
+  }
+  button { font-family: inherit; }
+
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(11,17,32,0.97); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: calc(6px + env(safe-area-inset-top)) 12px 6px 12px;
+  }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .app-title { font-weight: 800; font-size: 15px; color: #fff; }
+  .app-sub { font-size: 10.5px; color: var(--muted); }
+  .hall-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 7px 0 2px 0; scrollbar-width: none; }
+  .hall-tabs::-webkit-scrollbar { display: none; }
+  .hall-tab {
+    flex: 0 0 auto; padding: 7px 13px; border-radius: 9px; min-height: 34px;
+    background: var(--card-alt); border: 1px solid var(--border);
+    color: var(--muted); font-weight: 700; font-size: 12.5px; cursor: pointer;
+  }
+  .hall-tab.active { background: var(--accent); color: #062033; border-color: var(--accent); }
+
+  .container { padding: 10px 12px 10px 12px; max-width: 840px; margin: 0 auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .sticky-controls {
+    position: sticky; top: 96px; z-index: 40;
+    background: #101a2c; border: 1px solid var(--border); border-radius: 13px;
+    padding: 9px; margin-bottom: 12px; box-shadow: 0 10px 24px rgba(0,0,0,0.5);
+  }
+  .ctrl-label {
+    font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--muted);
+    letter-spacing: 0.4px; margin: 2px 0 5px 0;
+    display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  }
+  .brush-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 9px; }
+  .brush-btn {
+    padding: 10px 4px; border-radius: 8px; font-size: 12px; font-weight: 800; min-height: 42px;
+    border: 2px solid transparent; cursor: pointer; color: #fff; text-align: center;
+  }
+  .brush-btn:active { transform: scale(0.96); }
+  .brush-btn.active { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.25); }
+  .b-hung { background: var(--s-hung); color: #04291a; }
+  .b-ran { background: var(--s-ran); }
+  .b-prog { background: var(--s-prog); color: #241700; }
+  .b-staged { background: var(--s-staged); }
+  .b-remed { background: var(--s-remed); }
+  .b-none { background: #334155; color: #cbd5e1; }
+  .scope-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 6px; }
+  .scope-btn {
+    padding: 8px 4px; border-radius: 7px; font-size: 11.5px; font-weight: 800; min-height: 36px;
+    background: #1a2740; border: 1px solid var(--border); color: var(--muted); cursor: pointer; text-align: center;
+  }
+  .scope-btn.active { background: rgba(56,189,248,0.22); border-color: var(--accent); color: #fff; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 13px; padding: 11px 12px; margin-bottom: 11px; }
+  .card-title {
+    font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px;
+    color: var(--accent); margin-bottom: 9px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  }
+  .batch-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  select, input[type="text"], input[type="number"], textarea {
+    background: #0f172a; border: 1px solid var(--border); color: var(--text);
+    padding: 9px 10px; border-radius: 9px; font-size: 14px; font-family: inherit; min-height: 40px;
+  }
+  textarea { width: 100%; resize: vertical; }
+  .btn {
+    background: var(--accent); color: #062033; border: none; padding: 9px 13px;
+    border-radius: 9px; font-weight: 800; font-size: 12.5px; cursor: pointer; min-height: 40px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-secondary { background: var(--card-alt); color: var(--text); border: 1px solid var(--border); }
+  .btn-danger { background: rgba(239,68,68,0.16); color: #fca5a5; border: 1px solid #ef4444; }
+  .btn-ghost { background: transparent; border: 1px dashed var(--border); color: var(--muted); }
+
+  .stat-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 7px; }
+  .stat-cell { background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 6px 3px; text-align: center; }
+  .stat-num { font-size: 15px; font-weight: 800; }
+  .stat-lbl { font-size: 9px; color: var(--muted); }
+  .cable-stats { font-size: 10.5px; color: var(--muted); text-align: center; margin-bottom: 11px; }
+
+  .pod-header {
+    background: #1a2740; padding: 8px 10px; border-radius: 9px; margin: 13px 0 7px 0;
+    font-weight: 800; font-size: 12.5px; display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 6px; border-left: 4px solid var(--accent);
+  }
+  .pod-actions { display: flex; gap: 5px; }
+  .pod-btn {
+    background: #0d1830; border: 1px solid var(--border); color: #cbd5e1; font-size: 10.5px;
+    font-weight: 800; padding: 6px 9px; border-radius: 7px; cursor: pointer; min-height: 32px;
+  }
+  .pod-count { font-size: 10.5px; color: var(--muted); font-weight: 700; }
+
+  .aisle-legend {
+    display: grid; grid-template-columns: 1fr 58px 1fr; gap: 7px; text-align: center;
+    font-size: 10.5px; font-weight: 800; color: var(--muted); padding: 2px 0 6px 0;
+  }
+  .aisle-row { display: grid; grid-template-columns: 1fr 58px 1fr; gap: 7px; margin-bottom: 8px; align-items: stretch; }
+  .row-center-pill {
+    background: var(--card); border: 1px solid var(--border); border-radius: 11px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    cursor: pointer; user-select: none; padding: 4px; text-align: center;
+  }
+  .row-center-pill:active { transform: scale(0.95); }
+  .row-num { font-weight: 900; font-size: 15px; color: #fff; }
+  .row-both-hint { font-size: 8.5px; color: var(--accent); font-weight: 800; margin-top: 2px; }
+
+  .side-card {
+    border-radius: 11px; border: 2px solid var(--border); padding: 8px 9px; min-height: 64px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    cursor: pointer; user-select: none; background: var(--s-none, #151f32); -webkit-user-select: none;
+  }
+  .side-card:active { transform: scale(0.98); }
+  .side-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+  .side-id { font-weight: 900; font-size: 15px; letter-spacing: -0.3px; }
+  .side-span { font-size: 10px; opacity: 0.82; font-weight: 600; }
+  .side-status-badge {
+    font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 3px 6px;
+    border-radius: 6px; background: rgba(0,0,0,0.3); display: inline-block; margin-bottom: 6px;
+    text-align: center; align-self: flex-start;
+  }
+  .mini-cables { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.13); }
+  .mini-pill {
+    font-size: 9.5px; font-weight: 800; text-align: center; padding: 4px 2px; border-radius: 5px;
+    background: rgba(0,0,0,0.4); color: rgba(255,255,255,0.92); border: 1px solid rgba(255,255,255,0.13);
+  }
+  .mini-pill:active { transform: scale(0.92); }
+
+  .sc-none   { background: #141d30; border-color: #334155; color: #cbd5e1; }
+  .sc-staged { background: rgba(37,99,235,0.3);  border-color: #3b82f6; color: #fff; }
+  .sc-prog   { background: rgba(245,158,11,0.3); border-color: #f59e0b; color: #fff; }
+  .sc-ran    { background: rgba(147,51,234,0.32); border-color: #a855f7; color: #fff; }
+  .sc-hung   { background: rgba(16,185,129,0.3); border-color: #10b981; color: #fff; }
+  .sc-remed  { background: rgba(239,68,68,0.3);  border-color: #ef4444; color: #fff; }
+  .sc-mixed  { background: linear-gradient(135deg, rgba(59,130,246,0.25), rgba(245,158,11,0.25)); border-color: var(--accent); color: #fff; }
+
+  .mp-none   { background: rgba(10,16,30,0.7); color: #64748b; }
+  .mp-staged { background: var(--s-staged); color: #fff; }
+  .mp-prog   { background: var(--s-prog); color: #241700; }
+  .mp-ran    { background: var(--s-ran); color: #fff; }
+  .mp-hung   { background: var(--s-hung); color: #04291a; }
+  .mp-remed  { background: var(--s-remed); color: #fff; }
+
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+    background: #0d1526; border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    padding: 5px 6px calc(5px + env(safe-area-inset-bottom));
+  }
+  .nav-btn {
+    background: none; border: none; color: var(--muted); display: flex; flex-direction: column;
+    align-items: center; gap: 2px; font-size: 10.5px; font-weight: 700; padding: 5px 2px;
+    border-radius: 9px; cursor: pointer; min-height: 46px;
+  }
+  .nav-btn.active { color: var(--accent); background: rgba(56,189,248,0.12); }
+
+  .chip-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 7px; }
+  .crew-chip {
+    padding: 8px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700; min-height: 36px;
+    background: #0f172a; border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+    display: inline-flex; align-items: center;
+  }
+  .crew-chip.active { background: rgba(56,189,248,0.2); border-color: var(--accent); color: #fff; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 9px; }
+  .form-field { display: flex; flex-direction: column; gap: 4px; }
+  .form-field label { font-size: 11px; color: var(--muted); font-weight: 700; }
+  .form-field input, .form-field select { width: 100%; }
+
+  .report-pre {
+    background: #060b16; border: 1px solid var(--border); border-radius: 11px; padding: 12px;
+    color: #e2e8f0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px; white-space: pre-wrap; word-break: break-word; line-height: 1.5;
+  }
+  .hist-entry { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: #0d1526; }
+  .hist-entry summary { padding: 9px 11px; font-weight: 700; font-size: 12.5px; cursor: pointer; color: #cbd5e1; }
+  .hist-body { padding: 0 10px 10px 10px; }
+
+  .note-item {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    background: #0f172a; padding: 8px 10px; border-radius: 8px; margin-top: 6px;
+    font-size: 12.5px; border-left: 3px solid var(--accent);
+  }
+  .toast {
+    position: fixed; bottom: calc(86px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+    background: #10b981; color: #04291a; font-weight: 800; padding: 9px 17px; border-radius: 999px;
+    font-size: 13px; display: none; z-index: 100; max-width: 90vw; text-align: center;
+  }
+  .overlay {
+    position: fixed; inset: 0; z-index: 200; background: rgba(4,8,18,0.9);
+    display: flex; align-items: center; justify-content: center; padding: 18px;
+  }
+  .overlay-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 18px; max-width: 420px; width: 100%; max-height: 84vh; overflow-y: auto;
+  }
+  .overlay h2 { margin: 0 0 8px 0; font-size: 17px; }
+  .overlay ol, .overlay ul { padding-left: 20px; margin: 8px 0; font-size: 13px; color: #cbd5e1; }
+  .overlay li { margin-bottom: 7px; }
+  .undo-btn {
+    background: rgba(56,189,248,0.15); border: 1px solid var(--accent); color: var(--accent);
+    border-radius: 9px; font-weight: 800; font-size: 11.5px; padding: 7px 10px; cursor: pointer; min-height: 36px;
+  }
+  .muted { color: var(--muted); font-size: 11.5px; }
+  #copyFallback { position: fixed; left: -9999px; top: 0; opacity: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top-bar">
+    <div>
+      <div class="app-title">MP Walkthrough &amp; Shift Report</div>
+      <div class="app-sub" id="saveIndicator">Offline &bull; auto-saves to this phone</div>
+    </div>
+    <div style="display:flex; gap:6px;">
+      <button class="undo-btn" id="undoBtn" onclick="doUndo()">↩ Undo (0)</button>
+    </div>
+  </div>
+  <div class="hall-tabs" id="hallTabs"></div>
+</header>
+
+<div class="container">
+
+  <!-- ===================== WALKTHROUGH ===================== -->
+  <div id="panel-walk" class="panel active">
+    <div class="sticky-controls">
+      <div class="ctrl-label">
+        <span>1 &middot; Status stamp</span>
+        <span id="activeBrushLabel" style="color:var(--accent)">Ran &amp; Hung &bull; All cables</span>
+      </div>
+      <div class="brush-grid">
+        <button class="brush-btn b-hung active" onclick="setBrush('hung')">Ran &amp; Hung</button>
+        <button class="brush-btn b-ran" onclick="setBrush('ran')">Ran (Pulled)</button>
+        <button class="brush-btn b-prog" onclick="setBrush('prog')">In Progress</button>
+        <button class="brush-btn b-staged" onclick="setBrush('staged')">Staged</button>
+        <button class="brush-btn b-remed" onclick="setBrush('remed')">Remediation</button>
+        <button class="brush-btn b-none" onclick="setBrush('none')">Clear</button>
+      </div>
+      <div class="ctrl-label"><span>2 &middot; What a tap applies to</span></div>
+      <div class="scope-grid">
+        <button class="scope-btn active" id="sc-ALL" onclick="setScope('ALL')">ALL 3 CABLES</button>
+        <button class="scope-btn" id="sc-F144" onclick="setScope('F144')">144F</button>
+        <button class="scope-btn" id="sc-OCS" onclick="setScope('OCS')">OCS</button>
+        <button class="scope-btn" id="sc-CAT6" onclick="setScope('CAT6')">Copper</button>
+      </div>
+    </div>
+
+    <div class="stat-bar" id="hallStats"></div>
+    <div class="cable-stats" id="cableStats"></div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>Fast stamp &mdash; row range</span>
+        <button class="btn btn-secondary" style="padding:4px 9px; font-size:11px; min-height:30px;" onclick="toggleEditor()">Edit hall</button>
+      </div>
+      <div class="batch-row">
+        <span class="muted">Rows</span>
+        <input type="number" id="batchStart" value="7" style="width:58px;">
+        <span class="muted">to</span>
+        <input type="number" id="batchEnd" value="13" style="width:58px;">
+        <select id="batchSide" style="flex:1; min-width:130px;">
+          <option value="both">Both sides</option>
+          <option value="11">11 side only</option>
+          <option value="13">13 side only</option>
+        </select>
+        <button class="btn" onclick="applyBatchRange()">Stamp</button>
+      </div>
+      <div class="muted" style="margin-top:7px;">Uses the status + cable scope picked above. Tap a side card to stamp it, the aisle number to stamp both sides, a small pill to stamp one cable type.</div>
+      <div style="margin-top:9px; padding-top:9px; border-top:1px solid var(--border);">
+        <div class="batch-row">
+          <input type="text" id="noteInput" placeholder="Hall note — e.g. HAC 17, Rows 33–36 – Staged (8 hrs per person)" style="flex:1; min-width:150px;">
+          <button class="btn btn-secondary" onclick="addNote()">+ Note</button>
+        </div>
+        <div id="notesWrap"></div>
+      </div>
+    </div>
+
+    <div id="hallEditor" style="display:none;"></div>
+
+    <div class="aisle-legend">
+      <div>&#9664; 11 SIDE (X01–X11)</div>
+      <div>AISLE</div>
+      <div>13 SIDE (X13–X22) &#9654;</div>
+    </div>
+    <div id="walkGrid"></div>
+  </div>
+
+  <!-- ===================== CREW ===================== -->
+  <div id="panel-crew" class="panel">
+    <div class="card">
+      <div class="card-title">Shift &amp; personnel</div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Superintendents on site</label>
+          <input type="text" id="supers" oninput="saveMeta()">
+        </div>
+        <div class="form-field">
+          <label>Shift time</label>
+          <input type="text" id="shiftTime" oninput="saveMeta()">
+        </div>
+        <div class="form-field">
+          <label>Midpoint (MP) count</label>
+          <input type="number" id="mpCount" oninput="saveMeta()">
+        </div>
+        <div class="form-field">
+          <label>ServicePoint (SP) count <span class="muted">(auto from chips)</span></label>
+          <input type="number" id="spCount" oninput="saveMeta()">
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+        <label style="font-size:11px; color:var(--muted); font-weight:700;">SP CREW ON SHIFT (tap to toggle):</label>
+        <button class="btn btn-secondary" style="padding:4px 9px; font-size:11px; min-height:30px;" onclick="addCrewMember()">+ Name</button>
+      </div>
+      <div class="chip-wrap" id="crewChips"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">ServicePoint (SP) work notes &mdash; goes in report</div>
+      <textarea id="spWorkNotes" rows="5" oninput="saveMeta()"></textarea>
+    </div>
+  </div>
+
+  <!-- ===================== BLOCKERS ===================== -->
+  <div id="panel-blockers" class="panel">
+    <div class="card">
+      <div class="card-title">Blockers / issues</div>
+      <div class="batch-row" style="margin-bottom:9px;">
+        <input type="text" id="blockerDate" style="width:110px;" placeholder="MM/DD/YYYY">
+        <input type="text" id="blockerText" placeholder="What is blocking work" style="flex:1; min-width:140px;">
+        <button class="btn" onclick="addBlocker()">+ Add</button>
+      </div>
+      <div id="blockerList"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Areas of concern</div>
+      <textarea id="areasOfConcern" rows="2" oninput="saveMeta()"></textarea>
+    </div>
+    <div class="card">
+      <div class="card-title">Tasks for tomorrow (boss roll-up)</div>
+      <textarea id="tasksTomorrow" rows="4" oninput="saveMeta()"></textarea>
+    </div>
+  </div>
+
+  <!-- ===================== REPORT ===================== -->
+  <div id="panel-report" class="panel">
+    <div class="card">
+      <div class="card-title">Generate report</div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Report style</label>
+          <select id="reportStyle" onchange="renderReport()">
+            <option value="mine">My nightly report</option>
+            <option value="crew">Crew / table style</option>
+            <option value="boss">Boss roll-up (by hall &amp; cable)</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Row number style</label>
+          <select id="numStyle" onchange="renderReport()">
+            <option value="short">Shorthand (513)</option>
+            <option value="full">Full ranges (513–522)</option>
+            <option value="plain">Plain rows (Row 5, 13-side)</option>
+          </select>
+        </div>
+      </div>
+      <div class="batch-row" style="margin-bottom:10px;">
+        <button class="btn" onclick="copyReport()">Copy</button>
+        <button class="btn btn-secondary" onclick="shareReport()">Share</button>
+        <button class="btn btn-secondary" onclick="saveReportToHistory()">Save to history</button>
+      </div>
+      <pre class="report-pre" id="reportOutput"></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Backup &amp; restore</div>
+      <div class="muted" style="margin-bottom:8px;">Do a backup after each shift. The share sheet saves a small file to Files/iCloud &mdash; that file is your real safety net.</div>
+      <div class="batch-row">
+        <button class="btn" onclick="doBackup()">Backup now</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('restoreFile').click()">Restore from file</button>
+        <button class="btn btn-ghost" onclick="togglePasteRestore()">Paste restore</button>
+      </div>
+      <input type="file" id="restoreFile" accept=".json,application/json" style="display:none" onchange="restoreFromFile(event)">
+      <div id="pasteRestore" style="display:none; margin-top:9px;">
+        <textarea id="pasteJson" rows="4" placeholder="Paste a backup JSON here"></textarea>
+        <button class="btn" style="margin-top:6px;" onclick="restoreFromPaste()">Restore</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Report history</div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<textarea id="copyFallback" aria-hidden="true" tabindex="-1"></textarea>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="switchTab('walk', this)"><span>&#129524;</span><span>Walkthrough</span></button>
+  <button class="nav-btn" onclick="switchTab('crew', this)"><span>&#128119;</span><span>Crew</span></button>
+  <button class="nav-btn" onclick="switchTab('blockers', this)"><span>&#128679;</span><span>Blockers</span></button>
+  <button class="nav-btn" onclick="switchTab('report', this)"><span>&#128196;</span><span>Report</span></button>
+</nav>
+
+<div class="overlay" id="onboarding" style="display:none;">
+  <div class="overlay-card">
+    <h2>Install on your phone (one time)</h2>
+    <ol>
+      <li>Open this page in <b>Safari</b> (not Chrome).</li>
+      <li>Tap the <b>Share</b> button (square with arrow).</li>
+      <li>Scroll down, tap <b>Add to Home Screen</b>, then <b>Add</b>.</li>
+      <li>Launch it from the new icon &mdash; it now works <b>100% offline, forever</b>. No signal needed in the halls.</li>
+    </ol>
+    <ul>
+      <li>Your walkthrough data lives only on this phone.</li>
+      <li>Tap <b>Backup now</b> (Report tab) after each shift &mdash; it saves a file you can keep in Files/iCloud.</li>
+      <li>Never delete the home-screen icon without a fresh backup &mdash; deleting it erases the saved data.</li>
+    </ul>
+    <button class="btn" style="width:100%;" onclick="dismissOnboarding()">Got it</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+var STORAGE_KEY = 'mp_walkthrough_v1';
+var CABLES = ['F144', 'OCS', 'CAT6'];
+var CABLE_LABEL = { F144: '144F', OCS: 'OCS', CAT6: 'Copper' };
+var STATUS_ORDER = ['none', 'staged', 'prog', 'ran', 'hung', 'remed'];
+var REPORT_STATUS_ORDER = ['hung', 'ran', 'prog', 'staged', 'remed']; // most complete first, like the real reports
+var STATUS_META = {
+  none:   { short: '—',        badge: 'Empty',       report: 'Not started',   cardCls: 'sc-none',   pillCls: 'mp-none' },
+  staged: { short: 'Staged',   badge: 'Staged',      report: 'Staged',        cardCls: 'sc-staged', pillCls: 'mp-staged' },
+  prog:   { short: 'Prog',     badge: 'In Progress', report: 'In progress',   cardCls: 'sc-prog',   pillCls: 'mp-prog' },
+  ran:    { short: 'Ran',      badge: 'Ran',         report: 'Ran',           cardCls: 'sc-ran',    pillCls: 'mp-ran' },
+  hung:   { short: 'Hung',     badge: 'Ran & Hung',  report: 'Ran and hung',  cardCls: 'sc-hung',   pillCls: 'mp-hung' },
+  remed:  { short: 'Remed',    badge: 'Remediation', report: 'Remediation',   cardCls: 'sc-remed',  pillCls: 'mp-remed' }
+};
+var BRUSH_LABEL = { hung: 'Ran & Hung', ran: 'Ran (Pulled)', prog: 'In Progress', staged: 'Staged', remed: 'Remediation', none: 'Clear' };
+
+function emptySide() { return { F144: 'none', OCS: 'none', CAT6: 'none' }; }
+function emptyRow() { return { '11': emptySide(), '13': emptySide() }; }
+
+function makeHall(id, name, maxRow, groups) {
+  var rows = {};
+  for (var r = 1; r <= maxRow; r++) rows[r] = emptyRow();
+  return { id: id, name: name, maxRow: maxRow, groups: groups, notes: [], rows: rows };
+}
+function grp(name, from, to) {
+  var rows = [];
+  for (var r = from; r <= to; r++) rows.push(r);
+  return { name: name, rows: rows };
+}
+
+function defaultState() {
+  var s = {
+    version: 1,
+    activeHall: 'CB5_DH1',
+    brush: 'hung', scope: 'ALL',
+    settings: { onboarded: false, numStyle: 'short' },
+    meta: {
+      supers: 'Chris Dickman, Daniel Morris',
+      shiftTime: '2:00 PM – 2:00 AM',
+      mpCount: 106, spCount: 11,
+      spWorkNotes: 'Started training with Chris Dickman. Shadowed MP on staging and remediation in CB5 DH1. Tested new hires on the system to gauge their training progress.\nTaking measurements with the cable pole to determine cable lengths.',
+      areasOfConcern: 'None',
+      tasksTomorrow: 'Allocating and pulling material in CB5 DH1.\nQC of pulled cables in CB4 DH2 and installing of cables as HAC\u2019s are approved.\nTroubleshooting of AI\u2019s sent to the team.'
+    },
+    crewPool: [
+      'Richard Montgomery', 'Dwayne Phillips', 'Daniel Morris', 'Ken Smith',
+      'Jonathan Hall', 'Rafael Trevino', 'Kendrick Freeman', 'Darius Moore',
+      'Chris Dickman', 'Jack Tracy', 'Steve Maffeo'
+    ].map(function (n) { return { name: n, active: true }; }),
+    blockers: [],
+    history: [],
+    halls: {}
+  };
+  s.halls['CB5_DH1'] = makeHall('CB5_DH1', 'CB5 DH1', 26, [
+    grp('Network Rows 1–2', 1, 2),
+    grp('POD 1 (Rows 3–10)', 3, 10),
+    grp('POD 2 (Rows 11–18)', 11, 18),
+    grp('POD 3 (Rows 19–26)', 19, 26)
+  ]);
+  s.halls['CB4_DH2'] = makeHall('CB4_DH2', 'CB4 DH2', 36, [
+    grp('Network Rows 1–2', 1, 2),
+    grp('POD 10 (Rows 3–10)', 3, 10),
+    grp('POD 11 (Rows 11–18)', 11, 18),
+    grp('POD 12 (Rows 19–26)', 19, 26),
+    grp('Rows 27–36 (HAC area)', 27, 36)
+  ]);
+  s.halls['CB4_DH4'] = makeHall('CB4_DH4', 'CB4 DH4', 26, [
+    grp('Network Rows 1–2', 1, 2),
+    grp('POD 10 (Rows 3–10)', 3, 10),
+    grp('POD 11 (Rows 11–18)', 11, 18),
+    grp('POD 12 (Rows 19–26)', 19, 26)
+  ]);
+
+  // Pre-load last night's CB5 DH1 walkthrough so the first run looks familiar.
+  var cb5 = s.halls['CB5_DH1'].rows;
+  function stamp(r, side, st) { cb5[r][side] = { F144: st, OCS: st, CAT6: st }; }
+  [1, 2].forEach(function (r) { stamp(r, '11', 'hung'); stamp(r, '13', 'hung'); });
+  [3, 5, 6].forEach(function (r) { stamp(r, '11', 'hung'); });
+  [3, 5, 6].forEach(function (r) { stamp(r, '13', 'prog'); });
+  for (var r7 = 7; r7 <= 13; r7++) { stamp(r7, '11', 'staged'); stamp(r7, '13', 'staged'); }
+
+  s.halls['CB4_DH2'].notes.push('HAC 17, Rows 33–36 – Staged (8 hrs per person).');
+  s.halls['CB4_DH4'].notes.push('Remediation – Continued working through cut sheet.');
+  return s;
+}
+
+/* ---------------- persistence ---------------- */
+var state = loadState();
+var undoStack = [];
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      var s = JSON.parse(raw);
+      if (s && s.halls) return s;
+    }
+  } catch (e) {}
+  return defaultState();
+}
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    var t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('saveIndicator').textContent = 'Offline \u2022 saved ' + t;
+  } catch (e) {
+    document.getElementById('saveIndicator').textContent = 'WARNING: could not save!';
+  }
+}
+function snapshotCore() {
+  return JSON.stringify({ halls: state.halls, crewPool: state.crewPool, blockers: state.blockers, meta: state.meta, history: state.history });
+}
+function pushUndo() {
+  undoStack.push(snapshotCore());
+  if (undoStack.length > 60) undoStack.shift();
+  updateUndoBtn();
+}
+function doUndo() {
+  if (!undoStack.length) { showToast('Nothing to undo'); return; }
+  var snap = JSON.parse(undoStack.pop());
+  state.halls = snap.halls; state.crewPool = snap.crewPool;
+  state.blockers = snap.blockers; state.meta = snap.meta; state.history = snap.history;
+  saveState(); updateUndoBtn(); renderAll();
+  showToast('Undone');
+}
+function updateUndoBtn() {
+  document.getElementById('undoBtn').textContent = '\u21a9 Undo (' + undoStack.length + ')';
+}
+
+/* ---------------- brush & scope ---------------- */
+function setBrush(code) {
+  state.brush = code;
+  document.querySelectorAll('.brush-btn').forEach(function (b) { b.classList.remove('active'); });
+  var map = { hung: '.b-hung', ran: '.b-ran', prog: '.b-prog', staged: '.b-staged', remed: '.b-remed', none: '.b-none' };
+  var btn = document.querySelector(map[code]);
+  if (btn) btn.classList.add('active');
+  updateBrushLabel(); saveState();
+}
+function setScope(sc) {
+  state.scope = sc;
+  document.querySelectorAll('.scope-btn').forEach(function (b) { b.classList.remove('active'); });
+  document.getElementById('sc-' + sc).classList.add('active');
+  updateBrushLabel(); saveState();
+}
+function updateBrushLabel() {
+  var sc = state.scope === 'ALL' ? 'All cables' : CABLE_LABEL[state.scope] + ' only';
+  document.getElementById('activeBrushLabel').textContent = BRUSH_LABEL[state.brush] + ' \u2022 ' + sc;
+}
+
+/* ---------------- stamping ---------------- */
+function activeCables() { return state.scope === 'ALL' ? CABLES.slice() : [state.scope]; }
+
+function tapSide(r, side) {
+  pushUndo();
+  var seg = state.halls[state.activeHall].rows[r][side];
+  var br = state.brush, cs = activeCables();
+  var alreadyAll = cs.every(function (c) { return seg[c] === br; });
+  var next = alreadyAll ? 'none' : br;
+  cs.forEach(function (c) { seg[c] = next; });
+  saveState(); renderWalk();
+}
+function tapPill(e, r, side, cable) {
+  if (e) e.stopPropagation();
+  pushUndo();
+  var seg = state.halls[state.activeHall].rows[r][side];
+  seg[cable] = (seg[cable] === state.brush) ? 'none' : state.brush;
+  saveState(); renderWalk();
+}
+function tapBoth(r) {
+  pushUndo();
+  var hall = state.halls[state.activeHall];
+  var br = state.brush, cs = activeCables();
+  var allMatch = ['11', '13'].every(function (s) {
+    return cs.every(function (c) { return hall.rows[r][s][c] === br; });
+  });
+  var next = allMatch ? 'none' : br;
+  ['11', '13'].forEach(function (s) { cs.forEach(function (c) { hall.rows[r][s][c] = next; }); });
+  saveState(); renderWalk();
+}
+function stampRows(rows, sideMode, quiet) {
+  pushUndo();
+  var hall = state.halls[state.activeHall];
+  var br = state.brush, cs = activeCables();
+  var sides = sideMode === 'both' ? ['11', '13'] : [sideMode];
+  rows.forEach(function (r) {
+    if (!hall.rows[r]) return;
+    sides.forEach(function (s) { cs.forEach(function (c) { hall.rows[r][s][c] = br; }); });
+  });
+  saveState(); renderWalk();
+  if (!quiet) showToast('Stamped ' + rows.length + ' row' + (rows.length === 1 ? '' : 's'));
+}
+function applyBatchRange() {
+  var a = parseInt(document.getElementById('batchStart').value, 10);
+  var b = parseInt(document.getElementById('batchEnd').value, 10);
+  if (!a || !b) { showToast('Enter row numbers'); return; }
+  var rows = [];
+  for (var r = Math.min(a, b); r <= Math.max(a, b); r++) rows.push(r);
+  stampRows(rows, document.getElementById('batchSide').value);
+}
+
+/* ---------------- rendering ---------------- */
+function sideSummary(seg) {
+  if (seg.F144 === seg.OCS && seg.OCS === seg.CAT6) return { uniform: true, status: seg.F144 };
+  return { uniform: false, status: 'mixed' };
+}
+
+function renderHallTabs() {
+  var wrap = document.getElementById('hallTabs');
+  wrap.innerHTML = '';
+  Object.values(state.halls).forEach(function (h) {
+    var b = document.createElement('button');
+    b.className = 'hall-tab' + (state.activeHall === h.id ? ' active' : '');
+    b.textContent = h.name;
+    b.onclick = function () {
+      state.activeHall = h.id; saveState();
+      renderHallTabs(); renderWalk();
+    };
+    wrap.appendChild(b);
+  });
+  var add = document.createElement('button');
+  add.className = 'hall-tab';
+  add.textContent = '+ Hall';
+  add.onclick = addHallPrompt;
+  wrap.appendChild(add);
+}
+
+function renderWalk() {
+  var hall = state.halls[state.activeHall];
+  if (!hall) { state.activeHall = Object.keys(state.halls)[0]; hall = state.halls[state.activeHall]; }
+
+  // notes
+  var nw = document.getElementById('notesWrap');
+  nw.innerHTML = (hall.notes || []).map(function (n, i) {
+    return '<div class="note-item"><span>\uD83D\uDCCC ' + escapeHtml(n) + '</span>' +
+      '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:28px;" onclick="removeNote(' + i + ')">\u2715</button></div>';
+  }).join('');
+
+  // stats
+  var counts = { hung: 0, ran: 0, prog: 0, staged: 0, remed: 0 };
+  var totalSides = 0;
+  var cableDone = { F144: 0, OCS: 0, CAT6: 0 };
+  Object.keys(hall.rows).forEach(function (r) {
+    ['11', '13'].forEach(function (side) {
+      totalSides++;
+      var sum = sideSummary(hall.rows[r][side]);
+      if (sum.uniform && counts[sum.status] !== undefined) counts[sum.status]++;
+      CABLES.forEach(function (c) {
+        var st = hall.rows[r][side][c];
+        if (st === 'hung' || st === 'ran' || st === 'remed') cableDone[c]++;
+      });
+    });
+  });
+  document.getElementById('hallStats').innerHTML =
+    ['hung', 'ran', 'prog', 'staged', 'remed'].map(function (k) {
+      return '<div class="stat-cell"><div class="stat-num" style="color:var(--s-' + k + ')">' + counts[k] + '</div>' +
+        '<div class="stat-lbl">' + STATUS_META[k].badge.replace('Ran & ', 'R&').replace('In Progress', 'Prog') + '</div></div>';
+    }).join('');
+  document.getElementById('cableStats').textContent =
+    CABLES.map(function (c) { return CABLE_LABEL[c] + ' ' + cableDone[c] + '/' + totalSides + ' sides ran+'; }).join(' \u00b7 ') +
+    ' \u00b7 ' + totalSides + ' sides total';
+
+  var grid = document.getElementById('walkGrid');
+  grid.innerHTML = '';
+
+  (hall.groups || []).forEach(function (g) {
+    var existing = g.rows.filter(function (r) { return !!hall.rows[r]; });
+    var doneCount = 0;
+    existing.forEach(function (r) {
+      ['11', '13'].forEach(function (s) { if (sideSummary(hall.rows[r][s]).status === 'hung') doneCount++; });
+    });
+    var ph = document.createElement('div');
+    ph.className = 'pod-header';
+    ph.innerHTML = '<span>' + escapeHtml(g.name) + ' <span class="pod-count">' + doneCount + '/' + (existing.length * 2) + ' hung</span></span>' +
+      '<div class="pod-actions">' +
+      '<button class="pod-btn" onclick="stampRows([' + existing.join(',') + '], \'11\')">11 side</button>' +
+      '<button class="pod-btn" onclick="stampRows([' + existing.join(',') + '], \'13\')">13 side</button>' +
+      '<button class="pod-btn" onclick="stampRows([' + existing.join(',') + '], \'both\')">All</button>' +
+      '</div>';
+    grid.appendChild(ph);
+
+    existing.forEach(function (r) {
+      var rowEl = document.createElement('div');
+      rowEl.className = 'aisle-row';
+      rowEl.innerHTML = buildSideHtml(hall, r, '11') +
+        '<div class="row-center-pill" onclick="tapBoth(' + r + ')">' +
+        '<span class="row-num">R' + r + '</span><span class="row-both-hint">BOTH</span></div>' +
+        buildSideHtml(hall, r, '13');
+      grid.appendChild(rowEl);
+    });
+  });
+}
+
+function buildSideHtml(hall, r, side) {
+  var seg = hall.rows[r][side];
+  var sum = sideSummary(seg);
+  var cardCls = sum.uniform ? STATUS_META[sum.status].cardCls : 'sc-mixed';
+  var badge = sum.uniform
+    ? (sum.status === 'none' ? 'Tap to stamp' : STATUS_META[sum.status].badge)
+    : 'Mixed';
+  var span = side === '11' ? (r + '01–' + r + '11') : (r + '13–' + r + '22');
+  var pills = CABLES.map(function (c) {
+    var m = STATUS_META[seg[c]];
+    var lbl = c === 'CAT6' ? 'CAT6' : CABLE_LABEL[c];
+    return '<div class="mini-pill ' + m.pillCls + '" onclick="tapPill(event, ' + r + ', \'' + side + '\', \'' + c + '\')">' + lbl + ': ' + m.short + '</div>';
+  }).join('');
+  return '<div class="side-card ' + cardCls + '" onclick="tapSide(' + r + ', \'' + side + '\')">' +
+    '<div><div class="side-top"><span class="side-id">' + r + side + '</span><span class="side-span">' + span + '</span></div>' +
+    '<span class="side-status-badge">' + badge + '</span></div>' +
+    '<div class="mini-cables">' + pills + '</div></div>';
+}
+
+/* ---------------- notes ---------------- */
+function addNote() {
+  var inp = document.getElementById('noteInput');
+  var v = inp.value.trim();
+  if (!v) return;
+  pushUndo();
+  state.halls[state.activeHall].notes.push(v);
+  inp.value = '';
+  saveState(); renderWalk();
+}
+function removeNote(i) {
+  pushUndo();
+  state.halls[state.activeHall].notes.splice(i, 1);
+  saveState(); renderWalk();
+}
+
+/* ---------------- hall editor ---------------- */
+function toggleEditor() {
+  var el = document.getElementById('hallEditor');
+  if (el.style.display === 'none') { renderEditor(); el.style.display = 'block'; }
+  else el.style.display = 'none';
+}
+function renderEditor() {
+  var hall = state.halls[state.activeHall];
+  var gRows = (hall.groups || []).map(function (g, i) {
+    var from = g.rows.length ? g.rows[0] : 1;
+    var to = g.rows.length ? g.rows[g.rows.length - 1] : 1;
+    return '<div class="batch-row" style="margin-bottom:6px;">' +
+      '<input type="text" value="' + escapeAttr(g.name) + '" id="grpName' + i + '" style="flex:1; min-width:120px;">' +
+      '<input type="number" value="' + from + '" id="grpFrom' + i + '" style="width:60px;">' +
+      '<span class="muted">–</span>' +
+      '<input type="number" value="' + to + '" id="grpTo' + i + '" style="width:60px;">' +
+      '<button class="btn btn-danger" style="padding:4px 8px; min-height:32px;" onclick="removeGroup(' + i + ')">\u2715</button></div>';
+  }).join('');
+  document.getElementById('hallEditor').innerHTML =
+    '<div class="card">' +
+    '<div class="card-title">Edit ' + escapeHtml(hall.name) + '</div>' +
+    '<div class="batch-row" style="margin-bottom:9px;">' +
+    '<span class="muted">Name</span><input type="text" id="hallNameInput" value="' + escapeAttr(hall.name) + '" style="flex:1; min-width:110px;">' +
+    '<span class="muted">Max row</span><input type="number" id="hallMaxInput" value="' + hall.maxRow + '" style="width:66px;">' +
+    '<button class="btn" onclick="applyHallBasics()">Apply</button></div>' +
+    '<div class="muted" style="margin-bottom:5px;">Groups (name and row range):</div>' + gRows +
+    '<div class="batch-row" style="margin-top:7px;">' +
+    '<button class="btn btn-secondary" onclick="addGroup()">+ Group</button>' +
+    '<button class="btn" onclick="applyGroups()">Save groups</button>' +
+    '<button class="btn btn-danger" onclick="clearHallStatuses()">Clear statuses</button>' +
+    '<button class="btn btn-danger" onclick="deleteHall()">Delete hall</button></div>' +
+    '</div>';
+}
+function applyHallBasics() {
+  pushUndo();
+  var hall = state.halls[state.activeHall];
+  var name = document.getElementById('hallNameInput').value.trim();
+  var maxRow = parseInt(document.getElementById('hallMaxInput').value, 10);
+  if (name) hall.name = name;
+  if (maxRow && maxRow > 0 && maxRow <= 99) {
+    hall.maxRow = maxRow;
+    for (var r = 1; r <= maxRow; r++) if (!hall.rows[r]) hall.rows[r] = emptyRow();
+  }
+  saveState(); renderAll(); renderEditor();
+  showToast('Hall updated');
+}
+function addGroup() {
+  pushUndo();
+  state.halls[state.activeHall].groups.push(grp('New group', 1, 2));
+  saveState(); renderWalk(); renderEditor();
+}
+function removeGroup(i) {
+  pushUndo();
+  state.halls[state.activeHall].groups.splice(i, 1);
+  saveState(); renderWalk(); renderEditor();
+}
+function applyGroups() {
+  pushUndo();
+  var hall = state.halls[state.activeHall];
+  hall.groups = hall.groups.map(function (g, i) {
+    var name = document.getElementById('grpName' + i) ? document.getElementById('grpName' + i).value.trim() : g.name;
+    var from = parseInt(document.getElementById('grpFrom' + i).value, 10) || g.rows[0];
+    var to = parseInt(document.getElementById('grpTo' + i).value, 10) || g.rows[g.rows.length - 1];
+    return grp(name || 'Group', Math.max(1, Math.min(from, to)), Math.min(hall.maxRow, Math.max(from, to)));
+  });
+  saveState(); renderWalk(); renderEditor();
+  showToast('Groups saved');
+}
+function clearHallStatuses() {
+  if (!confirm('Clear ALL statuses in ' + state.halls[state.activeHall].name + '?')) return;
+  pushUndo();
+  var hall = state.halls[state.activeHall];
+  Object.keys(hall.rows).forEach(function (r) { hall.rows[r] = emptyRow(); });
+  saveState(); renderWalk();
+  showToast('Cleared');
+}
+function deleteHall() {
+  var ids = Object.keys(state.halls);
+  if (ids.length <= 1) { showToast('Keep at least one hall'); return; }
+  if (!confirm('Delete hall ' + state.halls[state.activeHall].name + ' and its statuses?')) return;
+  pushUndo();
+  delete state.halls[state.activeHall];
+  state.activeHall = Object.keys(state.halls)[0];
+  document.getElementById('hallEditor').style.display = 'none';
+  saveState(); renderAll();
+}
+function addHallPrompt() {
+  var name = prompt('Data hall name (e.g. CB5 DH2):');
+  if (!name || !name.trim()) return;
+  var id = name.trim().replace(/\s+/g, '_').toUpperCase() + '_' + Date.now().toString(36);
+  pushUndo();
+  state.halls[id] = makeHall(id, name.trim(), 26, [
+    grp('Network Rows 1–2', 1, 2),
+    grp('POD A (Rows 3–10)', 3, 10),
+    grp('POD B (Rows 11–18)', 11, 18),
+    grp('POD C (Rows 19–26)', 19, 26)
+  ]);
+  state.activeHall = id;
+  saveState(); renderHallTabs(); renderWalk();
+  showToast('Hall added — use Edit hall to set rows/groups');
+}
+
+/* ---------------- crew / meta / blockers ---------------- */
+function renderCrewPanel() {
+  var m = state.meta;
+  document.getElementById('supers').value = m.supers || '';
+  document.getElementById('shiftTime').value = m.shiftTime || '';
+  document.getElementById('mpCount').value = m.mpCount;
+  document.getElementById('spCount').value = m.spCount;
+  document.getElementById('spWorkNotes').value = m.spWorkNotes || '';
+  document.getElementById('areasOfConcern').value = m.areasOfConcern || '';
+  document.getElementById('tasksTomorrow').value = m.tasksTomorrow || '';
+  if (!document.getElementById('blockerDate').value) {
+    document.getElementById('blockerDate').value = new Date().toLocaleDateString('en-US');
+  }
+  var cw = document.getElementById('crewChips');
+  cw.innerHTML = '';
+  state.crewPool.forEach(function (member, i) {
+    var d = document.createElement('div');
+    d.className = 'crew-chip' + (member.active ? ' active' : '');
+    d.textContent = (member.active ? '\u2713 ' : '') + member.name;
+    d.onclick = function () {
+      pushUndo();
+      member.active = !member.active;
+      state.meta.spCount = state.crewPool.filter(function (x) { return x.active; }).length;
+      saveState(); renderCrewPanel();
+    };
+    cw.appendChild(d);
+  });
+  renderBlockers(); renderHistory();
+}
+function saveMeta() {
+  state.meta.supers = document.getElementById('supers').value;
+  state.meta.shiftTime = document.getElementById('shiftTime').value;
+  state.meta.mpCount = document.getElementById('mpCount').value;
+  state.meta.spCount = document.getElementById('spCount').value;
+  state.meta.spWorkNotes = document.getElementById('spWorkNotes').value;
+  state.meta.areasOfConcern = document.getElementById('areasOfConcern').value;
+  state.meta.tasksTomorrow = document.getElementById('tasksTomorrow').value;
+  saveState();
+}
+function addCrewMember() {
+  var n = prompt('Crew member name:');
+  if (!n || !n.trim()) return;
+  pushUndo();
+  state.crewPool.push({ name: n.trim(), active: true });
+  state.meta.spCount = state.crewPool.filter(function (x) { return x.active; }).length;
+  saveState(); renderCrewPanel();
+}
+function addBlocker() {
+  var d = document.getElementById('blockerDate').value.trim() || new Date().toLocaleDateString('en-US');
+  var t = document.getElementById('blockerText').value.trim();
+  if (!t) return;
+  pushUndo();
+  state.blockers.push({ date: d, text: t });
+  document.getElementById('blockerText').value = '';
+  saveState(); renderBlockers();
+}
+function removeBlocker(i) {
+  pushUndo();
+  state.blockers.splice(i, 1);
+  saveState(); renderBlockers();
+}
+function renderBlockers() {
+  var el = document.getElementById('blockerList');
+  if (!el) return;
+  el.innerHTML = state.blockers.length ? state.blockers.map(function (b, i) {
+    return '<div class="note-item" style="border-left-color:var(--s-remed);"><span><strong>' + escapeHtml(b.date) + '</strong> – ' + escapeHtml(b.text) + '</span>' +
+      '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:28px;" onclick="removeBlocker(' + i + ')">\u2715</button></div>';
+  }).join('') : '<div class="muted">No blockers added.</div>';
+}
+
+/* ---------------- report compression engine ---------------- */
+function numStyle() {
+  var el = document.getElementById('numStyle');
+  return el ? el.value : (state.settings.numStyle || 'short');
+}
+function runsOf(arr) {
+  var runs = [];
+  var i = 0;
+  while (i < arr.length) {
+    var j = i;
+    while (j + 1 < arr.length && arr[j + 1] === arr[j] + 1) j++;
+    runs.push({ a: arr[i], b: arr[j] });
+    i = j + 1;
+  }
+  return runs;
+}
+// Each formatter returns an ARRAY of tokens: runs of 1-3 rows stay per-row
+// ("111–113"), only runs of 4+ compress ("711–1311 & 713–1313").
+function fmt11(run, style) {
+  var out = [];
+  if (style === 'plain') {
+    out.push(run.a === run.b ? ('Row ' + run.a + ' (11 side)') : ('Rows ' + run.a + '–' + run.b + ' (11 side)'));
+    return out;
+  }
+  if (run.b - run.a >= 3) { out.push(run.a + '11–' + run.b + '11'); return out; }
+  for (var r = run.a; r <= run.b; r++) out.push(r + '01–' + r + '11');
+  return out;
+}
+function fmt13(run, style) {
+  var out = [];
+  if (style === 'plain') {
+    out.push(run.a === run.b ? ('Row ' + run.a + ' (13 side)') : ('Rows ' + run.a + '–' + run.b + ' (13 side)'));
+    return out;
+  }
+  if (run.b - run.a >= 3) { out.push(run.a + '13–' + run.b + (style === 'full' ? '22' : '13')); return out; }
+  for (var r = run.a; r <= run.b; r++) out.push(style === 'full' ? (r + '13–' + r + '22') : (r + '13'));
+  return out;
+}
+function fmtBoth(run, style) {
+  var out = [];
+  if (style === 'plain') {
+    out.push(run.a === run.b ? ('Row ' + run.a + ' (both sides)') : ('Rows ' + run.a + '–' + run.b + ' (both sides)'));
+    return out;
+  }
+  if (run.b - run.a >= 3) { out.push(run.a + '11–' + run.b + '11 & ' + run.a + '13–' + run.b + '13'); return out; }
+  for (var r = run.a; r <= run.b; r++) out.push(r + '11–' + r + '13');
+  return out;
+}
+function joinList(tokens) {
+  if (!tokens.length) return '';
+  if (tokens.length === 1) return tokens[0];
+  return tokens.slice(0, -1).join(', ') + ' & ' + tokens[tokens.length - 1];
+}
+function sideOverall(seg, cableFilter) {
+  if (cableFilter) return seg[cableFilter];
+  return (seg.F144 === seg.OCS && seg.OCS === seg.CAT6) ? seg.F144 : 'MIXED';
+}
+// Returns array of sentence strings for one hall at all statuses.
+function hallSentences(hall, cableFilter, style) {
+  var out = [];
+  REPORT_STATUS_ORDER.forEach(function (target) {
+    if (target === 'none') return;
+    var q11 = [], q13 = [];
+    Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
+      if (sideOverall(hall.rows[r]['11'], cableFilter) === target) q11.push(r);
+      if (sideOverall(hall.rows[r]['13'], cableFilter) === target) q13.push(r);
+    });
+    if (!q11.length && !q13.length && cableFilter) return;
+    var tokens = [];
+    var bothSet = {};
+    q11.forEach(function (r) { if (q13.indexOf(r) !== -1) bothSet[r] = true; });
+    var bothRows = Object.keys(bothSet).map(Number).sort(function (a, b) { return a - b; });
+    runsOf(bothRows).forEach(function (run) { tokens.push.apply(tokens, fmtBoth(run, style)); });
+    var rem11 = q11.filter(function (r) { return !bothSet[r]; });
+    var rem13 = q13.filter(function (r) { return !bothSet[r]; });
+    runsOf(rem11).forEach(function (run) { tokens.push.apply(tokens, fmt11(run, style)); });
+    runsOf(rem13).forEach(function (run) { tokens.push.apply(tokens, fmt13(run, style)); });
+
+    // Mixed sides (no cable filter): "511 (144F/OCS)" tokens for cables matching this status.
+    if (!cableFilter) {
+      Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
+        ['11', '13'].forEach(function (side) {
+          if (sideOverall(hall.rows[r][side], null) === 'MIXED') {
+            var hit = CABLES.filter(function (c) { return hall.rows[r][side][c] === target; });
+            if (hit.length) tokens.push(r + side + ' (' + hit.map(function (c) { return CABLE_LABEL[c]; }).join('/') + ')');
+          }
+        });
+      });
+    }
+    if (tokens.length) out.push(joinList(tokens) + ' – ' + STATUS_META[target].report + '.');
+  });
+  return out;
+}
+function activeHallNames() {
+  return Object.values(state.halls)
+    .filter(function (h) {
+      var any = false;
+      Object.keys(h.rows).forEach(function (r) {
+        ['11', '13'].forEach(function (s) {
+          CABLES.forEach(function (c) { if (h.rows[r][s][c] !== 'none') any = true; });
+        });
+      });
+      return any || (h.notes && h.notes.length);
+    })
+    .map(function (h) { return h.name; });
+}
+function hallBlock(hall) {
+  var lines = [];
+  var sents = hallSentences(hall, null, numStyle());
+  if (sents.length) lines.push(hall.name + ' ' + sents.join('   '));
+  (hall.notes || []).forEach(function (n) { lines.push(hall.name + ' ' + n); });
+  return lines;
+}
+
+/* ---------------- report templates ---------------- */
+function buildReport(style) {
+  var m = state.meta;
+  var activeCrew = state.crewPool.filter(function (c) { return c.active; }).map(function (c) { return c.name; });
+  var spCount = parseInt(m.spCount, 10) || activeCrew.length;
+  var mpCount = parseInt(m.mpCount, 10) || 0;
+  var out = '';
+
+  if (style === 'mine') {
+    out += 'Superintendent on site: ' + (m.supers || '') + '\n';
+    out += 'Shift Time: ' + (m.shiftTime || '') + '\n';
+    out += 'Personnel Count: MP ' + mpCount + ', SP ' + spCount + ' (' + activeCrew.join(', ') + ')\n\n';
+    out += 'Work Completed:\nMP:\n';
+    Object.values(state.halls).forEach(function (h) {
+      hallBlock(h).forEach(function (l) { out += l + '\n'; });
+    });
+    out += '\nSP:\n' + ((m.spWorkNotes || '').trim() || 'None') + '\n\n';
+    out += 'Blockers:\n';
+    out += state.blockers.length ? state.blockers.map(function (b) { return '- ' + b.date + ' – ' + b.text; }).join('\n') + '\n' : '- None\n';
+    out += '\nAreas of concern:\n- ' + ((m.areasOfConcern || '').trim() || 'None');
+  }
+
+  else if (style === 'crew') {
+    var locs = activeHallNames().join(', ') || 'n/a';
+    out += 'Company/Crew: Midpoint (MP)\n';
+    out += 'Headcount: ' + mpCount + '\n';
+    out += 'Location: ' + locs + '\n';
+    out += 'Work Completed:\n';
+    Object.values(state.halls).forEach(function (h) {
+      hallBlock(h).forEach(function (l) { out += l + '\n'; });
+    });
+    out += '\nCompany/Crew: ServicePoint (SP)\n';
+    out += 'Headcount: ' + spCount + '\n';
+    out += 'Location: ' + locs + '\n';
+    out += 'Work Completed:\n' + ((m.spWorkNotes || '').trim() || 'None') + '\n';
+    out += 'Crew Members: ' + (activeCrew.join(', ') || 'None');
+  }
+
+  else { // boss
+    out += '2 overlapping 12 hour shifts ' + (m.shiftTime || '') + '\n';
+    out += 'Personnel Count: ' + (mpCount + spCount) + '\n\n';
+    out += 'Work areas completed:\n';
+    Object.values(state.halls).forEach(function (h) {
+      var hasAny = false;
+      var cableLines = [];
+      CABLES.forEach(function (c) {
+        var sents = hallSentences(h, c, numStyle());
+        if (sents.length) { cableLines.push(CABLE_LABEL[c] + ' Pulling – ' + sents.join(' ')); hasAny = true; }
+      });
+      var hasNotes = (h.notes || []).length > 0;
+      if (hasAny || hasNotes) {
+        out += h.name + '\n';
+        (h.notes || []).forEach(function (n) { out += ' ' + n + '\n'; });
+        cableLines.forEach(function (l) { out += ' ' + l + '\n'; });
+        out += '\n';
+      }
+    });
+    out += 'Blockers / Issues:\n';
+    out += state.blockers.length ? state.blockers.map(function (b) { return b.date + ' – ' + b.text + ' (i)'; }).join('\n') + '\n' : 'None\n';
+    out += '\nTasks for tomorrow:\n' + ((m.tasksTomorrow || '').trim() || 'None');
+  }
+  return out;
+}
+function renderReport() {
+  document.getElementById('reportOutput').textContent = buildReport(document.getElementById('reportStyle').value);
+}
+
+/* ---------------- copy / share / history / backup ---------------- */
+function copyTextFallback(text) {
+  var ta = document.getElementById('copyFallback');
+  ta.value = text;
+  ta.style.left = '0'; ta.style.opacity = '0';
+  try {
+    ta.focus({ preventScroll: true });
+    ta.setSelectionRange(0, text.length);
+    var ok = document.execCommand('copy');
+    ta.blur(); ta.style.left = '-9999px';
+    return ok;
+  } catch (e) { ta.style.left = '-9999px'; return false; }
+}
+function copySomething(text, successMsg) {
+  function fb() {
+    if (copyTextFallback(text)) showToast(successMsg);
+    else showToast('Copy failed — select the text manually');
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { showToast(successMsg); }, fb);
+  } else fb();
+}
+function currentReportText() { return document.getElementById('reportOutput').textContent; }
+function copyReport() { copySomething(currentReportText(), 'Report copied'); }
+function shareReport() {
+  var txt = currentReportText();
+  if (navigator.share) navigator.share({ text: txt }).catch(function () {});
+  else copyReport();
+}
+function saveReportToHistory() {
+  pushUndo();
+  var txt = currentReportText();
+  var style = document.getElementById('reportStyle');
+  var label = style.options[style.selectedIndex].text;
+  state.history.unshift({ ts: Date.now(), label: label, text: txt });
+  if (state.history.length > 100) state.history.pop();
+  saveState(); renderHistory();
+  showToast('Saved to history');
+}
+function renderHistory() {
+  var el = document.getElementById('historyList');
+  if (!el) return;
+  if (!state.history.length) { el.innerHTML = '<div class="muted">No saved reports yet. Generate one and tap "Save to history".</div>'; return; }
+  el.innerHTML = state.history.map(function (h, i) {
+    var d = new Date(h.ts);
+    var when = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return '<details class="hist-entry"><summary>' + escapeHtml(when) + ' — ' + escapeHtml(h.label) + '</summary>' +
+      '<div class="hist-body"><pre class="report-pre" style="max-height:260px; overflow:auto;">' + escapeHtml(h.text) + '</pre>' +
+      '<div class="batch-row"><button class="btn" onclick="copySomething(state.history[' + i + '].text, \'Copied\')">Copy</button>' +
+      '<button class="btn btn-danger" onclick="removeHistory(' + i + ')">Delete</button></div></div></details>';
+  }).join('');
+}
+function removeHistory(i) {
+  pushUndo();
+  state.history.splice(i, 1);
+  saveState(); renderHistory();
+}
+function dateStamp() {
+  var d = new Date();
+  return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+}
+function doBackup() {
+  var payload = { app: 'mp-walkthrough', version: 1, exported: new Date().toISOString(), state: state };
+  var json = JSON.stringify(payload);
+  var fname = 'walkthrough-backup-' + dateStamp() + '.json';
+  try {
+    var file = new File([json], fname, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file] }).then(function () { showToast('Backup shared — save it to Files'); }, function () { fallbackBackup(json); });
+      return;
+    }
+  } catch (e) {}
+  fallbackBackup(json);
+}
+function fallbackBackup(json) {
+  copySomething(json, 'Backup copied — paste it into Notes or an email');
+}
+function togglePasteRestore() {
+  var el = document.getElementById('pasteRestore');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function applyRestore(json) {
+  var payload;
+  try { payload = JSON.parse(json); } catch (e) { showToast('Not valid backup data'); return false; }
+  if (!payload || payload.app !== 'mp-walkthrough' || !payload.state || !payload.state.halls) {
+    showToast('Not a walkthrough backup file'); return false;
+  }
+  if (!confirm('Restore backup from ' + (payload.exported || 'unknown date') + '? This replaces current data.')) return false;
+  pushUndo();
+  state = payload.state;
+  undoStack = [];
+  updateUndoBtn();
+  saveState(); renderAll();
+  document.getElementById('pasteRestore').style.display = 'none';
+  document.getElementById('pasteJson').value = '';
+  showToast('Backup restored');
+  return true;
+}
+function restoreFromFile(ev) {
+  var f = ev.target.files && ev.target.files[0];
+  if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function () { applyRestore(String(reader.result)); };
+  reader.readAsText(f);
+  ev.target.value = '';
+}
+function restoreFromPaste() {
+  applyRestore(document.getElementById('pasteJson').value);
+}
+
+/* ---------------- misc ---------------- */
+function switchTab(t, btn) {
+  document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+  document.getElementById('panel-' + t).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  if (t === 'crew' || t === 'blockers') renderCrewPanel();
+  if (t === 'report') { renderReport(); renderHistory(); }
+  window.scrollTo(0, 0);
+}
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(function () { t.style.display = 'none'; }, 2200);
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function (m) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+  });
+}
+function escapeAttr(s) { return escapeHtml(s); }
+function dismissOnboarding() {
+  state.settings.onboarded = true;
+  saveState();
+  document.getElementById('onboarding').style.display = 'none';
+  try {
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+  } catch (e) {}
+}
+function renderAll() {
+  renderHallTabs(); renderWalk(); renderCrewPanel();
+  if (document.getElementById('panel-report').classList.contains('active')) { renderReport(); renderHistory(); }
+}
+
+/* ---------------- boot ---------------- */
+(function boot() {
+  var sel = document.getElementById('numStyle');
+  if (sel && state.settings.numStyle) sel.value = state.settings.numStyle;
+  sel.addEventListener('change', function () { state.settings.numStyle = sel.value; saveState(); });
+  updateBrushLabel();
+  updateUndoBtn();
+  renderAll();
+  if (!state.settings.onboarded) document.getElementById('onboarding').style.display = 'flex';
+  try {
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+  } catch (e) {}
+  if ('serviceWorker' in navigator &&
+      (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    navigator.serviceWorker.register('./sw.js').catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>

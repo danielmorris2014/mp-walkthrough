@@ -1,0 +1,15 @@
+{
+  "name": "MP Walkthrough & Shift Report",
+  "short_name": "MP Walk",
+  "description": "Nightly basket walkthrough and shift report for Midpoint / ServicePoint data hall crews. Works fully offline.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1120",
+  "theme_color": "#0b1120",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
