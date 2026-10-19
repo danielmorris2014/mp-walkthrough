@@ -112,7 +112,7 @@
     background: rgba(255,255,255,0.045); border: 1px solid var(--border);
     color: var(--muted); font-weight: 700; font-size: 12.5px; cursor: pointer;
   }
-  .hall-tab.active { background: var(--slate-3); color: var(--slate-12); border-color: var(--slate-7); }
+  .hall-tab.active { background: #ffffff; color: #111113; border-color: #ffffff; font-weight: 800; box-shadow: 0 2px 10px rgba(255,255,255,0.18); }
 
   .container { padding: 10px 12px 10px 12px; max-width: 840px; margin: 0 auto; }
   .panel { display: none; }
@@ -235,12 +235,6 @@
   /* stamp-landed glow (color set via --glow by JS) */
   @keyframes stampGlow { 0% { box-shadow: 0 0 0 0 var(--glow, #5a6169); } 100% { box-shadow: 0 0 16px 6px transparent; } }
   .side-card.landed { animation: stampGlow var(--dur-stamp) var(--ease-out-3); }
-
-  .side-done-strip {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    min-height: 34px; border-radius: 12px; border: 1px dashed #30a46c66;
-    background: var(--green-2); color: var(--green-11); font-size: 11px; font-weight: 800;
-  }
 
   @keyframes flashRow { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 0 rgba(56,189,248,0); } }
   .flash { animation: flashRow 0.9s ease-out 2; border-radius: 12px; }
@@ -387,43 +381,25 @@
       </svg>
       <div class="cable-stats" id="cableStats" style="text-align:left; flex:1; margin-bottom:0;"></div>
     </div>
-    <div class="batch-row" style="margin-bottom:10px;">
-      <button class="btn btn-secondary" id="filterBtn" onclick="toggleHideDone()" style="flex:1; min-width:140px;">Show: everything</button>
-      <input type="number" id="gotoRow" placeholder="Row #" min="1" max="99" style="width:80px;" onkeydown="if(event.key==='Enter')gotoRowFn()">
-      <button class="btn btn-secondary" onclick="gotoRowFn()" aria-label="Go to row"><span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></span></button>
-    </div>
 
     <div class="card">
       <div class="card-title">
-        <span>Fast stamp &mdash; row range</span>
+        <span>Hall notes</span>
         <button class="btn btn-secondary" style="padding:4px 9px; font-size:11px; min-height:30px;" onclick="toggleEditor()">Edit hall</button>
       </div>
       <div class="batch-row">
-        <span class="muted">Rows</span>
-        <input type="number" id="batchStart" value="7" style="width:58px;">
-        <span class="muted">to</span>
-        <input type="number" id="batchEnd" value="13" style="width:58px;">
-        <select id="batchSide" style="flex:1; min-width:130px;">
-          <option value="both">Both sides</option>
-          <option value="11">11 side only</option>
-          <option value="13">13 side only</option>
-        </select>
-        <button class="btn" onclick="applyBatchRange()">Stamp</button>
+        <input type="text" id="noteInput" placeholder="e.g. HAC 17, Rows 33–36 – Staged (8 hrs per person)" style="flex:1; min-width:150px;">
+        <button class="btn btn-secondary" onclick="addNote()">+ Note</button>
       </div>
-      <div class="muted" style="margin-top:7px;">Uses the status + cable scope picked above. Tap a side card to stamp it, the aisle number to stamp both sides, a small pill to stamp one cable type.</div>
-      <div style="margin-top:9px; padding-top:9px; border-top:1px solid var(--border);">
-        <div class="batch-row">
-          <input type="text" id="noteInput" placeholder="Hall note — e.g. HAC 17, Rows 33–36 – Staged (8 hrs per person)" style="flex:1; min-width:150px;">
-          <button class="btn btn-secondary" onclick="addNote()">+ Note</button>
-        </div>
-        <div id="notesWrap"></div>
-      </div>
+      <div id="notesWrap"></div>
     </div>
 
     <div id="hallEditor" style="display:none;"></div>
 
     <div class="batch-row" style="justify-content:space-between; margin-bottom:6px;">
       <span class="muted" id="orientLabel">Row view</span>
+      <input type="number" id="gotoRow" placeholder="Row #" min="1" max="99" style="width:76px; min-height:32px;" onkeydown="if(event.key==='Enter')gotoRowFn()">
+      <button class="btn btn-secondary" style="padding:5px 9px; font-size:11px; min-height:32px;" onclick="gotoRowFn()" aria-label="Go to row"><span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></span></button>
       <button class="btn btn-secondary" style="padding:5px 10px; font-size:11px; min-height:32px;" onclick="cycleOrientation()">Rotate Row View</button>
     </div>
     <div class="aisle-legend" id="aisleLegend"></div>
@@ -604,7 +580,7 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v12';
+var APP_VERSION = 'v13';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -664,7 +640,7 @@ function defaultState() {
     version: 1,
     activeHall: 'CB5_DH1',
     brush: 'hung', scope: 'ALL',
-    settings: { onboarded: false, numStyle: 'short', orientation: 'h11', hideDone: false },
+    settings: { onboarded: false, numStyle: 'short', orientation: 'h11' },
     meta: {
       supers: 'Chris Dickman, Daniel Morris',
       shiftTime: '2:00 PM – 2:00 AM',
@@ -827,14 +803,6 @@ function stampRows(rows, sideMode, quiet) {
   saveState(); renderWalk();
   if (!quiet) showToast('Stamped ' + rows.length + ' row' + (rows.length === 1 ? '' : 's'));
 }
-function applyBatchRange() {
-  var a = parseInt(document.getElementById('batchStart').value, 10);
-  var b = parseInt(document.getElementById('batchEnd').value, 10);
-  if (!a || !b) { showToast('Enter row numbers'); return; }
-  var rows = [];
-  for (var r = Math.min(a, b); r <= Math.max(a, b); r++) rows.push(r);
-  stampRows(rows, document.getElementById('batchSide').value);
-}
 
 /* ---------------- rendering ---------------- */
 function sideSummary(seg) {
@@ -948,12 +916,6 @@ function renderWalk() {
   if (ring) ring.style.strokeDashoffset = (94.2 * (1 - pct)).toFixed(1);
   var pctEl = document.getElementById('progPct');
   if (pctEl) pctEl.textContent = Math.round(pct * 100) + '%';
-  var fb = document.getElementById('filterBtn');
-  if (fb) {
-    fb.textContent = state.settings.hideDone ? 'Show: not finished yet' : 'Show: everything';
-    fb.classList.toggle('active', !!state.settings.hideDone);
-  }
-
   var grid = document.getElementById('walkGrid');
   grid.innerHTML = '';
 
@@ -974,40 +936,26 @@ function renderWalk() {
     grid.appendChild(ph);
 
     var info = orientInfo();
-    var hideDone = !!state.settings.hideDone;
     existing.forEach(function (r) {
-      var s11 = hideDone && sideSummary(hall.rows[r]['11']).status === 'hung';
-      var s13 = hideDone && sideSummary(hall.rows[r]['13']).status === 'hung';
-      if (s11 && s13) return; // whole aisle finished — hide it while filtering
       var rowEl = document.createElement('div');
       rowEl.className = 'aisle-row' + (info.vert ? ' vert' : '');
       rowEl.setAttribute('data-row', r);
       var other = info.first === '11' ? '13' : '11';
-      function part(side, done) {
-        return done
-          ? '<div class="side-done-strip">\u2713 ' + r + side + ' side \u00b7 hung</div>'
-          : buildSideHtml(hall, r, side);
-      }
-      rowEl.innerHTML = part(info.first, info.first === '11' ? s11 : s13) +
+      rowEl.innerHTML = buildSideHtml(hall, r, info.first) +
         '<div class="row-center-pill" onclick="tapBoth(' + r + ')">' +
         '<span class="row-num">R' + r + '</span><span class="row-both-hint">BOTH</span></div>' +
-        part(other, other === '11' ? s11 : s13);
+        buildSideHtml(hall, r, other);
       grid.appendChild(rowEl);
     });
   });
 }
 
-/* ---------------- filter + jump ---------------- */
-function toggleHideDone() {
-  state.settings.hideDone = !state.settings.hideDone;
-  saveState();
-  renderWalk();
-}
+/* ---------------- jump to row ---------------- */
 function gotoRowFn() {
   var n = parseInt(document.getElementById('gotoRow').value, 10);
   if (!n) { showToast('Enter a row number'); return; }
   var el = document.querySelector('#walkGrid .aisle-row[data-row="' + n + '"]');
-  if (!el) { showToast('Row ' + n + ' is not in this hall' + (state.settings.hideDone ? ' (it may be hidden — showing everything)' : '')); return; }
+  if (!el) { showToast('Row ' + n + ' is not in this hall'); return; }
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   el.classList.remove('flash');
   void el.offsetWidth;
