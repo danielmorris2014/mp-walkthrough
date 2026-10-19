@@ -1,0 +1,88 @@
+CHANGELOG - MP Walkthrough & Shift Report
+==========================================
+History of changes since the original Gemini-generated prototype HTML.
+
+v5 (current) - Formal report rewritten to the hand-polished format
+------------------------------------------------------------------
+- "Team update (clean)" template: tokens-first lines
+  ("111-113, 211-213, and 311-611: Ran and hung.") instead of
+  status-first; single newlines everywhere (no blank lines).
+- Mixed-cable sides get their own standalone lines with a full
+  per-cable breakdown, most-advanced cables first:
+  "1311: CAT6 ran; 144F and OCS staged."
+- Uniform "ran" groups render as plain "Ran." (deliberate choice; the
+  user's hand-edited sample had both "Ran." and
+  "Ran 144F, OCS, and CAT6." styles).
+- Notes flip "SUBJECT - Status (detail)" into
+  "SUBJECT: Status (detail)." automatically
+  (e.g. "HAC 17, Rows 33-36: Staged (8 hours per person).").
+- Blocker lines auto-capitalized and period-terminated; hall prefix
+  kept ("CB5 DH1: ...").
+
+v4 - Bottom stamp dock + one-mention mixed rows + night rollover
+------------------------------------------------------------------
+- Status stamps moved from a top sticky card to a dock fixed at the
+  bottom, directly above the tab bar: 6 status buttons (Hung / Ran /
+  In Prog / Staged / Remed / Clear) + 4 cable-scope buttons.
+- Mixed-cable sides now appear ONCE per report line (at the side's
+  majority status, e.g. "1311 (Copper ran)") instead of being
+  scattered across every status line (new mixedBase() majority rule).
+- Night rollover: "Save tonight as baseline" on the Report tab, plus a
+  dropdown to generate reports as "everything" (cumulative, default)
+  or "only changes since baseline". Changes mode builds a synthetic
+  halls copy where sides that did not move read as 'none'; sides that
+  moved keep their FULL current state (effectiveHalls()).
+- Baseline included in undo snapshots and JSON backups.
+
+v3 - Rotate row view + formal template + blocker halls
+------------------------------------------------------------------
+- "Rotate Row View" button cycles 4 orientations: horizontal with
+  11-side or 13-side on the left, or vertical with either side on
+  top; the side legend arrows rotate with it; choice is remembered.
+- New "Team update (clean)" formal report style (Team, / Shift
+  Summary / "MP | hall" sections / Oxford-"and" token joins /
+  "Blockers - <date>" section).
+- Blockers gained an optional hall dropdown; rendered as
+  "CB5 DH1: ..." prefixes in the formal report.
+- Fixed empty "()" in the quick report's personnel line when no crew
+  chips are active.
+
+v2 (first GitHub Pages release) - full rewrite of the Gemini prototype
+------------------------------------------------------------------
+Everything below replaced or rebuilt from the original single HTML:
+- Real site layout encoded from the Large Site Cable Installation
+  Guide PDF: network rows 1-2; compute rows with pods of 8 rows
+  (3-10 / 11-18 / 19-26); CB4 DH2 extends to row 36 (HAC area);
+  EOR anchors at spot 11 and 13; middle SPOCS aisle not tracked.
+  Halls preloaded: CB5 DH1 (pods 1-3), CB4 DH2 (pods 10-12 + rows
+  27-36), CB4 DH4 (pods 10-12). Halls/groups/row counts editable
+  in-app.
+- Data model: per row, per side (11 = X01-X11, 13 = X13-X22), per
+  cable (144F / OCS / CAT6), one status: Not started, Staged, In
+  Progress, Ran, Ran & Hung, Remediation. Statuses carry over
+  night to night.
+- Stamp interactions: status brush + cable scope; tap side = stamp
+  side; tap aisle number = stamp both sides; tap a cable pill =
+  stamp one cable; range stamp (rows A-B); whole-pod bulk buttons;
+  tap-again-to-clear toggle; 60-level undo.
+- Live stats per hall (sides by status + per-cable progress).
+- Crew chips with auto-counted SP headcount; dated blockers;
+  areas of concern; tasks for tomorrow.
+- Report compressor producing the site's row shorthand:
+  "111-113, 211-213, 301-311, 501-511 & 601-611 - Ran and hung.",
+  run compression ("711-1311 & 713-1313"), short/full/plain number
+  styles, mixed-side notations. Templates: quick nightly report,
+  crew/table style, boss roll-up (per hall, per cable, blockers with
+  "(i)", tasks for tomorrow).
+- PWA packaging: versioned service worker (cache-first precache +
+  activate cleanup), web manifest, 180/192/512 icons, apple-touch-
+  icon, viewport-fit=cover + safe-area insets, touch-action
+  hardening, first-run install onboarding, storage.persist().
+- Data safety: autosave to localStorage; one-tap backup via Web
+  Share (files-only payload for the iOS quirk) with clipboard and
+  download fallbacks; restore from file picker or pasted JSON;
+  in-app report history.
+- Fixes vs the Gemini prototype: working iOS clipboard fallback
+  chain (Clipboard API -> hidden textarea + execCommand), real
+  layout instead of fixed 26 rows, export/backup the prototype never
+  had, service worker the prototype never had.
