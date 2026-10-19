@@ -2,7 +2,24 @@ CHANGELOG - MP Walkthrough & Shift Report
 ==========================================
 History of changes since the original Gemini-generated prototype HTML.
 
-v5 (current) - Formal report rewritten to the hand-polished format
+v6 (current) - "Midnight" visual redesign + field filters
+------------------------------------------------------------------
+- Full visual overhaul: deeper midnight palette, frosted-glass header
+  and bottom dock, pill-style hall tabs, status cards with colored
+  left rails + tinted backgrounds instead of full-color blocks,
+  solid status badges, tabular numbers so row IDs align.
+- Professional line icons (Lucide v1.59, ISC license, inlined) in the
+  bottom nav, status dock, undo and jump buttons - replaces emoji.
+- "Show: not finished yet" filter - hides fully-hung aisles and
+  collapses finished sides to slim green check strips while walking.
+- Jump-to-row: type a row number, it scrolls to and flashes that aisle.
+- Hall progress bar (% of sides ran & hung) under the stats row.
+- App now toasts "Update installed - close and reopen" when a new
+  version downloads, and nudges the service worker to check for
+  updates every time the app is reopened.
+- iOS polish: long-press callouts suppressed on tappable elements.
+
+v5 - Formal report rewritten to the hand-polished format
 ------------------------------------------------------------------
 - "Team update (clean)" template: tokens-first lines
   ("111-113, 211-213, and 311-611: Ran and hung.") instead of
