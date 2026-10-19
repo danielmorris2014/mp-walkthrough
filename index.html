@@ -76,6 +76,25 @@
   button { font-family: inherit; }
   .side-id, .row-num, .side-span, .stat-num, .report-pre { font-variant-numeric: tabular-nums; }
 
+  .update-banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 210;
+    display: none; align-items: center; gap: 9px;
+    background: var(--amber-9); color: var(--amber-1);
+    font-weight: 800; font-size: 12.5px;
+    padding: calc(9px + env(safe-area-inset-top)) 12px 9px 12px; min-height: 46px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .update-banner .glyph { width: 15px; height: 15px; flex: 0 0 auto; }
+  .update-banner .glyph svg { width: 100%; height: 100%; display: block; }
+  .ub-btn {
+    margin-left: auto; background: var(--amber-1); color: var(--amber-9);
+    border: none; border-radius: 8px; font-weight: 800; font-size: 11.5px;
+    padding: 7px 12px; min-height: 34px; cursor: pointer; flex: 0 0 auto;
+  }
+  .ub-btn:active { transform: scale(0.96); }
+  body.has-update-banner { padding-top: calc(52px + env(safe-area-inset-top)); }
+  body.has-update-banner header { top: calc(52px + env(safe-area-inset-top)); }
+
   header {
     position: sticky; top: 0; z-index: 50;
     background: rgba(13,20,31,0.82); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
@@ -335,6 +354,12 @@
 <body>
 <!-- Icons: Lucide v1.59 (ISC License) / Feather (MIT) - https://lucide.dev -->
 
+<div id="updateBanner" class="update-banner">
+  <span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></span>
+  <span id="updateBannerText">Update ready</span>
+  <button class="ub-btn" id="updateNowBtn" onclick="applyUpdateNow()">Update now</button>
+</div>
+
 <header>
   <div class="top-bar">
     <div>
@@ -578,7 +603,21 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v9';
+var APP_VERSION = 'v11';
+var swReg = null;
+
+function showUpdateBanner(text, showBtn) {
+  var b = document.getElementById('updateBanner');
+  if (!b) return;
+  document.getElementById('updateBannerText').textContent = text;
+  document.getElementById('updateNowBtn').style.display = showBtn ? '' : 'none';
+  b.style.display = 'flex';
+  document.body.classList.add('has-update-banner');
+}
+function applyUpdateNow() {
+  try { if (swReg && swReg.waiting) swReg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
+  setTimeout(function () { location.reload(); }, 400);
+}
 var CABLES = ['F144', 'OCS', 'CAT6'];
 var CABLE_LABEL = { F144: '144F', OCS: 'OCS', CAT6: 'Copper' };
 var STATUS_ORDER = ['none', 'staged', 'prog', 'ran', 'hung', 'remed'];
@@ -1748,6 +1787,9 @@ function renderAll() {
       location.reload();
     });
     navigator.serviceWorker.register('./sw.js').then(function (reg) {
+      swReg = reg;
+      // If a downloaded update is already waiting when the app opens, banner it.
+      if (reg.waiting && navigator.serviceWorker.controller) showUpdateBanner('Update ready', true);
       // iOS checks for updates lazily - nudge it every time the app is reopened.
       document.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'visible') { try { reg.update(); } catch (e) {} }
@@ -1755,9 +1797,11 @@ function renderAll() {
       reg.addEventListener('updatefound', function () {
         var nw = reg.installing;
         if (!nw) return;
+        if (!navigator.serviceWorker.controller) return; // first-ever install, not an update
+        showUpdateBanner('Downloading update\u2026', false);
         nw.addEventListener('statechange', function () {
           if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-            showToast('Update installed \u2014 applying');
+            showUpdateBanner('Update ready', true);
             try { nw.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
           }
         });
