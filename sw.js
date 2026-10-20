@@ -17,6 +17,7 @@ var PRECACHE = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './guide.html',
+  './labels.html',
   './vendor/leaflet/leaflet.js',
   './vendor/leaflet/leaflet.css',
   './vendor/leaflet/images/layers.png',
