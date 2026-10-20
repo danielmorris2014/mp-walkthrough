@@ -876,7 +876,7 @@ hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v32';
+var APP_VERSION = 'v33';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1175,12 +1175,11 @@ function sideSummary(seg) {
 }
 
 function toggleHallMenu() {
-  var m = document.getElementById('hallMenu');
+  var mEl = document.getElementById('hallMenu');
   var b = document.getElementById('hallMenuBody');
-  if (!m || !b) return;
-  if (m.classList.contains('open')) { m.classList.remove('open'); return; }
+  if (!mEl || !b) return;
+  if (mEl.classList.contains('open')) { mEl.classList.remove('open'); return; }
   var h = state.halls[state.activeHall];
-  var m = state.meta;
   var pct = hallPctHung(h);
   b.innerHTML =
     '<div class="card-title" style="margin-bottom:12px;">' + escapeHtml(h ? h.name : '') + ' · ' + pct + '% hung</div>' +
@@ -1197,11 +1196,11 @@ function toggleHallMenu() {
     '<button class="btn btn-secondary" onclick="gotoRowFn(); toggleHallMenu();">Go</button></div></div>' +
     '<div class="card"><div class="card-title">Hall settings</div>' +
     '<div id="hallEditor"></div></div>' +
-    '<button class="btn btn-ghost" style="width:100%; margin-top:10px;" onclick="toggleHallMenu()">Close</button>';
-  m.classList.add('open');
-  renderHallTabs(); // populate stats
-  renderNotes();
-  renderHallEditor && renderHallEditor();
+    '<button class="btn btn-secondary" style="width:100%; margin-top:10px;" onclick="addHallPrompt()">+ Add another hall</button>' +
+    '<button class="btn btn-ghost" style="width:100%; margin-top:8px;" onclick="toggleHallMenu()">Close</button>';
+  mEl.classList.add('open');
+  renderHallTabs(); // populate segments
+  renderWalk();     // populate notes + stats (guarded)
   // wire the ring
   var ring = document.getElementById('progRing');
   var pctEl = document.getElementById('progPct');
