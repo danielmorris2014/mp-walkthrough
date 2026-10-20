@@ -90,7 +90,7 @@
   .ub-btn {
     margin-left: auto; background: var(--amber-1); color: var(--amber-9);
     border: none; border-radius: 8px; font-weight: 800; font-size: 11.5px;
-    padding: 7px 12px; min-height: 34px; cursor: pointer; flex: 0 0 auto;
+    padding: 7px 12px; min-height: 44px; cursor: pointer; flex: 0 0 auto;
   }
   .ub-btn:active { transform: scale(0.96); }
   body.has-update-banner { padding-top: calc(52px + env(safe-area-inset-top)); }
@@ -104,7 +104,7 @@
   }
   .top-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .app-title { font-weight: 800; font-size: 15px; color: var(--slate-12); letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .app-sub { font-size: 10.5px; color: var(--faint); }
+  .app-sub { font-size: 11px; color: var(--faint); }
   /* Hall segmented control (design change 4) */
   .hall-seg {
     display: flex; gap: 0; border-radius: 10px; overflow: hidden;
@@ -173,8 +173,8 @@
   .stat-bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 7px; }
   .stat-cell { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 6px 3px; text-align: center; }
   .stat-num { font-size: 15px; font-weight: 800; }
-  .stat-lbl { font-size: 8.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
-  .cable-stats { font-size: 10.5px; color: var(--muted); text-align: center; margin-bottom: 7px; }
+  .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
+  .cable-stats { font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 7px; }
   .prog-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
   #progRing { transition: stroke-dashoffset var(--dur-ring) var(--ease-spring); }
   .prog-ring { flex: 0 0 auto; }
@@ -202,7 +202,7 @@
   .hs-cell.s-mixed { background: var(--slate-7); }
   .hs-info {
     flex: 0 0 auto; margin-left: auto; padding-left: 10px;
-    font-size: 10px; font-weight: 700; color: var(--muted);
+    font-size: 11px; font-weight: 700; color: var(--muted);
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
 
@@ -232,7 +232,7 @@
   /* Folded hung row: slim green strip */
   .folded-row {
     display: flex; align-items: center; gap: 10px; padding: 0 12px;
-    min-height: 36px; margin-bottom: 4px; border-radius: 8px;
+    min-height: 44px; margin-bottom: 4px; border-radius: 8px;
     background: var(--green-2); border: 1px solid #30a46c40;
     cursor: pointer;
   }
@@ -303,15 +303,15 @@
   }
   .pod-actions { display: flex; gap: 5px; }
   .pod-btn {
-    background: rgba(255,255,255,0.045); border: 1px solid var(--border); color: var(--muted); font-size: 10.5px;
-    font-weight: 800; padding: 5px 9px; border-radius: 8px; cursor: pointer; min-height: 32px;
+    background: rgba(255,255,255,0.045); border: 1px solid var(--border); color: var(--muted); font-size: 11px;
+    font-weight: 800; padding: 5px 9px; border-radius: 8px; cursor: pointer; min-height: 44px;
   }
   .pod-btn:active { transform: scale(0.95); filter: brightness(0.85); }
   .pod-count { font-size: 12px; color: var(--st-hung); font-weight: 700; font-variant-numeric: tabular-nums; }
 
   .aisle-legend {
     display: grid; grid-template-columns: 1fr 58px 1fr; gap: 7px; text-align: center;
-    font-size: 10px; font-weight: 800; color: var(--muted); letter-spacing: 0.4px; padding: 2px 0 7px 0;
+    font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: 0.4px; padding: 2px 0 7px 0;
   }
   .aisle-row { display: grid; grid-template-columns: minmax(0,1fr) 44px minmax(0,1fr); gap: 5px; margin-bottom: 5px; align-items: stretch; }
   .aisle-row.vert { grid-template-columns: 1fr; gap: 5px; }
@@ -336,17 +336,17 @@
   .side-card:active { transform: scale(0.98); }
   .side-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
   .side-id { font-weight: 800; font-size: 17px; letter-spacing: -0.3px; color: #fff; font-variant-numeric: tabular-nums; }
-  .side-span { font-size: 10px; opacity: 0.75; font-weight: 700; }
+  .side-span { font-size: 11px; opacity: 0.75; font-weight: 700; }
   .side-status-badge {
-    font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px;
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px;
     padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 6px;
     text-align: center; align-self: flex-start;
   }
 
   .mini-cables { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 4px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.08); }
   .mini-pill {
-    font-size: 9px; font-weight: 800; text-align: center; padding: 4px 1px; border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.08); line-height: 1.25; min-height: 30px;
+    font-size: 11px; font-weight: 800; text-align: center; padding: 4px 1px; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.08); line-height: 1.25; min-height: 44px;
     display: flex; align-items: center; justify-content: center; overflow-wrap: break-word;
   }
   .mini-pill:active { transform: scale(0.92); }
@@ -378,7 +378,7 @@
   @keyframes stampGlow { 0% { box-shadow: 0 0 0 0 var(--glow, #5a6169); } 100% { box-shadow: 0 0 16px 6px transparent; } }
   .side-card.landed { animation: stampGlow var(--dur-stamp) var(--ease-out-3); }
 
-  @keyframes flashRow { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 0 rgba(56,189,248,0); } }
+  @keyframes flashRow { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
   .flash { animation: flashRow 0.9s ease-out 2; border-radius: 12px; }
 
   .bottom-stack { position: fixed; bottom: 0; left: 0; right: 0; z-index: 60; }
@@ -388,14 +388,14 @@
     border-top: 1px solid var(--border); padding: 7px 10px 4px 10px;
     box-shadow: var(--shadow-3), var(--inner-shadow-highlight);
   }
-  .dock-label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin: 1px 0 5px 0; }
+  .dock-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin: 1px 0 5px 0; }
   .dock-brush { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 6px; }
   .dock-scope {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;
     background: rgba(118,118,128,0.12); border-radius: 10px; padding: 2px;
   }
   .dock-brush .brush-btn {
-    padding: 6px 1px; font-size: 9.5px; min-height: 48px; border-radius: 11px;
+    padding: 6px 1px; font-size: 11px; min-height: 48px; border-radius: 11px;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
     background: rgba(255,255,255,0.045); border: 1px solid transparent; color: var(--muted);
     box-shadow: none; -webkit-touch-callout: none; -webkit-user-select: none; cursor: pointer;
@@ -412,7 +412,7 @@
   .glyph { width: 16px; height: 16px; display: inline-block; }
   .glyph svg { width: 100%; height: 100%; display: block; }
   .dock-scope .scope-btn {
-    padding: 7px 1px; font-size: 10.5px; min-height: 30px; border-radius: 8px;
+    padding: 7px 1px; font-size: 11px; min-height: 44px; border-radius: 8px;
     background: transparent; border: none; color: var(--muted); cursor: pointer; text-align: center; font-weight: 800;
   }
   .scope-btn.active { background: var(--slate-5); color: var(--slate-12); box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
@@ -424,7 +424,7 @@
   }
   .nav-btn {
     background: none; border: none; color: var(--muted); display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 2px; font-size: 9.5px; font-weight: 800;
+    align-items: center; justify-content: center; gap: 2px; font-size: 11px; font-weight: 800;
     letter-spacing: 0.3px; padding: 5px 2px; border-radius: 10px; cursor: pointer; min-height: 48px;
     position: relative;
   }
@@ -467,7 +467,7 @@
   body.has-dock { padding-bottom: calc(176px + env(safe-area-inset-bottom)); }
   body.has-dock .toast { bottom: calc(186px + env(safe-area-inset-bottom)); }
   .kit-back {
-    display: none; min-height: 36px; padding: 0 12px 0 9px; border-radius: 999px; flex: none;
+    display: none; min-height: 44px; padding: 0 12px 0 9px; border-radius: 999px; flex: none;
     background: rgba(255,255,255,.055); border: 1px solid var(--border); color: var(--muted);
     font: 800 12.5px var(--font-family, -apple-system, sans-serif); cursor: pointer; align-items: center;
   }
@@ -479,7 +479,7 @@
   .dir-item:active { transform: scale(0.98); }
   .dir-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 700; font-size: 14px; }
   .dir-fam {
-    font-size: 9.5px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase;
     padding: 3px 8px; border-radius: 6px; white-space: nowrap;
   }
   .df-saslmgmt { background: #0090ff40; color: var(--blue-11); }
@@ -491,7 +491,7 @@
   .dir-end { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--muted); word-break: break-all; }
   .dir-end b { color: var(--slate-12); }
   .dir-chip {
-    padding: 6px 11px; border-radius: 999px; font-size: 11px; font-weight: 700; min-height: 32px;
+    padding: 6px 11px; border-radius: 999px; font-size: 11px; font-weight: 700; min-height: 44px;
     background: rgba(255,255,255,0.045); border: 1px solid var(--border); color: var(--muted); cursor: pointer;
   }
   .dir-chip.active { background: var(--slate-3); border-color: var(--slate-7); color: var(--slate-12); }
@@ -500,21 +500,21 @@
   body.text-large { font-size: 16px; }
   body.text-large .side-id { font-size: 17px; }
   body.text-large .side-status-badge { font-size: 11.5px; }
-  body.text-large .mini-pill { font-size: 10px; }
+  body.text-large .mini-pill { font-size: 11px; }
   body.text-large .btn { font-size: 14px; }
   body.text-large select, body.text-large input[type="text"], body.text-large input[type="search"], body.text-large input[type="number"], body.text-large textarea { font-size: 17px; }
   body.text-large .pod-header { font-size: 14.5px; }
   body.text-large .stat-num { font-size: 17px; }
   body.text-large .muted { font-size: 12.5px; }
-  #nightChecklist { padding-left: 20px; margin: 8px 0; font-size: 13px; color: #c3d0e6; }
+  #nightChecklist { padding-left: 20px; margin: 8px 0; font-size: 13px; color: var(--slate-11); }
   #nightChecklist li { margin-bottom: 6px; }
   .nav-btn.active { color: var(--slate-12); background: rgba(255,255,255,0.07); }
   .nav-ico { width: 21px; height: 21px; }
   .nav-ico svg { width: 100%; height: 100%; display: block; }
 
-  .chip-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 7px; }
+  .chip-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 7px; max-width: 100%; overflow-x: clip; }
   .crew-chip {
-    padding: 8px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 700; min-height: 36px;
+    padding: 8px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 700; min-height: 44px;
     background: rgba(255,255,255,0.045); border: 1px solid var(--border); color: var(--muted); cursor: pointer;
     display: inline-flex; align-items: center;
   }
@@ -527,11 +527,11 @@
 
   .report-pre {
     background: #0e0f11; border: 1px solid var(--border); border-radius: 12px; padding: 12px;
-    color: #dbe6f5; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--slate-12); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 12.5px; white-space: pre-wrap; word-break: break-word; line-height: 1.55;
   }
   .hist-entry { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; background: var(--bg2); }
-  .hist-entry summary { padding: 10px 11px; font-weight: 700; font-size: 12.5px; cursor: pointer; color: #b9c7de; }
+  .hist-entry summary { padding: 10px 11px; font-weight: 700; font-size: 12.5px; cursor: pointer; color: var(--slate-11); }
   .hist-body { padding: 0 10px 10px 10px; }
 
   .note-item {
@@ -556,11 +556,11 @@
     box-shadow: 0 30px 80px rgba(0,0,0,0.6);
   }
   .overlay h2 { margin: 0 0 8px 0; font-size: 17px; }
-  .overlay ol, .overlay ul { padding-left: 20px; margin: 8px 0; font-size: 13px; color: #c3d0e6; }
+  .overlay ol, .overlay ul { padding-left: 20px; margin: 8px 0; font-size: 13px; color: var(--slate-11); }
   .overlay li { margin-bottom: 7px; }
   .undo-btn {
     background: rgba(255,255,255,0.07); border: 1px solid var(--slate-7); color: var(--slate-12);
-    border-radius: 10px; font-weight: 800; font-size: 11px; padding: 7px 10px; cursor: pointer; min-height: 36px;
+    border-radius: 10px; font-weight: 800; font-size: 11px; padding: 7px 10px; cursor: pointer; min-height: 44px;
     display: inline-flex; align-items: center; gap: 5px;
   }
   .undo-btn:active { transform: scale(0.96); }
@@ -600,8 +600,15 @@
     <div class="card" style="margin-top:2px;">
       <div class="card-title"><span>Tonight</span><span class="muted" id="homeMeta"></span></div>
       <div id="syncStatus" style="font-size:11px;font-weight:700;margin-top:6px;color:var(--muted);"></div>
+      <div id="shiftLine" style="font-size:12px;font-weight:600;color:var(--muted);margin-top:4px;"></div>
       <div id="homeWalkStatus" class="home-hero-line" style="font-size:13px; font-weight:700;"></div>
+      <div id="lastNightLine" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
     </div>
+    <button class="btn" style="width:100%; min-height:56px; margin-bottom:10px;" onclick="resumeWalk()" id="resumeBtn">
+      <span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/></svg></span>
+      <span id="resumeText">Resume walkthrough</span>
+    </button>
+    <button class="btn btn-secondary" style="width:100%; min-height:48px; margin-bottom:10px;" onclick="openSettings()">Settings</button>
     <div class="home-cards">
       <button class="home-card" onclick="switchTab('walk')">
         <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/></svg></span>
@@ -660,7 +667,7 @@
         </div>
         <div class="form-field">
           <label>ServicePoint (SP) count <span class="muted">(auto from chips)</span></label>
-          <input type="number" id="spCount" oninput="saveMeta()">
+          <input type="number" id="spCount" oninput="saveMeta()" readonly>
         </div>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
@@ -869,7 +876,7 @@ hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v31';
+var APP_VERSION = 'v32';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1173,6 +1180,7 @@ function toggleHallMenu() {
   if (!m || !b) return;
   if (m.classList.contains('open')) { m.classList.remove('open'); return; }
   var h = state.halls[state.activeHall];
+  var m = state.meta;
   var pct = hallPctHung(h);
   b.innerHTML =
     '<div class="card-title" style="margin-bottom:12px;">' + escapeHtml(h ? h.name : '') + ' · ' + pct + '% hung</div>' +
@@ -1308,9 +1316,9 @@ function renderWalk() {
   if (!hall) { state.activeHall = Object.keys(state.halls)[0]; hall = state.halls[state.activeHall]; }
   renderLegend();
 
-  // notes
+  // notes (may live in the hall menu, not the walk panel)
   var nw = document.getElementById('notesWrap');
-  nw.innerHTML = (hall.notes || []).map(function (n, i) {
+  if (nw) nw.innerHTML = (hall.notes || []).map(function (n, i) {
     return '<div class="note-item"><span>\uD83D\uDCCC ' + escapeHtml(n) + '</span>' +
       '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:28px;" onclick="removeNote(' + i + ')">\u2715</button></div>';
   }).join('');
@@ -1330,12 +1338,14 @@ function renderWalk() {
       });
     });
   });
-  document.getElementById('hallStats').innerHTML =
+  var hsEl = document.getElementById('hallStats');
+  if (hsEl) hsEl.innerHTML =
     ['hung', 'ran', 'prog', 'staged', 'remed'].map(function (k) {
       return '<div class="stat-cell"><div class="stat-num" style="color:var(--st-' + k + ')">' + counts[k] + '</div>' +
         '<div class="stat-lbl">' + STATUS_META[k].badge.replace('Ran & ', 'R&').replace('In Progress', 'Prog') + '</div></div>';
     }).join('');
-  document.getElementById('cableStats').textContent =
+  var csEl = document.getElementById('cableStats');
+  if (csEl) csEl.textContent =
     CABLES.map(function (c) { return CABLE_LABEL[c] + ' ' + cableDone[c] + '/' + totalSides + ' sides ran+'; }).join(' \u00b7 ') +
     ' \u00b7 ' + totalSides + ' sides total';
   var pct = totalSides ? counts.hung / totalSides : 0;
@@ -1976,7 +1986,18 @@ function switchTab(t, btn) {
   var at = document.querySelector('.app-title');
   if (at) at.textContent = s.title;
   try { history.replaceState(null, '', '#/' + t); } catch (e) {}
+  // save scroll position when leaving walk
+  if (currentTab === 'walk' && t !== 'walk') {
+    try { sessionStorage.setItem('mp_scroll_' + state.activeHall, String(window.scrollY)); } catch (e) {}
+  }
   if (s.onShow) s.onShow();
+  // restore scroll position when entering walk
+  if (t === 'walk') {
+    try {
+      var sy = sessionStorage.getItem('mp_scroll_' + state.activeHall);
+      if (sy) { window.scrollTo(0, parseInt(sy, 10)); return; }
+    } catch (e) {}
+  }
   window.scrollTo(0, 0);
 }
 function routeFromHash() {
@@ -1989,7 +2010,10 @@ function routeFromHash() {
 window.addEventListener('hashchange', routeFromHash);
 
 /* ---------------- home / launcher ---------------- */
-function openGuide() { window.location.href = './guide.html'; }
+function openGuide() {
+  try { sessionStorage.setItem('mp_return_hash', location.hash || '#/walk'); } catch (e) {}
+  window.location.href = './guide.html';
+}
 function hallPctHung(hall) {
   var tot = 0, hung = 0;
   if (!hall) return 0;
@@ -2012,12 +2036,22 @@ function updateSyncStatus() {
     else { el.textContent = '\u27F3 Sync error'; el.style.color = 'var(--red-11)'; }
   } catch (e) { el.textContent = ''; }
 }
+function openSettings() {
+  var s = document.getElementById('settingsSheet');
+  if (s) { s.classList.add('open'); renderCrewPanel(); }
+}
+function closeSettings() {
+  var s = document.getElementById('settingsSheet');
+  if (s) s.classList.remove('open');
+}
+function resumeWalk() { switchTab('walk'); }
 function renderHome() {
   var heroEl = document.getElementById('homeWalkStatus');
   var metaEl = document.getElementById('homeMeta');
   if (!heroEl && !metaEl) return;
   var h = state.halls[state.activeHall];
   if (!h) { var ks = Object.keys(state.halls); if (ks.length) h = state.halls[ks[0]]; }
+  var m = state.meta;
   var pct = hallPctHung(h);
   var bl = (state.blockers || []).length;
   var nights = state.settings.lastBackup ? Math.floor((Date.now() - state.settings.lastBackup) / 86400000) : -1;
@@ -2030,6 +2064,56 @@ function renderHome() {
   var h12 = hh % 12 === 0 ? 12 : hh % 12;
   if (heroEl) heroEl.textContent = h ? (h.name + ' \u00b7 ' + pct + '% ran & hung' + (bl ? ' \u00b7 ' + bl + ' blocker' + (bl === 1 ? '' : 's') : '')) : 'Ready when you are';
   updateSyncStatus();
+  // shift line
+  var sl = document.getElementById('shiftLine');
+  if (sl && m.shiftTime) {
+    var mt = m.shiftTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*[–-]\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+    if (mt) {
+      var sh = parseInt(mt[1], 10) + (mt[3] && mt[3].toUpperCase() === 'PM' && parseInt(mt[1], 10) < 12 ? 12 : 0);
+      var sm = parseInt(mt[2], 10);
+      var eh = parseInt(mt[4], 10) + (mt[6] && mt[6].toUpperCase() === 'PM' && parseInt(mt[4], 10) < 12 ? 12 : 0);
+      var em = parseInt(mt[5], 10);
+      var now = new Date();
+      var nowMin = now.getHours() * 60 + now.getMinutes();
+      var startMin = sh * 60 + sm;
+      var endMin = eh * 60 + em;
+      if (endMin < startMin) endMin += 24 * 60; // overnight shift
+      if (nowMin < startMin) nowMin += 24 * 60;
+      var left = endMin - nowMin;
+      if (left > 0) {
+        var lh = Math.floor(left / 60), lm = left % 60;
+        sl.textContent = m.shiftTime + ' \u00b7 ' + lh + 'h ' + lm + 'm left';
+      } else { sl.textContent = m.shiftTime + ' \u00b7 shift over'; }
+    } else { sl.textContent = m.shiftTime; }
+  }
+  // last-night comparison
+  var ln = document.getElementById('lastNightLine');
+  if (ln) {
+    var tonight = 0;
+    var hh = state.halls[state.activeHall];
+    if (hh) { Object.keys(hh.rows).forEach(function (r) {
+      ['11','13'].forEach(function (sd) { if (sideOverall(hh.rows[r][sd], null) === 'hung') tonight++; });
+    }); }
+    if (state.baseline && state.baseline.halls && state.baseline.halls[state.activeHall]) {
+      var bh = state.baseline.halls[state.activeHall];
+      var lastNight = 0;
+      Object.keys(bh.rows || {}).forEach(function (r) {
+        ['11','13'].forEach(function (sd) {
+          var seg = bh.rows[r] && bh.rows[r][sd];
+          if (seg && seg.F144 === 'hung' && seg.OCS === 'hung' && seg.CAT6 === 'hung') lastNight++;
+        });
+      });
+      var diff = tonight - lastNight;
+      ln.textContent = 'Tonight: ' + tonight + ' hung \u00b7 Last night: ' + lastNight +
+        (diff > 0 ? ' \u00b7 \u2191' + diff : diff < 0 ? ' \u00b7 \u2193' + Math.abs(diff) : ' \u00b7 =');
+    } else { ln.textContent = 'Tonight: ' + tonight + ' hung'; }
+  }
+  // resume button
+  var rb = document.getElementById('resumeText');
+  if (rb) {
+    var lastHall = state.halls[state.activeHall];
+    rb.textContent = lastHall ? 'Resume ' + lastHall.name : 'Resume walkthrough';
+  }
   if (metaEl) metaEl.textContent = days[d.getDay()] + ', ' + mons[d.getMonth()] + ' ' + d.getDate() + ' \u00b7 ' + h12 + ':' + mm + ' ' + ampm + ' \u00b7 ' + bk;
 }
 function showToast(msg) {
@@ -2134,6 +2218,14 @@ function renderAll() {
   });
     if (!state.settings.onboarded) {
       document.getElementById('onboarding').style.display = 'flex';
+      // in the installed app, hide install steps and lead with the site code
+      var isInstalled = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+      if (isInstalled) {
+        var steps = document.querySelector('#onboarding ol');
+        if (steps) steps.style.display = 'none';
+        var h2 = document.querySelector('#onboarding h2');
+        if (h2) h2.textContent = 'Welcome';
+      }
       var joinHtml = '<div style="margin:14px 0;padding:12px;border:1px dashed var(--border);border-radius:12px;">' +
         '<div style="font-weight:800;font-size:13px;margin-bottom:6px;">Have a site code?</div>' +
         '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Paste the code to join the shared site.</div>' +
@@ -2180,5 +2272,34 @@ function renderAll() {
   }
 })();
 </script>
+
+  <div class="palette-sheet" id="settingsSheet">
+    <div class="palette-card">
+      <div class="card-title">Settings</div>
+      <div class="form-field" style="margin-bottom:10px;">
+        <label>Sign-off line</label>
+        <input type="text" id="signature" placeholder="e.g. Daniel Morris - Superintendent, Midpoint" oninput="savePrefs()">
+      </div>
+      <div class="batch-row" style="justify-content:space-between; margin-bottom:8px;">
+        <span class="muted">Text size</span>
+        <button class="btn btn-secondary" id="textSizeBtn" onclick="cycleTextSize()">Normal</button>
+      </div>
+      <div class="batch-row" style="justify-content:space-between; margin-bottom:8px;">
+        <span class="muted">Keep screen awake</span>
+        <button class="btn btn-secondary" id="wakeBtn" onclick="toggleWake()">On</button>
+      </div>
+      <div class="card-title" style="margin-top:14px;">Shared site</div>
+      <div class="batch-row" style="justify-content:space-between; margin-bottom:8px;">
+        <span class="muted">Your name (for sync)</span>
+        <input type="text" id="syncName" placeholder="e.g. Daniel" style="width:120px;" oninput="saveSyncName()">
+      </div>
+      <div class="batch-row" style="margin-top:8px;">
+        <button class="btn btn-secondary" onclick="syncNow()">Sync now</button>
+        <button class="btn btn-ghost" onclick="disconnectSite()">Disconnect</button>
+      </div>
+      <div id="syncSettingsInfo" class="muted" style="margin-top:6px;"></div>
+      <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closeSettings()">Close</button>
+    </div>
+  </div>
 </body>
 </html>
