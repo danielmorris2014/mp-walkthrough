@@ -463,9 +463,12 @@
   body.has-dock .status-dock { display: block; }
   body.has-bar .bottom-nav { display: grid; }
   body.has-halltabs .hall-seg-wrap { display: flex !important; }
+  /* Bottom padding is driven by --chrome-h, measured from .bottom-stack at
+     runtime (applyChromeHeight). Never hand-bump these numbers again — change
+     the dock/nav markup and the padding follows automatically. */
   body { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
-  body.has-dock { padding-bottom: calc(176px + env(safe-area-inset-bottom)); }
-  body.has-dock .toast { bottom: calc(186px + env(safe-area-inset-bottom)); }
+  body.has-bar, body.has-dock { padding-bottom: calc(var(--chrome-h, 62px) + env(safe-area-inset-bottom)); }
+  body.has-bar .toast, body.has-dock .toast { bottom: calc(var(--chrome-h, 62px) + 10px + env(safe-area-inset-bottom)); }
   .kit-back {
     display: none; min-height: 44px; padding: 0 12px 0 9px; border-radius: 999px; flex: none;
     background: rgba(255,255,255,.055); border: 1px solid var(--border); color: var(--muted);
@@ -919,7 +922,7 @@ hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v35.4';
+var APP_VERSION = 'v36';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1995,6 +1998,15 @@ var SCREENS = {
   report:   { title: WALK_TITLE, panel: 'panel-report', chrome: WALK_CHROME, onShow: function () { renderReport(); renderHistory(); } }
 };
 var currentTab = null;
+// Measure the real height of the fixed bottom chrome and expose it as --chrome-h,
+// so body padding and toast placement always match what's actually on screen.
+function applyChromeHeight() {
+  var stack = document.querySelector('.bottom-stack');
+  var chromeOn = document.body.classList.contains('has-bar') || document.body.classList.contains('has-dock');
+  var h = (stack && chromeOn) ? stack.offsetHeight : 0;
+  document.documentElement.style.setProperty('--chrome-h', (h + 5) + 'px');
+}
+window.addEventListener('resize', applyChromeHeight);
 function switchTab(t, btn) {
   var s = SCREENS[t]; if (!s) { t = 'home'; s = SCREENS.home; }
   currentTab = t;
@@ -2008,6 +2020,7 @@ function switchTab(t, btn) {
   document.body.classList.toggle('has-bar', !!s.chrome.bar);
   document.body.classList.toggle('has-halltabs', !!s.chrome.hallTabs);
   document.body.classList.toggle('has-back', !!s.chrome.back);
+  applyChromeHeight();
   var at = document.querySelector('.app-title');
   if (at) at.textContent = s.title;
   try { history.replaceState(null, '', '#/' + t); } catch (e) {}

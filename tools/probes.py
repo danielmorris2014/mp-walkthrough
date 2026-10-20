@@ -68,6 +68,25 @@ with sync_playwright() as p:
     r2 = pg.evaluate("""() => { location.hash = '#/report'; return new Promise(r => setTimeout(() => r(currentTab), 300)); }""")
     check("route: #/report", r2 == "report", str(r2))
 
+    # --- 5. LAYOUT GATE: body padding clears the fixed chrome on every screen.
+    #    Catches the v35.5 bug class: content hidden behind the nav/dock after
+    #    a tab switch. Padding must be >= measured .bottom-stack height. ---
+    res5 = pg.evaluate("""() => {
+      const out = {};
+      for (const t of Object.keys(SCREENS)) {
+        switchTab(t);
+        const stack = document.querySelector('.bottom-stack');
+        const chromeOn = document.body.classList.contains('has-bar') || document.body.classList.contains('has-dock');
+        out[t] = { chromeOn, stackH: stack ? stack.offsetHeight : 0,
+                   padB: parseFloat(getComputedStyle(document.body).paddingBottom) };
+      }
+      return out;
+    }""")
+    for t, r in res5.items():
+        need = r["stackH"] if r["chromeOn"] else 0
+        check(f"layout[{t}]: padding clears chrome", r["padB"] >= need,
+              f"padB={r['padB']} stackH={r['stackH']} chromeOn={r['chromeOn']}")
+
     b.close()
 
 print("\n" + ("PROBES: ALL PASS" if not fails else "PROBES FAILED: " + ", ".join(fails)))
