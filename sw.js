@@ -1,6 +1,6 @@
 // MP Walkthrough — minimal offline-first service worker.
 // Bump CACHE_VERSION whenever index.html/icons change so every phone picks up the update.
-var CACHE_VERSION = 'mp-walk-v21';
+var CACHE_VERSION = 'mp-walk-v22-crew-checkpoints';
 
 self.addEventListener('message', function (event) {
   if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
@@ -10,6 +10,11 @@ self.addEventListener('message', function (event) {
 var PRECACHE = [
   './',
   './index.html',
+  './crew-checklists.html',
+  './crew-checklists.css',
+  './crew-runtime.js',
+  './crew-checklists.js',
+  './job-checklists.json',
   './manifest.webmanifest',
   './icons/apple-touch-icon.png',
   './icons/icon-192.png',
@@ -56,3 +61,4 @@ self.addEventListener('fetch', function (event) {
     })
   );
 });
+
