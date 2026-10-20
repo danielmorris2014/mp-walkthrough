@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Flag Label Maker</title>
+<style>
+:root{--bg:#111418;--card:#1a1f26;--b:#2d3540;--t:#e8edf2;--m:#93a0ae;--y:#f5c542;--r:#ff6b6b;--g:#4ade80}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font:16px/1.4 -apple-system,system-ui,Segoe UI,sans-serif;padding:12px 14px 80px;max-width:720px;margin:0 auto}
+h1{font-size:20px;margin:8px 0 2px}.sub{color:var(--m);font-size:13px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:12px;margin-bottom:12px}
+label{display:block;font-size:13px;color:var(--m);margin:8px 0 3px}
+input,textarea,select{width:100%;font-size:16px;padding:11px;border-radius:10px;border:1px solid var(--b);background:#0e1115;color:var(--t);font-family:inherit}
+textarea{min-height:90px}
+.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
+button{font-size:16px;font-weight:600;padding:13px 14px;border-radius:12px;border:1px solid var(--b);background:#232a33;color:var(--t);min-height:48px}
+button.p{background:var(--y);color:#111;border-color:var(--y)}
+.warn{color:var(--r);font-size:13px;margin-top:6px}.ok{color:var(--g);font-size:13px}
+.lab{background:#fff;color:#000;border:1px dashed #888;border-radius:4px;padding:5px 7px;margin:8px 0;font-family:Calibri,Carlito,Arial,sans-serif;font-weight:700;line-height:1.15;overflow:hidden}
+.lab .t{font-size:13px;white-space:nowrap}.lab svg{display:block;width:100%;height:34px;margin-top:3px}
+.lab .sn{font:700 10px Calibri,Carlito,Arial,sans-serif;text-align:center}
+a.back{color:var(--y);text-decoration:none;font-weight:600;display:inline-block;padding:10px 0}
+.hist div{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--b);font-size:13px}
+#sheet{display:none}
+@media print{
+ body{background:#fff;padding:0;max-width:none}
+ body>*:not(#sheet){display:none!important}
+ #sheet{display:block}
+ #sheet .lab{border:0;border-radius:0;margin:0 0 0.04in;page-break-inside:avoid;width:var(--lw);height:0.75in;padding:0.04in 0.06in}
+ #sheet .lab svg{height:0.3in}#sheet .lab .t{font-size:var(--fs)}
+ @page{margin:0.25in}
+}
+</style></head><body>
+<a class="back" href="./index.html#/home">&#8249; Back</a>
+<h1>Flag Label Maker</h1>
+<div class="sub">Line 1 = A end, line 2 = Z end. Barcode (Code 128) = serial. Made on this phone, works offline.</div>
+
+<div class="card">
+ <div class="row"><div><label>Site code</label><input id="site" value="BUF102" autocapitalize="characters"></div>
+ <div><label>Next serial #</label><input id="next" inputmode="numeric" value="1"></div></div>
+ <label>Cables: one per line, "A end | Z end" (each gets the next serial)</label>
+ <textarea id="in" placeholder="BUF102-DH4-R12-SW01-E1/1 | BUF102-DH4-R40-PP02-A14&#10;BUF102-DH4-R12-SW01-E1/2 | BUF102-DH4-R40-PP02-A15" autocapitalize="characters"></textarea>
+ <div class="row"><div><label>Label width</label><select id="w"><option value="2">2 in (min)</option><option value="3" selected>3 in</option><option value="4">4 in</option></select></div>
+ <div><label>Copies per cable</label><select id="cp"><option>1</option><option selected>2</option><option>4</option></select></div></div>
+ <div id="msg"></div>
+ <div class="row" style="margin-top:10px"><button class="p" id="mk">Make labels</button><button id="pr">Print</button></div>
+</div>
+<div id="out"></div>
+<div class="card"><div class="row"><button id="csv">Save list (CSV)</button><button id="clr">Clear history</button></div>
+<div class="hist" id="hist"></div></div>
+<div id="sheet"></div>
+
+<script>
+(function(){
+// ---- Code 128 (set B) ----
+var P=["212222","222122","222221","121223","121322","131222","122213","122312","132212","221213","221312","231212","112232","122132","122231","113222","123122","123221","223211","221132","221231","213212","223112","312131","311222","321122","321221","312212","322112","322211","212123","212321","232121","111323","131123","131321","112313","132113","132311","211313","231113","231311","112133","112331","132131","113123","113321","133121","313121","211331","231131","213113","213311","213131","311123","311321","331121","312113","312311","332111","314111","221411","431111","111224","111422","121124","121421","141122","141221","112214","112412","122114","122411","142112","142211","241211","221114","413111","241112","134111","111242","121142","121241","114212","124112","124211","411212","421112","421211","212141","214121","412121","111143","111341","131141","114113","114311","411113","411311","113141","114131","311141","411131","211412","211214","211232","2331112"];
+function enc(s){var v=[104],i,sum=104;for(i=0;i<s.length;i++){var c=s.charCodeAt(i)-32;if(c<0||c>95)c=0;v.push(c);sum+=c*(i+1)}v.push(sum%103);v.push(106);
+ var x=0,r='';v.forEach(function(c,k){var p=P[c],bar=true;for(var j=0;j<p.length;j++){var w=+p[j];if(bar)r+='<rect x="'+x+'" y="0" width="'+w+'" height="40"/>';x+=w;bar=!bar}});
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+(x+20)+' 40" preserveAspectRatio="none"><g transform="translate(10,0)" fill="#000">'+r+'</g></svg>'}
+// ---- helpers ----
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function ld(){try{return JSON.parse(localStorage.getItem('mp_labels')||'{}')}catch(e){return {}}}
+function sv(o){try{localStorage.setItem('mp_labels',JSON.stringify(o))}catch(e){}}
+var st=ld();st.list=st.list||[];if(st.site)$('site').value=st.site;if(st.next)$('next').value=st.next;
+function serial(site,n){return site+'#'+('0000000'+n).slice(-7)}
+function check(t,site){var w=[];
+ if(/[a-z]/.test(t))w.push('lowercase letters');
+ if(/_/.test(t))w.push('underscore (use dash)');
+ if(/\s/.test(t.trim()))w.push('spaces (use dash)');
+ if(/BUF101/.test(t))w.push('BUF101 (site is BUF102)');
+ var m=t.match(/(DH\d)-\1/);if(m)w.push('hall written twice ('+m[0]+')');
+ return w}
+var cur=[];
+function labelHtml(l){return '<div class="lab"><div class="t">'+esc(l.a)+'</div><div class="t">'+esc(l.z)+'</div>'+enc(l.s)+'<div class="sn">'+esc(l.s)+'</div></div>'}
+$('mk').onclick=function(){
+ var site=$('site').value.trim().toUpperCase()||'BUF102',n=parseInt($('next').value,10)||1,warns=[];cur=[];
+ $('in').value.split('\n').forEach(function(ln){ln=ln.trim();if(!ln)return;var p=ln.split('|');var a=(p[0]||'').trim(),z=(p[1]||'').trim();
+  [a,z].forEach(function(t){check(t,site).forEach(function(w){warns.push(esc(t)+': '+w)})});
+  cur.push({s:serial(site,n++),a:a,z:z})});
+ if(!cur.length){$('msg').innerHTML='<div class="warn">Type at least one cable.</div>';return}
+ $('msg').innerHTML=warns.length?'<div class="warn">Check: '+warns.slice(0,6).join('; ')+'</div>':'<div class="ok">Label text looks right.</div>';
+ $('out').innerHTML=cur.map(labelHtml).join('');
+ st.site=site;st.next=n;$('next').value=n;
+ cur.forEach(function(l){st.list.unshift({s:l.s,a:l.a,z:l.z,d:new Date().toISOString().slice(0,16).replace('T',' ')})});
+ st.list=st.list.slice(0,500);sv(st);hist()};
+$('pr').onclick=function(){
+ if(!cur.length){$('msg').innerHTML='<div class="warn">Tap Make labels first.</div>';return}
+ var w=$('w').value,c=+$('cp').value,h='';
+ cur.forEach(function(l){for(var i=0;i<c;i++)h+=labelHtml(l)});
+ $('sheet').style.setProperty('--lw',w+'in');$('sheet').style.setProperty('--fs',w==='2'?'8pt':'10pt');
+ $('sheet').innerHTML=h;window.print()};
+function hist(){$('hist').innerHTML=st.list.slice(0,30).map(function(l){return '<div><span>'+esc(l.s)+'</span><span style="text-align:right">'+esc(l.a)+' &rarr; '+esc(l.z)+'</span></div>'}).join('')||'<div>No labels made yet.</div>'}
+$('csv').onclick=function(){var r=['serial,line1_A_end,line2_Z_end,made'].concat(st.list.map(function(l){return [l.s,l.a,l.z,l.d].map(function(x){return '"'+String(x).replace(/"/g,'""')+'"'}).join(',')}));
+ var b=new Blob([r.join('\n')],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='flag-labels.csv';document.body.appendChild(a);a.click();a.remove()};
+$('clr').onclick=function(){if(confirm('Clear label history? Serial counter stays.')){st.list=[];sv(st);hist()}};
+hist();
+})();
+</script></body></html>
