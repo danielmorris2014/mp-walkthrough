@@ -2,7 +2,28 @@ CHANGELOG - MP Walkthrough & Shift Report
 ==========================================
 History of changes since the original Gemini-generated prototype HTML.
 
-v20 (current) - FULL data haul + real scanning
+v21 (current) - Team update, bullet format (his 10/19 spec)
+------------------------------------------------------------------
+- Subject line added: 'Subject: Shift Update - M/D/YYYY (shift
+  time)' - date pulled from tonight's blockers, else today.
+- ALL-CAPS section headers with blank lines between sections.
+- Status-first bullets: 'Ran and hung: 111-113, 211-213, 311-611'.
+  Within every status, racks are now collected per side, sorted
+  numerically, and re-compressed into runs - so buckets read in
+  row order and ranges regroup automatically (the grouping his
+  other agent described: same-status racks together, nothing
+  dropped).
+- Mixed rows with identical patterns now share one bullet:
+  '1413, 1513, 1613: 144F and CAT6 ran; OCS staged' - grouped
+  even when separated by other rows, ordered by first rack.
+- Hall notes render as bullets ('Continued working through cut
+  sheet'); SP work notes and Areas of Concern are bulleted lines;
+  blockers are per-entry bullets.
+- Diff-tested against his exact 10/19 target report: all 21
+  expected lines reproduced verbatim (tools/test_report.py).
+
+v20 - FULL data haul + real scanning
+
 ------------------------------------------------------------------
 - Complete dataset shipped: 28,353 barcodes with A/Z ends +
   192,423 BUF102-relevant preset connection paths (from the full

@@ -733,7 +733,7 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v20';
+var APP_VERSION = 'v21';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1697,49 +1697,66 @@ function formalizeNote2(n) {
   }
   return polishSentence(t);
 }
-// Team-update lines for one hall: uniform runs first ("tokens: Status."),
-// then mixed sides as their own lines, then notes.
+// Team-update bullets for one hall. Within each status, sides are collected
+// as (row, class) triples and sorted numerically, so every bucket reads in
+// row order and runs re-compress ("1711, 1713, 1811, 1813" -> ordered
+// grouped tokens). Mixed rows sharing the same description share a bullet.
 function formalHallLines2(hall) {
   var style = numStyle();
   var out = [];
   REPORT_STATUS_ORDER.forEach(function (target) {
-    var q11 = [], q13 = [];
+    var sides = []; // cls 0 = both sides, 1 = 11-side, 2 = 13-side
     Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
-      if (sideOverall(hall.rows[r]['11'], null) === target) q11.push(r);
-      if (sideOverall(hall.rows[r]['13'], null) === target) q13.push(r);
+      var s11 = sideOverall(hall.rows[r]['11'], null) === target;
+      var s13 = sideOverall(hall.rows[r]['13'], null) === target;
+      if (s11 && s13) sides.push({ r: r, cls: 0 });
+      else if (s11) sides.push({ r: r, cls: 1 });
+      else if (s13) sides.push({ r: r, cls: 2 });
     });
-    if (!q11.length && !q13.length) return;
+    if (!sides.length) return;
     var tokens = [];
-    var bothSet = {};
-    q11.forEach(function (r) { if (q13.indexOf(r) !== -1) bothSet[r] = true; });
-    var bothRows = Object.keys(bothSet).map(Number).sort(function (a, b) { return a - b; });
-    runsOf(bothRows).forEach(function (run) { tokens.push.apply(tokens, fmtBoth(run, style, true)); });
-    runsOf(q11.filter(function (r) { return !bothSet[r]; })).forEach(function (run) { tokens.push.apply(tokens, fmt11(run, style)); });
-    runsOf(q13.filter(function (r) { return !bothSet[r]; })).forEach(function (run) { tokens.push.apply(tokens, fmt13(run, style)); });
-    if (tokens.length) out.push(formalJoin(tokens) + ': ' + STATUS_META[target].report + '.');
+    var i = 0;
+    while (i < sides.length) {
+      var j = i;
+      while (j + 1 < sides.length && sides[j + 1].cls === sides[i].cls && sides[j + 1].r === sides[j].r + 1) j++;
+      var run = { a: sides[i].r, b: sides[j].r };
+      var fmt = sides[i].cls === 0 ? fmtBoth(run, style, true) : (sides[i].cls === 1 ? fmt11(run, style) : fmt13(run, style));
+      tokens.push.apply(tokens, fmt);
+      i = j + 1;
+    }
+    if (tokens.length) out.push('\u2022 ' + STATUS_META[target].report + ': ' + tokens.join(', '));
   });
   var mixed = [];
   Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
     ['11', '13'].forEach(function (side) {
       var seg = hall.rows[r][side];
-      if (sideOverall(seg, null) === 'MIXED') mixed.push({ r: r, side: side, base: mixedBase(seg).base, seg: seg });
+      if (sideOverall(seg, null) === 'MIXED') mixed.push({ r: r, side: side, desc: mixedDesc2(seg) });
     });
   });
-  mixed.sort(function (a, b) {
-    var d = REPORT_STATUS_ORDER.indexOf(a.base) - REPORT_STATUS_ORDER.indexOf(b.base);
-    return d !== 0 ? d : (a.r - b.r || (a.side < b.side ? -1 : 1));
-  });
-  mixed.forEach(function (mx) { out.push(mx.r + mx.side + ': ' + mixedDesc2(mx.seg) + '.'); });
-  (hall.notes || []).forEach(function (n) { var ln = formalizeNote2(n); if (ln) out.push(ln); });
+  // Group every row sharing the same description (not just adjacent ones),
+  // groups ordered by their first rack - "1413, 1513, 1613" style bullets.
+  var byDesc = {};
+  mixed.forEach(function (mx) { (byDesc[mx.desc] = byDesc[mx.desc] || []).push(mx); });
+  Object.keys(byDesc).map(function (d) { return { d: d, rows: byDesc[d] }; })
+    .sort(function (a, b) { var x = a.rows[0], y = b.rows[0]; return x.r - y.r || (x.side < y.side ? -1 : 1); })
+    .forEach(function (g) {
+      out.push('\u2022 ' + g.rows.map(function (x) { return x.r + x.side; }).join(', ') + ': ' + g.d);
+    });
+  (hall.notes || []).forEach(function (n) { var ln = formalizeNote2(n); if (ln) out.push('\u2022 ' + ln.replace(/\.$/, '')); });
   return out;
 }
+function reportDateStr() {
+  if (state.blockers.length && state.blockers[0].date) return state.blockers[0].date;
+  var d = new Date();
+  return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+}
 function blockersFormal() {
-  if (!state.blockers.length) return 'Blockers\nNone.';
+  if (!state.blockers.length) return 'BLOCKERS\n\u2022 None';
   var dates = state.blockers.map(function (b) { return b.date; });
   var allSame = dates.every(function (d) { return d === dates[0]; });
-  var lines = [allSame ? 'Blockers \u2013 ' + dates[0] : 'Blockers'];
+  var lines = [allSame ? 'BLOCKERS \u2013 ' + dates[0] : 'BLOCKERS'];
   state.blockers.forEach(function (b) {
-    lines.push((b.hall ? b.hall + ': ' : '') + polishSentence(b.text));
+    lines.push('\u2022 ' + (b.hall ? b.hall + ': ' : '') + polishSentence(b.text).replace(/\.$/, ''));
   });
   return lines.join('\n');
 }
@@ -1754,21 +1771,25 @@ function buildReport(style) {
   var out = '';
 
   if (style === 'formal') {
-    out += 'Team,\nPlease see the shift update below.\n';
-    out += 'Shift Summary\n';
+    out += 'Subject: Shift Update \u2013 ' + reportDateStr() + (m.shiftTime ? ' (' + m.shiftTime + ')' : '') + '\n\n';
+    out += 'Team,\n\nPlease see the shift update below.\n\n';
+    out += 'SHIFT SUMMARY\n';
     out += 'Superintendent on Site: ' + (m.supers || '') + '\n';
     out += 'Shift Time: ' + (m.shiftTime || '') + '\n';
-    out += 'Personnel Count: MP \u2013 ' + mpCount + ' | SP \u2013 ' + spCount + '\n';
-    out += 'Work Performed\n';
+    out += 'Personnel Count: MP \u2013 ' + mpCount + ' | SP \u2013 ' + spCount + '\n\n';
+    out += 'WORK PERFORMED\n\n';
     var blocks = [];
     Object.values(hallsNow).forEach(function (h) {
       var hl = formalHallLines2(h);
       if (hl.length) blocks.push('MP | ' + h.name + '\n' + hl.join('\n'));
     });
-    if (blocks.length) out += blocks.join('\n') + '\n';
-    out += 'SP\n' + ((m.spWorkNotes || '').trim() || 'None.') + '\n';
-    out += blockersFormal() + '\n';
-    out += 'Areas of Concern\n' + ((m.areasOfConcern || '').trim() || 'None') + '\n';
+    if (blocks.length) out += blocks.join('\n\n') + '\n\n';
+    var spLines = (m.spWorkNotes || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    out += 'SP\n' + (spLines.length ? spLines.map(function (l) { return '\u2022 ' + l; }).join('\n') : '\u2022 None') + '\n\n';
+    out += blockersFormal() + '\n\n';
+    out += 'AREAS OF CONCERN\n';
+    var aoc = (m.areasOfConcern || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    out += (aoc.length ? aoc.map(function (l) { return '\u2022 ' + l; }).join('\n') : '\u2022 None') + '\n';
     if (state.settings.signature && state.settings.signature.trim()) {
       out += '\n' + state.settings.signature.trim() + '\n';
     }
