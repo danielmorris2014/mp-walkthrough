@@ -2,7 +2,28 @@ CHANGELOG - MP Walkthrough & Shift Report
 ==========================================
 History of changes since the original Gemini-generated prototype HTML.
 
-v19 (current) - Data Haul Directory (tool #3)
+v20 (current) - FULL data haul + real scanning
+------------------------------------------------------------------
+- Complete dataset shipped: 28,353 barcodes with A/Z ends +
+  192,423 BUF102-relevant preset connection paths (from the full
+  Downloads exports). Stored as a compressed side file
+  (data/directory.json.gz, 1.5MB) decoded in-browser; the service
+  worker precaches it, so it is fully offline after first load.
+  Search stays instant: exact/suffix barcode numeric index plus
+  substring scan, indexed in time-sliced chunks with progress.
+- Real Scan button in the Data Haul Directory: opens the camera,
+  decodes cable-flag barcodes, and drops the result straight into
+  search. Runs on zxing-wasm 3.1.6 (upgraded from 2.2.4 in BOTH
+  apps - fixes a memory leak that matters for all-night scan
+  sessions, faster + better decodes, zero API changes).
+- Scanner hardened with field techniques from the GitHub research:
+  reticle band crop (10x fewer pixels per frame), two-frame voting
+  with a label-character gate (misreads never survive), session
+  dedupe, and a WebAudio confirmation beep (iOS has no vibration
+  API for web apps). Engine shared from vendor/zxing for both apps.
+
+v19 - Data Haul Directory (tool #3)
+
 ------------------------------------------------------------------
 - New module from the Service Field Guide exports: search every
   assigned barcode and preset A/Z connection path offline.

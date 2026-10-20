@@ -102,12 +102,25 @@ body { font:400 14px/1.45 var(--font-ui); }
 assert raw.count('</style>') == 1, "expected exactly one style block"
 raw = raw.replace('</style>', '</style>' + THEME, 1)
 
+# 3) upgrade the embedded barcode engine to zxing-wasm 3.1.6 (vendor/zxing).
+#    Zero API breakage for our formats; fixes a wasm memory leak that matters
+#    for hours-long scan sessions, plus decode + speed improvements.
+import base64, os
+VND = os.path.join(os.path.dirname(DST), "vendor", "zxing")
+reader_js = open(os.path.join(VND, "reader.js"), encoding="utf-8").read().strip()
+assert "</script>" not in reader_js
+wasm_b64 = base64.b64encode(open(os.path.join(VND, "zxing_reader.wasm"), "rb").read()).decode()
+raw, n3 = re.subn(r"<script>var ZXingWASM=.*?</script>", "<script>" + reader_js + "</script>", raw, count=1, flags=re.S)
+raw, n4 = re.subn(r"(<script type=\"application/octet-stream\" id=\"zxwasm\">).*?(</script>)",
+                  lambda m: m.group(1) + wasm_b64 + m.group(2), raw, count=1, flags=re.S)
+
 open(DST, "w", encoding="utf-8", newline="").write(raw)
 
 # 3) integrity checks
 checks = {
     "zxwasm decoder embedded": 'id="zxwasm"' in raw,
-    "ZXingWASM wrapper present": 'var ZXingWASM=' in raw,
+    "ZXingWASM wrapper present": 'ZXingWASM' in raw,
+    "engine upgraded to 3.1.6": wasm_b64[:2000] in raw and n3 == 1 and n4 == 1,
     "sitepack BUF102 embedded": '"site":"BUF102"' in raw,
     "fonts embedded (woff2)": raw.count("data:font/woff2;base64") >= 2,
     "theme override injected": 'id="mp-theme"' in raw,
