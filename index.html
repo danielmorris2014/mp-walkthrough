@@ -316,7 +316,16 @@
   .home-card.soon .home-tile { background: transparent; border-style: dashed; }
   body.in-home .status-dock, body.in-dir .status-dock { display: none; }
   body.in-home .hall-tabs, body.in-dir .hall-tabs { display: none; }
-  body.in-home .toast, body.in-dir .toast { bottom: calc(96px + env(safe-area-inset-bottom)); }
+  body.in-home .bottom-nav, body.in-dir .bottom-nav { display: none; }
+  body.in-home, body.in-dir { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+  body.in-home .toast, body.in-dir .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
+  .kit-back {
+    display: none; min-height: 36px; padding: 0 12px 0 9px; border-radius: 999px; flex: none;
+    background: rgba(255,255,255,.055); border: 1px solid var(--border); color: var(--muted);
+    font: 800 12.5px var(--font-family, -apple-system, sans-serif); cursor: pointer; align-items: center;
+  }
+  body.in-dir .kit-back { display: inline-flex; }
+  .kit-back:active { transform: scale(.96); }
 
   /* ---- Data haul directory ---- */
   .dir-item { cursor: pointer; }
@@ -424,6 +433,7 @@
 
 <header>
   <div class="top-bar">
+    <button class="kit-back" onclick="switchTab('home')">&#8249; Home</button>
     <div>
       <div class="app-title">MP Walkthrough &amp; Shift Report</div>
       <div class="app-sub" id="saveIndicator">Offline &bull; auto-saves to this phone</div>
@@ -733,7 +743,7 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v25';
+var APP_VERSION = 'v26';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
