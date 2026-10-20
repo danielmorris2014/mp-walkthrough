@@ -206,6 +206,85 @@
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
 
+
+  /* v31 row redesign: status word in step-11 color, no badge */
+  .side-status { font-size: 13px; font-weight: 700; line-height: 1.2; }
+  .side-status.st-hung { color: var(--st-hung); }
+  .side-status.st-ran { color: var(--st-ran); }
+  .side-status.st-prog { color: var(--st-prog); }
+  .side-status.st-staged { color: var(--st-staged); }
+  .side-status.st-remed { color: var(--st-remed); }
+  .side-status.st-none { color: var(--faint); }
+
+  /* Mixed side: cable cells with status underlines */
+  .mixed-cells { display: flex; gap: 6px; margin-top: 2px; }
+  .mc {
+    flex: 1; font-size: 11px; font-weight: 700; text-align: center;
+    padding: 2px 0 3px 0; border-bottom: 3px solid var(--slate-6);
+  }
+  .mc.u-hung { border-bottom-color: var(--green-9); color: var(--green-11); }
+  .mc.u-ran { border-bottom-color: var(--violet-9); color: var(--violet-11); }
+  .mc.u-prog { border-bottom-color: var(--amber-9); color: var(--amber-11); }
+  .mc.u-staged { border-bottom-color: var(--blue-9); color: var(--blue-11); }
+  .mc.u-remed { border-bottom-color: var(--red-9); color: var(--red-11); }
+  .mc.u-none { border-bottom-color: var(--slate-6); color: var(--faint); }
+
+  /* Folded hung row: slim green strip */
+  .folded-row {
+    display: flex; align-items: center; gap: 10px; padding: 0 12px;
+    min-height: 36px; margin-bottom: 4px; border-radius: 8px;
+    background: var(--green-2); border: 1px solid #30a46c40;
+    cursor: pointer;
+  }
+  .folded-row .fr-text { font-size: 13px; font-weight: 700; color: var(--green-11); flex: 1; }
+  .folded-row .fr-expand { font-size: 11px; color: var(--muted); font-weight: 700; }
+
+  /* v31 brush bar: 60px, replaces 119px dock */
+  .brush-bar {
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px 4px 12px;
+  }
+  .brush-chip {
+    flex: 1; min-height: 44px; display: flex; align-items: center; gap: 8px;
+    border-radius: 12px; padding: 0 12px; cursor: pointer;
+    background: rgba(255,255,255,0.045); border: 1px solid var(--border);
+    user-select: none; -webkit-user-select: none;
+  }
+  .brush-chip:active { transform: scale(0.97); }
+  .brush-chip .bc-name { font-weight: 800; font-size: 16px; }
+  .brush-chip .bc-scope { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .brush-undo {
+    flex: none; min-height: 44px; min-width: 84px; border-radius: 12px;
+    background: rgba(255,255,255,0.055); border: 1px solid var(--border);
+    color: var(--muted); font-weight: 800; font-size: 12px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .brush-undo:active { transform: scale(0.96); }
+
+  /* Palette sheet */
+  .palette-sheet {
+    position: fixed; inset: 0; z-index: 170; background: rgba(17,17,19,0.88);
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .palette-sheet.open { display: flex; }
+  .palette-card {
+    background: var(--card); border: 1px solid var(--border2); border-radius: 20px 20px 0 0;
+    padding: 16px; width: 100%; max-height: 70vh; overflow-y: auto;
+  }
+  .palette-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
+  .palette-tile {
+    min-height: 72px; border-radius: 14px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 4px; cursor: pointer;
+    background: rgba(255,255,255,0.03); border: 2px solid transparent;
+    font-weight: 800; font-size: 15px; color: var(--muted);
+  }
+  .palette-tile.active { border-color: currentColor; }
+  .palette-tile:active { transform: scale(0.96); }
+  .palette-scope { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
+  .ps-btn {
+    min-height: 40px; border-radius: 8px; border: none; cursor: pointer;
+    background: rgba(118,118,128,0.12); color: var(--muted); font-weight: 700; font-size: 12px;
+  }
+  .ps-btn.active { background: var(--slate-5); color: var(--slate-12); }
   /* Hall menu sheet (design change 1) */
   .hall-menu {
     position: fixed; inset: 0; z-index: 160; background: rgba(17,17,19,0.88);
@@ -234,28 +313,29 @@
     display: grid; grid-template-columns: 1fr 58px 1fr; gap: 7px; text-align: center;
     font-size: 10px; font-weight: 800; color: var(--muted); letter-spacing: 0.4px; padding: 2px 0 7px 0;
   }
-  .aisle-row { display: grid; grid-template-columns: minmax(0,1fr) 52px minmax(0,1fr); gap: 7px; margin-bottom: 7px; align-items: stretch; }
+  .aisle-row { display: grid; grid-template-columns: minmax(0,1fr) 44px minmax(0,1fr); gap: 5px; margin-bottom: 5px; align-items: stretch; }
   .aisle-row.vert { grid-template-columns: 1fr; gap: 5px; }
   .aisle-row.vert .row-center-pill { flex-direction: row; justify-content: center; gap: 7px; padding: 6px 4px; }
   .aisle-legend.vert { grid-template-columns: 1fr; gap: 2px; }
   .row-center-pill {
-    background: var(--bg2); border: 1px solid var(--border2); border-radius: 13px; min-width: 0;
+    background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; min-width: 0;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
-    cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; padding: 4px; text-align: center;
+    cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; padding: 2px; text-align: center;
   }
   .row-center-pill:active { transform: scale(0.95); border-color: var(--accent); }
-  .row-num { font-weight: 900; font-size: 16px; color: #fff; }
-  .row-both-hint { font-size: 8px; color: var(--muted); font-weight: 800; margin-top: 2px; letter-spacing: 0.5px; }
+  .row-num { font-weight: 900; font-size: 22px; color: #fff; font-variant-numeric: tabular-nums; }
+  .row-both-hint { display: none; }
 
   .side-card {
-    border-radius: 12px; border: 1px solid var(--border); border-left-width: 4px; padding: 8px 9px; min-height: 64px; min-width: 0;
-    display: flex; flex-direction: column; justify-content: space-between;
+    border-radius: 10px; border: 1px solid var(--border); border-left-width: 4px; padding: 6px 8px;
+    min-height: 56px; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px;
     cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
     background: var(--card); transition: transform 0.05s;
   }
+  .side-card.empty { border-style: dashed; border-left-style: solid; }
   .side-card:active { transform: scale(0.98); }
   .side-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
-  .side-id { font-weight: 900; font-size: 15px; letter-spacing: -0.3px; color: #fff; }
+  .side-id { font-weight: 800; font-size: 17px; letter-spacing: -0.3px; color: #fff; font-variant-numeric: tabular-nums; }
   .side-span { font-size: 10px; opacity: 0.75; font-weight: 700; }
   .side-status-badge {
     font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px;
@@ -732,21 +812,26 @@
 </div>
 
 <div class="bottom-stack">
-  <div class="status-dock">
-    <div class="dock-label"><span id="activeBrushLabel" style="color:var(--accent)">Stamps: Ran &amp; Hung &bull; All cables</span></div>
-    <div class="dock-brush">
-      <button class="brush-btn b-hung active" onclick="setBrush('hung')"><span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg></span>Hung</button>
-      <button class="brush-btn b-ran" onclick="setBrush('ran')"><span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 12H3"/><path d="m11 18 6-6-6-6"/><path d="M21 5v14"/></svg></span>Ran</button>
-      <button class="brush-btn b-prog" onclick="setBrush('prog')"><span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/></svg></span>In&nbsp;Prog</button>
-      <button class="brush-btn b-staged" onclick="setBrush('staged')"><span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg></span>Staged</button>
-      <button class="brush-btn b-remed" onclick="setBrush('remed')"><span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></svg></span>Remed</button>
-      <button class="brush-btn b-none" onclick="setBrush('none')"><span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21"/><path d="m5.082 11.09 8.828 8.828"/></svg></span>Clear</button>
+  <div class="status-dock brush-bar">
+    <div class="brush-chip" id="brushChip" onclick="openPalette()">
+      <span id="brushDot" style="width:12px;height:12px;border-radius:99px;flex:none;background:#30a46c;"></span>
+      <div>
+        <span id="activeBrushLabel" style="display:none;"></span>
+        <div class="bc-name" id="brushName">Ran &amp; Hung</div>
+        <div class="bc-scope" id="brushScope">All cables</div>
+      </div>
     </div>
-    <div class="dock-scope">
-      <button class="scope-btn active" id="sc-ALL" onclick="setScope('ALL')">All cables</button>
-      <button class="scope-btn" id="sc-F144" onclick="setScope('F144')">144F</button>
-      <button class="scope-btn" id="sc-OCS" onclick="setScope('OCS')">OCS</button>
-      <button class="scope-btn" id="sc-CAT6" onclick="setScope('CAT6')">Copper</button>
+    <button class="brush-undo" id="undoBtn" onclick="doUndo()">
+      <span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span>
+      <span id="undoLabel">Undo</span>
+    </button>
+  </div>
+  <div class="palette-sheet" id="paletteSheet">
+    <div class="palette-card">
+      <div class="card-title" id="paletteTitle">Stamp brush</div>
+      <div class="palette-scope" id="paletteScope"></div>
+      <div class="palette-grid" id="paletteGrid"></div>
+      <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closePalette()">Cancel</button>
     </div>
   </div>
   <nav class="bottom-nav">
@@ -784,7 +869,7 @@ hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v30';
+var APP_VERSION = 'v31';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -957,6 +1042,58 @@ function updateUndoBtn() {
 }
 
 /* ---------------- brush & scope ---------------- */
+/* ---- palette sheet (design change 3) ---- */
+function openPalette(row, side) {
+  var sheet = document.getElementById('paletteSheet');
+  var grid = document.getElementById('paletteGrid');
+  var scopeEl = document.getElementById('paletteScope');
+  var title = document.getElementById('paletteTitle');
+  if (!sheet || !grid) return;
+  title.textContent = row ? ('Stamp ' + row + side) : 'Stamp brush';
+  var statuses = ['hung', 'ran', 'prog', 'staged', 'remed', 'none'];
+  grid.innerHTML = '';
+  statuses.forEach(function (st) {
+    var meta = STATUS_META[st];
+    var active = state.brush === st ? ' active' : '';
+    var color = st === 'none' ? 'var(--faint)' : 'var(--st-' + st + ')';
+    var tile = document.createElement('div');
+    tile.className = 'palette-tile' + active;
+    tile.style.color = color;
+    tile.textContent = meta.badge;
+    tile.addEventListener('click', function () {
+      if (row && side) { applyStamp(row, side, st); closePalette(); return; }
+      setBrush(st); closePalette();
+    });
+    grid.appendChild(tile);
+  });
+  scopeEl.innerHTML = '';
+  var scopes = [['ALL', 'All'], ['F144', '144F'], ['OCS', 'OCS'], ['CAT6', 'Copper']];
+  scopes.forEach(function (s) {
+    var btn = document.createElement('button');
+    btn.className = 'ps-btn' + (state.scope === s[0] ? ' active' : '');
+    btn.textContent = s[1];
+    btn.addEventListener('click', function () { setScope(s[0]); });
+    scopeEl.appendChild(btn);
+  });
+  sheet.classList.add('open');
+}
+function closePalette() {
+  var sheet = document.getElementById('paletteSheet');
+  if (sheet) sheet.classList.remove('open');
+}
+function pickBrush(st, row, side) {
+  if (row && side) { applyStamp(row, side, st); closePalette(); return; }
+  setBrush(st); closePalette();
+}
+function updateBrushBar() {
+  var name = document.getElementById('brushName');
+  var scope = document.getElementById('brushScope');
+  var dot = document.getElementById('brushDot');
+  if (name) name.textContent = STATUS_META[state.brush].badge;
+  if (scope) scope.textContent = state.scope === 'ALL' ? 'All cables' : CABLE_LABEL[state.scope];
+  if (dot) dot.style.background = STATUS_COLOR[state.brush] || STATUS_COLOR.none;
+}
+
 function setBrush(code) {
   state.brush = code;
   document.querySelectorAll('.brush-btn').forEach(function (b) { b.classList.remove('active'); });
@@ -972,6 +1109,7 @@ function setScope(sc) {
   updateBrushLabel(); saveState();
 }
 function updateBrushLabel() {
+  updateBrushBar();
   var sc = state.scope === 'ALL' ? 'All cables' : CABLE_LABEL[state.scope] + ' only';
   document.getElementById('activeBrushLabel').textContent = BRUSH_LABEL[state.brush] + ' \u2022 ' + sc;
 }
