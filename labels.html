@@ -36,7 +36,7 @@ a.back{color:var(--y);text-decoration:none;font-weight:600;display:inline-block;
 
 <div class="card">
  <div class="row"><div><label>Site code</label><input id="site" value="BUF102" autocapitalize="characters"></div>
- <div><label>Next serial #</label><input id="next" inputmode="numeric" value="1"></div></div>
+ <div><label>Next serial #</label><input id="next" inputmode="numeric" value="9000001"></div></div>
  <label>Cables: one per line, "A end | Z end" (each gets the next serial)</label>
  <textarea id="in" placeholder="BUF102-DH4-R12-SW01-E1/1 | BUF102-DH4-R40-PP02-A14&#10;BUF102-DH4-R12-SW01-E1/2 | BUF102-DH4-R40-PP02-A15" autocapitalize="characters"></textarea>
  <div class="row"><div><label>Label width</label><select id="w"><option value="2">2 in (min)</option><option value="3" selected>3 in</option><option value="4">4 in</option></select></div>
@@ -73,8 +73,14 @@ function check(t,site){var w=[];
 var cur=[];
 function labelHtml(l){return '<div class="lab"><div class="t">'+esc(l.a)+'</div><div class="t">'+esc(l.z)+'</div>'+enc(l.s)+'<div class="sn">'+esc(l.s)+'</div></div>'}
 $('mk').onclick=function(){
- var site=$('site').value.trim().toUpperCase()||'BUF102',n=parseInt($('next').value,10)||1,warns=[];cur=[];
+ var site=$('site').value.trim().toUpperCase()||'BUF102',n=parseInt($('next').value,10),warns=[];cur=[];
+ if(!/^[A-Z0-9]{3,10}$/.test(site)){$('msg').innerHTML='<div class="warn">Site code should be letters/numbers only, like BUF102.</div>';return}
+ if(!(n>=1)){$('msg').innerHTML='<div class="warn">Next serial # must be 1 or higher.</div>';return}
+ if(n<=29335)warns.push('serial '+n+' is inside the database range (BUF102#0000001-0029335) and may duplicate a real cable label; use 9000001 or higher');
+ var lines=$('in').value.split('\n').filter(function(x){return x.trim()}).length;
+ if(n+lines-1>9999999){$('msg').innerHTML='<div class="warn">Serial would pass 9,999,999. Lower the starting number.</div>';return}
  $('in').value.split('\n').forEach(function(ln){ln=ln.trim();if(!ln)return;var p=ln.split('|');var a=(p[0]||'').trim(),z=(p[1]||'').trim();
+  if(!a||!z)warns.push(esc(ln)+': needs both ends, written A end | Z end');
   [a,z].forEach(function(t){check(t,site).forEach(function(w){warns.push(esc(t)+': '+w)})});
   cur.push({s:serial(site,n++),a:a,z:z})});
  if(!cur.length){$('msg').innerHTML='<div class="warn">Type at least one cable.</div>';return}

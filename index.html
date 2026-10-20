@@ -922,7 +922,7 @@ hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v36';
+var APP_VERSION = 'v37';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2008,6 +2008,9 @@ function applyChromeHeight() {
 }
 window.addEventListener('resize', applyChromeHeight);
 function switchTab(t, btn) {
+  if (currentTab === 'walk' && t !== 'walk') {
+    try { sessionStorage.setItem('mp_scroll_' + state.activeHall, String(window.scrollY)); } catch (e) {}
+  }
   var s = SCREENS[t]; if (!s) { t = 'home'; s = SCREENS.home; }
   currentTab = t;
   document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
@@ -2024,10 +2027,7 @@ function switchTab(t, btn) {
   var at = document.querySelector('.app-title');
   if (at) at.textContent = s.title;
   try { history.replaceState(null, '', '#/' + t); } catch (e) {}
-  // save scroll position when leaving walk
-  if (currentTab === 'walk' && t !== 'walk') {
-    try { sessionStorage.setItem('mp_scroll_' + state.activeHall, String(window.scrollY)); } catch (e) {}
-  }
+  // scroll position is saved at the top of this function, before currentTab changes
   if (s.onShow) s.onShow();
   // restore scroll position when entering walk
   if (t === 'walk') {
@@ -2200,7 +2200,7 @@ function syncNow() {
     if (m !== state) { state = m; renderAll(); }
     updateSyncStatus();
     showToast('Synced!');
-  });
+  }).catch(function () { showToast('Sync failed. Check your connection and try again.'); });
 }
 function disconnectSite() {
   Sync.disconnect();
