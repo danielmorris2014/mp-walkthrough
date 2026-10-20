@@ -41,6 +41,8 @@ if have_pw:
         time.sleep(0.5)
     if not run("report diff test", [PY, os.path.join("tools", "test_report.py")]):
         fails.append("report-diff")
+    if not run("probe suite (nav/fonts/copy/route)", [PY, os.path.join("tools", "probes.py")]):
+        fails.append("probes")
     if "--shots" in sys.argv:
         if not run("screenshots", [PY, os.path.join("tools", "shoot.py")]):
             fails.append("shots")

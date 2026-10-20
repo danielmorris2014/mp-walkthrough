@@ -9,8 +9,9 @@
 # - integrity checks
 import re, sys, hashlib, os
 
-SRC = r"C:\Users\DanielMorris\Downloads\cable-field-guide.html"
-DST = r"C:\Users\DanielMorris\Downloads\fluidstack\walkthrough-app\guide.html"
+_APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SRC = os.path.join(os.path.expanduser("~"), "Downloads", "cable-field-guide.html")
+DST = os.path.join(_APP, "guide.html")
 
 raw = open(SRC, encoding="utf-8").read()
 orig_len = len(raw)
@@ -107,7 +108,7 @@ assert raw.count('</style>') == 1, "expected exactly one style block"
 raw = raw.replace('</style>', '</style>' + THEME, 1)
 
 # 3) barcode-directory augmentation (same data file the kit ships)
-GUIDE_DIR_JS = open(os.path.join(os.path.dirname(DST), "tools", "guide_directory.js"), encoding="utf-8").read()
+GUIDE_DIR_JS = open(os.path.join(_APP, "tools", "guide_directory.js"), encoding="utf-8").read()
 assert raw.count("</head>") == 1
 raw = raw.replace("</head>", GUIDE_DIR_JS + "</head>", 1)
 
@@ -125,7 +126,9 @@ raw, n4 = re.subn(r"(<script type=\"application/octet-stream\" id=\"zxwasm\">).*
 
 open(DST, "w", encoding="utf-8", newline="").write(raw)
 
-# 3) integrity checks
+# 3) integrity checks — per-LAYER proofs: each patch must leave a visible
+# mark in the output, so an upstream change can't silently disable a layer
+# (the v18 light-mode bug's genus: selectors stopped matching, checks stayed green).
 checks = {
     "zxwasm decoder embedded": 'id="zxwasm"' in raw,
     "ZXingWASM wrapper present": 'ZXingWASM' in raw,
@@ -133,13 +136,18 @@ checks = {
     "directory augmentation injected": "mp-dir" in raw and "Barcode directory" in raw,
     "sitepack BUF102 embedded": '"site":"BUF102"' in raw,
     "fonts embedded (woff2)": raw.count("data:font/woff2;base64") >= 2,
-    "theme override injected": 'id="mp-theme"' in raw,
-    "back-button observer injected": "MutationObserver(addBack)" in raw,
     "old floating pill gone": 'id="mpkit-back"' not in raw,
     "icon links removed": 'icon-180.png' not in raw,
     "manifest link removed": 'manifest.webmanifest' not in raw,
     "style blocks balanced (theirs + ours)": raw.count('<style') == 2 and raw.count('</style>') == 2,
     "size sane": 2_000_000 < len(raw) < 3_200_000,
+    # --- layer proofs (selector presence in the OUTPUT, not just our patch text) ---
+    "LAYER theme: selectors still exist in output (v18 bug class)":
+        all(cls in raw for cls in ('class="top', 'class="brand', 'class="tabs')),
+    "LAYER back: header.top mounts in output markup": 'header class="top"' in raw,
+    "LAYER dir: augmentation listens for both renders and typing":
+        "MutationObserver" in raw[raw.index("mp-dir"):] and "addEventListener('input'" in raw[raw.index("mp-dir"):],
+    "LAYER engine: 3.1.6 wasm payload landed": wasm_b64[:200] in raw,
 }
 ok = True
 for k, v in checks.items():

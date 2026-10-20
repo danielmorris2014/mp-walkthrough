@@ -68,7 +68,7 @@
     *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
   }
   body {
-    margin: 0; padding: 0 0 calc(176px + env(safe-area-inset-bottom)) 0;
+    margin: 0; padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: radial-gradient(900px 340px at 50% -100px, rgba(255,255,255,0.035), transparent 70%), var(--bg);
     color: var(--text); font-size: 14px; line-height: 1.35;
@@ -314,17 +314,21 @@
   .home-card.soon { opacity: 0.55; border-style: dashed; cursor: default; }
   .home-card.soon:active { transform: none; }
   .home-card.soon .home-tile { background: transparent; border-style: dashed; }
-  body.in-home .status-dock, body.in-dir .status-dock { display: none; }
-  body.in-home .hall-tabs, body.in-dir .hall-tabs { display: none; }
-  body.in-home .bottom-nav, body.in-dir .bottom-nav { display: none; }
-  body.in-home, body.in-dir { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
-  body.in-home .toast, body.in-dir .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
+  /* Chrome is opt-in per screen via the SCREENS registry (has-* classes).
+     A new screen with no chrome flags gets a clean layout by default. */
+  .status-dock, .bottom-nav, .hall-tabs { display: none; }
+  body.has-dock .status-dock { display: block; }
+  body.has-bar .bottom-nav { display: grid; }
+  body.has-halltabs .hall-tabs { display: flex; }
+  body { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+  body.has-dock { padding-bottom: calc(176px + env(safe-area-inset-bottom)); }
+  body.has-dock .toast { bottom: calc(186px + env(safe-area-inset-bottom)); }
   .kit-back {
     display: none; min-height: 36px; padding: 0 12px 0 9px; border-radius: 999px; flex: none;
     background: rgba(255,255,255,.055); border: 1px solid var(--border); color: var(--muted);
     font: 800 12.5px var(--font-family, -apple-system, sans-serif); cursor: pointer; align-items: center;
   }
-  body.in-dir .kit-back, body.in-tool .kit-back { display: inline-flex; }
+  body.has-back .kit-back { display: inline-flex; }
   .kit-back:active { transform: scale(.96); }
 
   /* ---- Data haul directory ---- */
@@ -720,10 +724,15 @@
   </div>
 </div>
 
+<script src="report-engine.js"></script>
+<script>var STATUS_META = ReportEngine.STATUS_META, STATUS_ORDER = ReportEngine.STATUS_ORDER,
+REPORT_STATUS_ORDER = ReportEngine.REPORT_STATUS_ORDER, CABLES = ReportEngine.CABLES,
+CABLE_LABEL = ReportEngine.CABLE_LABEL, sideOverall = ReportEngine.sideOverall,
+hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v27';
+var APP_VERSION = 'v28';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -738,18 +747,6 @@ function applyUpdateNow() {
   try { if (swReg && swReg.waiting) swReg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
   setTimeout(function () { location.reload(); }, 400);
 }
-var CABLES = ['F144', 'OCS', 'CAT6'];
-var CABLE_LABEL = { F144: '144F', OCS: 'OCS', CAT6: 'Copper' };
-var STATUS_ORDER = ['none', 'staged', 'prog', 'ran', 'hung', 'remed'];
-var REPORT_STATUS_ORDER = ['hung', 'ran', 'prog', 'staged', 'remed']; // most complete first, like the real reports
-var STATUS_META = {
-  none:   { short: '—',        badge: 'Empty',       report: 'Not started',   cardCls: 'sc-none',   pillCls: 'mp-none' },
-  staged: { short: 'Staged',   badge: 'Staged',      report: 'Staged',        cardCls: 'sc-staged', pillCls: 'mp-staged' },
-  prog:   { short: 'Prog',     badge: 'In Progress', report: 'In progress',   cardCls: 'sc-prog',   pillCls: 'mp-prog' },
-  ran:    { short: 'Ran',      badge: 'Ran',         report: 'Ran',           cardCls: 'sc-ran',    pillCls: 'mp-ran' },
-  hung:   { short: 'Hung',     badge: 'Ran & Hung',  report: 'Ran and hung',  cardCls: 'sc-hung',   pillCls: 'mp-hung' },
-  remed:  { short: 'Remed',    badge: 'Remediation', report: 'Remediation',   cardCls: 'sc-remed',  pillCls: 'mp-remed' }
-};
 var BRUSH_LABEL = { hung: 'Ran & Hung', ran: 'Ran (Pulled)', prog: 'In Progress', staged: 'Staged', remed: 'Remediation', none: 'Clear' };
 var STATUS_COLOR = { none: '#5a6169', staged: '#0090ff', prog: '#ffc53d', ran: '#6e56cf', hung: '#30a46c', remed: '#e5484d' };
 
@@ -780,12 +777,12 @@ function grp(name, from, to) {
 
 function defaultState() {
   var s = {
-    version: 1,
+    version: 2,
     activeHall: 'CB5_DH1',
     brush: 'hung', scope: 'ALL',
     settings: { onboarded: false, numStyle: 'short', orientation: 'h11', signature: '', textSize: 'normal', wakeLock: true, lastBackup: 0 },
     meta: {
-      supers: 'Chris Dickman, Daniel Morris',
+      supers: '',
       shiftTime: '2:00 PM – 2:00 AM',
       mpCount: 106, spCount: 11,
       spWorkNotes: 'Started training with Chris Dickman. Shadowed MP on staging and remediation in CB5 DH1. Tested new hires on the system to gauge their training progress.\nTaking measurements with the cable pole to determine cable lengths.',
@@ -839,15 +836,40 @@ function defaultState() {
 var state = loadState();
 var undoStack = [];
 
+// ---- state module (architecture candidate #5): one shape, versioned ----
+// CORE_SHAPE is the single list of keys that undo, restore, and the backup
+// all move together — it was hand-enumerated in three places before.
+var CORE_SHAPE = ['halls', 'crewPool', 'blockers', 'meta', 'history', 'baseline'];
+var STATE_VERSION = 2;
+// MIGRATIONS[n] upgrades a version-n state to n+1. Add an entry when the
+// shape changes; old phones load cleanly instead of silently breaking.
+var MIGRATIONS = {
+  1: function (s) {
+    s.settings = Object.assign({ onboarded: false, numStyle: 'short', orientation: 'h11',
+      signature: '', textSize: 'normal', wakeLock: true, lastBackup: 0 }, s.settings || {});
+    s.version = 2;
+    return s;
+  }
+};
+function migrateState(s) {
+  var v = s.version || 1;
+  while (v < STATE_VERSION) {
+    if (!MIGRATIONS[v]) break; // unknown future version: load best-effort
+    s = MIGRATIONS[v](s);
+    v = s.version;
+  }
+  s.version = STATE_VERSION;
+  return s;
+}
 function loadState() {
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       var s = JSON.parse(raw);
-      if (s && s.halls) return s;
+      if (s && s.halls) return migrateState(s);
     }
   } catch (e) {}
-  return defaultState();
+  var d = defaultState(); d.version = STATE_VERSION; return d;
 }
 function saveState() {
   try {
@@ -859,7 +881,9 @@ function saveState() {
   }
 }
 function snapshotCore() {
-  return JSON.stringify({ halls: state.halls, crewPool: state.crewPool, blockers: state.blockers, meta: state.meta, history: state.history, baseline: state.baseline });
+  var o = {};
+  CORE_SHAPE.forEach(function (k) { o[k] = state[k]; });
+  return JSON.stringify(o);
 }
 function pushUndo() {
   undoStack.push(snapshotCore());
@@ -869,8 +893,7 @@ function pushUndo() {
 function doUndo() {
   if (!undoStack.length) { showToast('Nothing to undo'); return; }
   var snap = JSON.parse(undoStack.pop());
-  state.halls = snap.halls; state.crewPool = snap.crewPool;
-  state.blockers = snap.blockers; state.meta = snap.meta; state.history = snap.history;
+  CORE_SHAPE.forEach(function (k) { if (snap[k] !== undefined) state[k] = snap[k]; });
   if ('baseline' in snap) state.baseline = snap.baseline;
   saveState(); updateUndoBtn(); renderAll();
   showToast('Undone');
@@ -1344,128 +1367,12 @@ function numStyle() {
   var el = document.getElementById('numStyle');
   return el ? el.value : (state.settings.numStyle || 'short');
 }
-function runsOf(arr) {
-  var runs = [];
-  var i = 0;
-  while (i < arr.length) {
-    var j = i;
-    while (j + 1 < arr.length && arr[j + 1] === arr[j] + 1) j++;
-    runs.push({ a: arr[i], b: arr[j] });
-    i = j + 1;
-  }
-  return runs;
-}
 // Each formatter returns an ARRAY of tokens: runs of 1-3 rows stay per-row
 // ("111–113"), only runs of 4+ compress ("711–1311 & 713–1313").
-function fmt11(run, style) {
-  var out = [];
-  if (style === 'plain') {
-    out.push(run.a === run.b ? ('Row ' + run.a + ' (11 side)') : ('Rows ' + run.a + '–' + run.b + ' (11 side)'));
-    return out;
-  }
-  if (run.b - run.a >= 3) { out.push(run.a + '11–' + run.b + '11'); return out; }
-  for (var r = run.a; r <= run.b; r++) out.push(r + '01–' + r + '11');
-  return out;
-}
-function fmt13(run, style) {
-  var out = [];
-  if (style === 'plain') {
-    out.push(run.a === run.b ? ('Row ' + run.a + ' (13 side)') : ('Rows ' + run.a + '–' + run.b + ' (13 side)'));
-    return out;
-  }
-  if (run.b - run.a >= 3) { out.push(run.a + '13–' + run.b + (style === 'full' ? '22' : '13')); return out; }
-  for (var r = run.a; r <= run.b; r++) out.push(style === 'full' ? (r + '13–' + r + '22') : (r + '13'));
-  return out;
-}
-function fmtBoth(run, style, splitAnd) {
-  var out = [];
-  if (style === 'plain') {
-    out.push(run.a === run.b ? ('Row ' + run.a + ' (both sides)') : ('Rows ' + run.a + '–' + run.b + ' (both sides)'));
-    return out;
-  }
-  if (run.b - run.a >= 3) {
-    if (splitAnd) { out.push(run.a + '11–' + run.b + '11'); out.push(run.a + '13–' + run.b + '13'); }
-    else out.push(run.a + '11–' + run.b + '11 & ' + run.a + '13–' + run.b + '13');
-    return out;
-  }
-  for (var r = run.a; r <= run.b; r++) out.push(r + '11–' + r + '13');
-  return out;
-}
-function joinList(tokens) {
-  if (!tokens.length) return '';
-  if (tokens.length === 1) return tokens[0];
-  return tokens.slice(0, -1).join(', ') + ' & ' + tokens[tokens.length - 1];
-}
-function sideOverall(seg, cableFilter) {
-  if (cableFilter) return seg[cableFilter];
-  return (seg.F144 === seg.OCS && seg.OCS === seg.CAT6) ? seg.F144 : 'MIXED';
-}
 // A mixed cable side shows up ONCE in the report: grouped under its main
 // (majority) status, with the odd cables called out in the parentheses.
-function mixedBase(seg) {
-  var counts = {};
-  CABLES.forEach(function (c) { counts[seg[c]] = (counts[seg[c]] || 0) + 1; });
-  var keys = Object.keys(counts);
-  var base = keys[0];
-  keys.forEach(function (k) {
-    var ko = STATUS_ORDER.indexOf(k), bo = STATUS_ORDER.indexOf(base);
-    if (counts[k] > counts[base] || (counts[k] === counts[base] && ko > bo)) base = k;
-  });
-  if (base === 'none') {
-    var maxK = null;
-    keys.forEach(function (k) {
-      if (k !== 'none' && (maxK === null || STATUS_ORDER.indexOf(k) > STATUS_ORDER.indexOf(maxK))) maxK = k;
-    });
-    if (maxK) base = maxK;
-  }
-  var others = CABLES.filter(function (c) { return seg[c] !== base; }).map(function (c) {
-    return CABLE_LABEL[c] + (seg[c] === 'none' ? ' not started' : ' ' + STATUS_META[seg[c]].report.toLowerCase());
-  });
-  return { base: base, desc: others.join(', ') };
-}
 // Returns [{status, tokens}] for one hall at all statuses.
 // splitAnd=true (formal template) splits "A11–B11 & A13–B13" into two tokens.
-function hallStatusLines(hall, cableFilter, style, splitAnd) {
-  var out = [];
-  REPORT_STATUS_ORDER.forEach(function (target) {
-    if (target === 'none') return;
-    var q11 = [], q13 = [];
-    Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
-      if (sideOverall(hall.rows[r]['11'], cableFilter) === target) q11.push(r);
-      if (sideOverall(hall.rows[r]['13'], cableFilter) === target) q13.push(r);
-    });
-    if (!q11.length && !q13.length && cableFilter) return;
-    var tokens = [];
-    var bothSet = {};
-    q11.forEach(function (r) { if (q13.indexOf(r) !== -1) bothSet[r] = true; });
-    var bothRows = Object.keys(bothSet).map(Number).sort(function (a, b) { return a - b; });
-    runsOf(bothRows).forEach(function (run) { tokens.push.apply(tokens, fmtBoth(run, style, splitAnd)); });
-    var rem11 = q11.filter(function (r) { return !bothSet[r]; });
-    var rem13 = q13.filter(function (r) { return !bothSet[r]; });
-    runsOf(rem11).forEach(function (run) { tokens.push.apply(tokens, fmt11(run, style)); });
-    runsOf(rem13).forEach(function (run) { tokens.push.apply(tokens, fmt13(run, style)); });
-
-    // Mixed sides: one token at the side's majority status, e.g. "1311 (Copper ran)".
-    if (!cableFilter) {
-      Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
-        ['11', '13'].forEach(function (side) {
-          var seg = hall.rows[r][side];
-          if (sideOverall(seg, null) === 'MIXED') {
-            var mb = mixedBase(seg);
-            if (mb.base === target) tokens.push(r + side + ' (' + mb.desc + ')');
-          }
-        });
-      });
-    }
-    if (tokens.length) out.push({ status: target, tokens: tokens });
-  });
-  return out;
-}
-function hallSentences(hall, cableFilter, style) {
-  return hallStatusLines(hall, cableFilter, style).map(function (l) {
-    return joinList(l.tokens) + ' \u2013 ' + STATUS_META[l.status].report + '.';
-  });
-}
 function activeHallNames(halls) {
   return Object.values(halls || state.halls)
     .filter(function (h) {
@@ -1478,13 +1385,6 @@ function activeHallNames(halls) {
       return any || (h.notes && h.notes.length);
     })
     .map(function (h) { return h.name; });
-}
-function hallBlock(hall) {
-  var lines = [];
-  var sents = hallSentences(hall, null, numStyle());
-  if (sents.length) lines.push(hall.name + ' ' + sents.join('   '));
-  (hall.notes || []).forEach(function (n) { lines.push(hall.name + ' ' + n); });
-  return lines;
 }
 
 /* ---------------- end of night ---------------- */
@@ -1639,206 +1539,18 @@ function effectiveHalls() {
 }
 
 /* ---------------- formal (Team update) template helpers ---------------- */
-function formalJoin(tokens) {
-  if (!tokens.length) return '';
-  if (tokens.length === 1) return tokens[0];
-  if (tokens.length === 2) return tokens[0] + ' and ' + tokens[1];
-  return tokens.slice(0, -1).join(', ') + ', and ' + tokens[tokens.length - 1];
-}
-function polishSentence(t) {
-  t = (t || '').trim();
-  if (!t) return t;
-  t = t.charAt(0).toUpperCase() + t.slice(1);
-  if (!/[.!?]$/.test(t)) t += '.';
-  return t;
-}
 var CABLE_SHORT = { F144: '144F', OCS: 'OCS', CAT6: 'CAT6' };
-function cableNamesAnd(cables) {
-  return formalJoin(cables.map(function (c) { return CABLE_SHORT[c]; }));
-}
 // "CAT6 ran; 144F and OCS staged" — most advanced cables first.
-function mixedDesc2(seg) {
-  var groups = [];
-  REPORT_STATUS_ORDER.forEach(function (st) {
-    var cs = CABLES.filter(function (c) { return seg[c] === st; });
-    if (cs.length) groups.push(cableNamesAnd(cs) + ' ' + STATUS_META[st].report.toLowerCase());
-  });
-  var noneC = CABLES.filter(function (c) { return seg[c] === 'none'; });
-  if (noneC.length) groups.push(cableNamesAnd(noneC) + ' not started');
-  return groups.join('; ');
-}
 // Formal notes: "Remediation – rest" -> plain sentence;
 // "HAC 17, Rows 33–36 – Staged (8 hrs)" -> "HAC 17, Rows 33–36: Staged (8 hrs)."
-function formalizeNote2(n) {
-  var t = (n || '').trim();
-  if (!t) return '';
-  var lead = t.match(/^(Ran and hung|Ran|In progress|Staged|Remediation)\s*[\u2013-]\s*(.+)$/i);
-  if (lead) return polishSentence(lead[2]);
-  var trail = t.match(/^(.+?)\s*[\u2013-]\s*(Ran and hung|Ran|In progress|Staged|Remediation)\b\s*(\([^)]*\))?\s*\.?\s*$/i);
-  if (trail) {
-    var word = null;
-    Object.keys(STATUS_META).forEach(function (k) {
-      if (STATUS_META[k].report.toLowerCase() === trail[2].toLowerCase()) word = STATUS_META[k].report;
-    });
-    if (word) {
-      var paren = trail[3] ? ' ' + trail[3].replace(/\.$/, '') : '';
-      return trail[1].replace(/[.;,]+$/, '') + ': ' + word + paren + '.';
-    }
-  }
-  return polishSentence(t);
-}
 // Team-update bullets for one hall. Within each status, sides are collected
 // as (row, class) triples and sorted numerically, so every bucket reads in
 // row order and runs re-compress ("1711, 1713, 1811, 1813" -> ordered
 // grouped tokens). Mixed rows sharing the same description share a bullet.
-function formalHallLines2(hall) {
-  var style = numStyle();
-  var out = [];
-  REPORT_STATUS_ORDER.forEach(function (target) {
-    var sides = []; // cls 0 = both sides, 1 = 11-side, 2 = 13-side
-    Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
-      var s11 = sideOverall(hall.rows[r]['11'], null) === target;
-      var s13 = sideOverall(hall.rows[r]['13'], null) === target;
-      if (s11 && s13) sides.push({ r: r, cls: 0 });
-      else if (s11) sides.push({ r: r, cls: 1 });
-      else if (s13) sides.push({ r: r, cls: 2 });
-    });
-    if (!sides.length) return;
-    var tokens = [];
-    var i = 0;
-    while (i < sides.length) {
-      var j = i;
-      while (j + 1 < sides.length && sides[j + 1].cls === sides[i].cls && sides[j + 1].r === sides[j].r + 1) j++;
-      var run = { a: sides[i].r, b: sides[j].r };
-      var fmt = sides[i].cls === 0 ? fmtBoth(run, style, true) : (sides[i].cls === 1 ? fmt11(run, style) : fmt13(run, style));
-      tokens.push.apply(tokens, fmt);
-      i = j + 1;
-    }
-    if (tokens.length) out.push('\u2022 ' + STATUS_META[target].report + ': ' + tokens.join(', '));
-  });
-  var mixed = [];
-  Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
-    ['11', '13'].forEach(function (side) {
-      var seg = hall.rows[r][side];
-      if (sideOverall(seg, null) === 'MIXED') mixed.push({ r: r, side: side, desc: mixedDesc2(seg) });
-    });
-  });
-  // Group every row sharing the same description (not just adjacent ones),
-  // groups ordered by their first rack - "1413, 1513, 1613" style bullets.
-  var byDesc = {};
-  mixed.forEach(function (mx) { (byDesc[mx.desc] = byDesc[mx.desc] || []).push(mx); });
-  Object.keys(byDesc).map(function (d) { return { d: d, rows: byDesc[d] }; })
-    .sort(function (a, b) { var x = a.rows[0], y = b.rows[0]; return x.r - y.r || (x.side < y.side ? -1 : 1); })
-    .forEach(function (g) {
-      out.push('\u2022 ' + g.rows.map(function (x) { return x.r + x.side; }).join(', ') + ': ' + g.d);
-    });
-  (hall.notes || []).forEach(function (n) { var ln = formalizeNote2(n); if (ln) out.push('\u2022 ' + ln.replace(/\.$/, '')); });
-  return out;
-}
-function reportDateStr() {
-  if (state.blockers.length && state.blockers[0].date) return state.blockers[0].date;
-  var d = new Date();
-  return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
-}
-function blockersFormal() {
-  if (!state.blockers.length) return 'BLOCKERS\n\u2022 None';
-  var dates = state.blockers.map(function (b) { return b.date; });
-  var allSame = dates.every(function (d) { return d === dates[0]; });
-  var lines = [allSame ? 'BLOCKERS \u2013 ' + dates[0] : 'BLOCKERS'];
-  state.blockers.forEach(function (b) {
-    lines.push('\u2022 ' + (b.hall ? b.hall + ': ' : '') + polishSentence(b.text).replace(/\.$/, ''));
-  });
-  return lines.join('\n');
-}
 
 /* ---------------- report templates ---------------- */
 function buildReport(style) {
-  var m = state.meta;
-  var activeCrew = state.crewPool.filter(function (c) { return c.active; }).map(function (c) { return c.name; });
-  var spCount = parseInt(m.spCount, 10) || activeCrew.length;
-  var mpCount = parseInt(m.mpCount, 10) || 0;
-  var hallsNow = effectiveHalls();
-  var out = '';
-
-  if (style === 'formal') {
-    out += 'Subject: Shift Update \u2013 ' + reportDateStr() + (m.shiftTime ? ' (' + m.shiftTime + ')' : '') + '\n\n';
-    out += 'Team,\n\nPlease see the shift update below.\n\n';
-    out += 'SHIFT SUMMARY\n';
-    out += 'Superintendent on Site: ' + (m.supers || '') + '\n';
-    out += 'Shift Time: ' + (m.shiftTime || '') + '\n';
-    out += 'Personnel Count: MP \u2013 ' + mpCount + ' | SP \u2013 ' + spCount + '\n\n';
-    out += 'WORK PERFORMED\n\n';
-    var blocks = [];
-    Object.values(hallsNow).forEach(function (h) {
-      var hl = formalHallLines2(h);
-      if (hl.length) blocks.push('MP | ' + h.name + '\n' + hl.join('\n'));
-    });
-    if (blocks.length) out += blocks.join('\n\n') + '\n\n';
-    var spLines = (m.spWorkNotes || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
-    out += 'SP\n' + (spLines.length ? spLines.map(function (l) { return '\u2022 ' + l; }).join('\n') : '\u2022 None') + '\n\n';
-    out += blockersFormal() + '\n\n';
-    out += 'AREAS OF CONCERN\n';
-    var aoc = (m.areasOfConcern || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
-    out += (aoc.length ? aoc.map(function (l) { return '\u2022 ' + l; }).join('\n') : '\u2022 None') + '\n';
-    if (state.settings.signature && state.settings.signature.trim()) {
-      out += '\n' + state.settings.signature.trim() + '\n';
-    }
-  }
-
-  else if (style === 'mine') {
-    out += 'Superintendent on site: ' + (m.supers || '') + '\n';
-    out += 'Shift Time: ' + (m.shiftTime || '') + '\n';
-    out += 'Personnel Count: MP ' + mpCount + ', SP ' + spCount + (activeCrew.length ? ' (' + activeCrew.join(', ') + ')' : '') + '\n\n';
-    out += 'Work Completed:\nMP:\n';
-    Object.values(hallsNow).forEach(function (h) {
-      hallBlock(h).forEach(function (l) { out += l + '\n'; });
-    });
-    out += '\nSP:\n' + ((m.spWorkNotes || '').trim() || 'None') + '\n\n';
-    out += 'Blockers:\n';
-    out += state.blockers.length ? state.blockers.map(function (b) { return '- ' + b.date + ' – ' + b.text; }).join('\n') + '\n' : '- None\n';
-    out += '\nAreas of concern:\n- ' + ((m.areasOfConcern || '').trim() || 'None');
-  }
-
-  else if (style === 'crew') {
-    var locs = activeHallNames(hallsNow).join(', ') || 'n/a';
-    out += 'Company/Crew: Midpoint (MP)\n';
-    out += 'Headcount: ' + mpCount + '\n';
-    out += 'Location: ' + locs + '\n';
-    out += 'Work Completed:\n';
-    Object.values(hallsNow).forEach(function (h) {
-      hallBlock(h).forEach(function (l) { out += l + '\n'; });
-    });
-    out += '\nCompany/Crew: ServicePoint (SP)\n';
-    out += 'Headcount: ' + spCount + '\n';
-    out += 'Location: ' + locs + '\n';
-    out += 'Work Completed:\n' + ((m.spWorkNotes || '').trim() || 'None') + '\n';
-    out += 'Crew Members: ' + (activeCrew.join(', ') || 'None');
-  }
-
-  else { // boss
-    out += '2 overlapping 12 hour shifts ' + (m.shiftTime || '') + '\n';
-    out += 'Personnel Count: ' + (mpCount + spCount) + '\n\n';
-    out += 'Work areas completed:\n';
-    Object.values(hallsNow).forEach(function (h) {
-      var hasAny = false;
-      var cableLines = [];
-      CABLES.forEach(function (c) {
-        var sents = hallSentences(h, c, numStyle());
-        if (sents.length) { cableLines.push(CABLE_LABEL[c] + ' Pulling – ' + sents.join(' ')); hasAny = true; }
-      });
-      var hasNotes = (h.notes || []).length > 0;
-      if (hasAny || hasNotes) {
-        out += h.name + '\n';
-        (h.notes || []).forEach(function (n) { out += ' ' + n + '\n'; });
-        cableLines.forEach(function (l) { out += ' ' + l + '\n'; });
-        out += '\n';
-      }
-    });
-    out += 'Blockers / Issues:\n';
-    out += state.blockers.length ? state.blockers.map(function (b) { return b.date + ' – ' + b.text + ' (i)'; }).join('\n') + '\n' : 'None\n';
-    out += '\nTasks for tomorrow:\n' + ((m.tasksTomorrow || '').trim() || 'None');
-  }
-  return out;
+  return ReportEngine.buildReport(style, { state: state, numStyle: numStyle(), halls: effectiveHalls() });
 }
 function renderReport() {
   renderBaselineInfo();
@@ -1945,7 +1657,7 @@ function applyRestore(json) {
   }
   if (!confirm('Restore backup from ' + (payload.exported || 'unknown date') + '? This replaces current data.')) return false;
   pushUndo();
-  state = payload.state;
+  state = migrateState(payload.state);
   undoStack = [];
   updateUndoBtn();
   saveState(); renderAll();
@@ -1967,33 +1679,45 @@ function restoreFromPaste() {
 }
 
 /* ---------------- misc ---------------- */
-var TABS = ['home', 'walk', 'crew', 'blockers', 'report'];
+/* ---------------- screen registry ----------------
+   ONE place defines a screen: its panel, title, chrome (opt-in flags:
+   bar = bottom tab bar, dock = stamp dock, hallTabs = hall pills,
+   back = header back-pill), and onShow. switchTab is generic; the
+   nav bar renders from the registry for the current tool. */
+var WALK_TITLE = 'MP Walkthrough & Shift Report';
+var WALK_CHROME = { bar: true, back: true };
+var SCREENS = {
+  home:     { title: 'MP Kit', panel: 'panel-home', chrome: {}, onShow: function () { renderHome(); } },
+  walk:     { title: WALK_TITLE, panel: 'panel-walk', chrome: { bar: true, dock: true, hallTabs: true, back: true }, onShow: null },
+  crew:     { title: WALK_TITLE, panel: 'panel-crew', chrome: WALK_CHROME, onShow: function () { renderCrewPanel(); } },
+  blockers: { title: WALK_TITLE, panel: 'panel-blockers', chrome: WALK_CHROME, onShow: function () { renderCrewPanel(); } },
+  report:   { title: WALK_TITLE, panel: 'panel-report', chrome: WALK_CHROME, onShow: function () { renderReport(); renderHistory(); } }
+};
 var currentTab = null;
 function switchTab(t, btn) {
-  if (TABS.indexOf(t) < 0) t = 'home';
+  var s = SCREENS[t]; if (!s) { t = 'home'; s = SCREENS.home; }
   currentTab = t;
   document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
-  document.getElementById('panel-' + t).classList.add('active');
+  var panel = document.getElementById(s.panel);
+  if (panel) panel.classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(function (b) {
-    b.classList.toggle('active', b.getAttribute('data-tab') === t || (t === 'directory' && b.getAttribute('data-tab') === 'home'));
+    b.classList.toggle('active', b.getAttribute('data-tab') === t);
   });
-  document.body.classList.toggle('in-home', t === 'home');
-  document.body.classList.toggle('in-dir', t === 'directory');
-  document.body.classList.toggle('in-tool', t === 'walk' || t === 'crew' || t === 'blockers' || t === 'report');
+  document.body.classList.toggle('has-dock', !!s.chrome.dock);
+  document.body.classList.toggle('has-bar', !!s.chrome.bar);
+  document.body.classList.toggle('has-halltabs', !!s.chrome.hallTabs);
+  document.body.classList.toggle('has-back', !!s.chrome.back);
   var at = document.querySelector('.app-title');
-  if (at) at.textContent = t === 'directory' ? 'Data Haul Directory' : (t === 'home' ? 'MP Kit' : 'MP Walkthrough & Shift Report');
+  if (at) at.textContent = s.title;
   try { history.replaceState(null, '', '#/' + t); } catch (e) {}
-  if (t === 'home') renderHome();
-  if (t === 'directory') { dirInit(); }
-  if (t === 'crew' || t === 'blockers') renderCrewPanel();
-  if (t === 'report') { renderReport(); renderHistory(); }
+  if (s.onShow) s.onShow();
   window.scrollTo(0, 0);
 }
 function routeFromHash() {
   var h = (location.hash || '').replace(/^#\/?/, '');
   if (h === 'walkthrough') h = 'walk'; // older bookmarks
-  if (h === 'directory') h = 'home';
-  if (TABS.indexOf(h) < 0) h = 'home';
+  if (h === 'directory') h = 'home';   // directory lives in the Field Guide now
+  if (!SCREENS[h]) h = 'home';
   if (h !== currentTab) switchTab(h);
 }
 window.addEventListener('hashchange', routeFromHash);
