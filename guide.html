@@ -297,6 +297,10 @@ select{min-height:48px}
   color-scheme: dark;
 }
 body { font:400 14px/1.45 var(--font-ui); }
+/* iOS zooms the whole page when an input < 16px gets focus (the "double
+   scroll" field bug) - force 16px on everything focusable, inline styles
+   included. */
+input, select, textarea { font-size: 16px !important; }
 .top { padding:calc(env(safe-area-inset-top,0px) + 6px) 12px 7px; gap:8px; }
 .brand { font:800 16px var(--font-head); gap:7px; }
 .brand .logo > rect:first-child { fill:#212225; }

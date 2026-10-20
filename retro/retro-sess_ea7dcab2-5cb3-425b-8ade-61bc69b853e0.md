@@ -66,3 +66,15 @@
 - Tooling: `tools/verify.py` (static gate), `tools/shoot.py` + Playwright/Edge (screenshot gate), `tools/test_report.py` (report diff test), `tools/build_directory_full.py` + `tools/integrate_guide.py` (data/app pipelines).
 - Side effects: 27 Matt Pocock skills installed at user scope; project memory updated each round.
 - Next session entry point: the zoom bug (#1) — reproduce, fix, screenshot-verify, ship v22.
+
+## Environment retro (second pass — the actual skill run)
+
+The first pass produced a narrative; the skill wants **environment improvements for future agent runs**, candidates in severity order, checks built over rules written. Findings and disposition:
+
+1. **No guardrail (critical — fixed).** verify.py existed but nothing ran it automatically; a repo with no gate is a standing missed opportunity. Built: GitHub Actions CI (verify + credential-shaped-string scan on every push) and a versioned pre-commit hook (scripts/hooks, wired via core.hooksPath). CI validated itself on the v22 push.
+2. **No navigation pointers (high — fixed).** No AGENTS.md: post-compaction agents and Daniel's outside reviewers had no map, and load-bearing conventions (bump APP_VERSION + CACHE_VERSION together; 16px inputs; screenshot-before-ship) lived only in agent memory. Built: lean AGENTS.md with Map / Invariants / Checks / Deploy.
+3. **Heavy gates unwired (medium — documented pointer).** test_report.py and shoot.py need Playwright/Edge, too heavy for this CI; AGENTS.md makes them mandatory gates for report-engine and UI changes respectively (navigation pointer, honest tradeoff).
+4. **Secret hygiene (medium — mitigated).** Deploy used a credential on a temp path; the new CI + pre-commit secret scan blocks credential-shaped strings from entering the public repo. Moving the credential itself to a proper store remains open.
+5. **Tool economy (low — no action).** No custom tooling worth changing; Playwright/Edge local runs are the cheapest adequate gate.
+
+**v22 (this push):** the zoom bug fixed — all focusable inputs in both apps now 16px+ (iOS auto-zooms the page when focusing sub-16px inputs, the cause of the accidental zoom / double scroll). Verified by a computed-font gate across every panel and guide page: zero inputs below 16px.

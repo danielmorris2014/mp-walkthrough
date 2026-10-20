@@ -127,9 +127,9 @@
     color: var(--muted); margin-bottom: 9px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
   }
   .batch-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-  select, input[type="text"], input[type="number"], textarea {
+  select, input[type="text"], input[type="search"], input[type="number"], textarea {
     background: var(--slate-2); border: 1px solid var(--slate-6); color: var(--text);
-    padding: 9px 10px; border-radius: 10px; font-size: 14px; font-family: inherit; min-height: 40px;
+    padding: 9px 10px; border-radius: 10px; font-size: 16px; font-family: inherit; min-height: 40px;
   }
   select:focus, input:focus, textarea:focus { border-color: var(--slate-7); outline: none; }
   textarea { width: 100%; resize: vertical; }
@@ -346,7 +346,7 @@
   body.text-large .side-status-badge { font-size: 11.5px; }
   body.text-large .mini-pill { font-size: 10px; }
   body.text-large .btn { font-size: 14px; }
-  body.text-large select, body.text-large input[type="text"], body.text-large input[type="number"], body.text-large textarea { font-size: 16px; }
+  body.text-large select, body.text-large input[type="text"], body.text-large input[type="search"], body.text-large input[type="number"], body.text-large textarea { font-size: 17px; }
   body.text-large .pod-header { font-size: 14.5px; }
   body.text-large .stat-num { font-size: 17px; }
   body.text-large .muted { font-size: 12.5px; }
@@ -733,7 +733,7 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v21';
+var APP_VERSION = 'v22';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
