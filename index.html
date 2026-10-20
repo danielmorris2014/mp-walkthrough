@@ -849,7 +849,8 @@
   </nav>
 </div>
 
-<div class="overlay" id="onboarding" style="display:none;">
+<div class="overlay" id="onboarding" style="display:none;" onclick="if(event.target===this)dismissOnboarding()">
+  <button class="btn btn-ghost" style="position:absolute; top:calc(env(safe-area-inset-top,0px) + 14px); right:14px; z-index:2; min-height:44px;" onclick="dismissOnboarding()">Skip</button>
   <div class="overlay-card">
     <h2>Install on your phone (one time)</h2>
     <ol>
@@ -876,7 +877,7 @@ hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v33';
+var APP_VERSION = 'v34';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2215,6 +2216,15 @@ function renderAll() {
       }
     } catch (e) {}
   });
+    var hasData = Object.keys(state.halls).some(function (hid) {
+      var h = state.halls[hid];
+      return Object.keys(h.rows).some(function (r) {
+        return ['11','13'].some(function (sd) {
+          return h.rows[r][sd] && (h.rows[r][sd].F144 !== 'none' || h.rows[r][sd].OCS !== 'none' || h.rows[r][sd].CAT6 !== 'none');
+        });
+      });
+    });
+    if (hasData && !state.settings.onboarded) { state.settings.onboarded = true; saveState(); }
     if (!state.settings.onboarded) {
       document.getElementById('onboarding').style.display = 'flex';
       // in the installed app, hide install steps and lead with the site code
