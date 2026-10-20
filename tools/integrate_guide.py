@@ -7,7 +7,7 @@
 # - inject a MutationObserver that keeps a "< MP Kit" button pinned as the
 #   first item of their header across their re-renders (replaces floating pill)
 # - integrity checks
-import re, sys, hashlib
+import re, sys, hashlib, os
 
 SRC = r"C:\Users\DanielMorris\Downloads\cable-field-guide.html"
 DST = r"C:\Users\DanielMorris\Downloads\fluidstack\walkthrough-app\guide.html"
@@ -106,6 +106,11 @@ input, select, textarea { font-size: 16px !important; }
 assert raw.count('</style>') == 1, "expected exactly one style block"
 raw = raw.replace('</style>', '</style>' + THEME, 1)
 
+# 3) barcode-directory augmentation (same data file the kit ships)
+GUIDE_DIR_JS = open(os.path.join(os.path.dirname(DST), "tools", "guide_directory.js"), encoding="utf-8").read()
+assert raw.count("</head>") == 1
+raw = raw.replace("</head>", GUIDE_DIR_JS + "</head>", 1)
+
 # 3) upgrade the embedded barcode engine to zxing-wasm 3.1.6 (vendor/zxing).
 #    Zero API breakage for our formats; fixes a wasm memory leak that matters
 #    for hours-long scan sessions, plus decode + speed improvements.
@@ -125,6 +130,7 @@ checks = {
     "zxwasm decoder embedded": 'id="zxwasm"' in raw,
     "ZXingWASM wrapper present": 'ZXingWASM' in raw,
     "engine upgraded to 3.1.6": wasm_b64[:2000] in raw and n3 == 1 and n4 == 1,
+    "directory augmentation injected": "mp-dir" in raw and "Barcode directory" in raw,
     "sitepack BUF102 embedded": '"site":"BUF102"' in raw,
     "fonts embedded (woff2)": raw.count("data:font/woff2;base64") >= 2,
     "theme override injected": 'id="mp-theme"' in raw,
