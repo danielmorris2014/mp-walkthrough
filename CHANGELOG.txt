@@ -2,7 +2,20 @@ CHANGELOG - MP Walkthrough & Shift Report
 ==========================================
 History of changes since the original Gemini-generated prototype HTML.
 
-v14 (current) - The rhythm & safety package (9 improvements)
+v15 (current) - Home launcher (multi-tool platform begins)
+------------------------------------------------------------------
+- New Home tab (first of 5): the app now opens on a launcher with
+  tool cards; the walkthrough is tool #1, a second tool slot is
+  reserved ("coming soon").
+- Home "Tonight" card: live hall status line (active hall, % ran &
+  hung, open blockers), date/time, and backup freshness.
+- Hash routing (#/home, #/walk, ...): screens survive reload and
+  deep links like .../index.html#/walk jump straight into a tool.
+- Stamp dock + hall tabs hide while on Home (clean launcher view);
+  toast repositions.
+- Nav buttons carry data-tab (programmatic switching from cards).
+
+v14 - The rhythm & safety package (9 improvements)
 ------------------------------------------------------------------
 - "End of night" button: archives the report, saves the baseline,
   then offers Copy report / Backup file in one overlay.

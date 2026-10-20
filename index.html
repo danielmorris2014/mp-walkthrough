@@ -277,7 +277,7 @@
 
   .bottom-nav {
     background: #080d18; border-top: 1px solid var(--border);
-    display: grid; grid-template-columns: repeat(4, 1fr);
+    display: grid; grid-template-columns: repeat(5, 1fr);
     padding: 4px 6px calc(4px + env(safe-area-inset-bottom));
   }
   .nav-btn {
@@ -290,6 +290,33 @@
   .navdot.show { display: block; }
   .backup-status { font-size: 11px; margin-top: 7px; color: var(--muted); }
   .backup-status.stale { color: var(--amber-11); font-weight: 700; }
+
+  /* ---- Home / tool launcher ---- */
+  .home-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; }
+  .home-card {
+    width: 100%; text-align: left; display: flex; align-items: center; gap: 13px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.018), transparent 40%), var(--card);
+    border: 1px solid var(--border); border-radius: 16px; padding: 14px; min-height: 80px;
+    cursor: pointer; color: var(--text);
+    transition: transform var(--dur-press) var(--ease-2);
+  }
+  .home-card:active { transform: scale(0.97); }
+  .home-tile {
+    flex: 0 0 auto; width: 46px; height: 46px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--slate-3); border: 1px solid var(--slate-6); color: var(--slate-12);
+  }
+  .home-tile svg { width: 22px; height: 22px; display: block; }
+  .home-name { font-weight: 800; font-size: 15.5px; color: var(--slate-12); letter-spacing: -0.2px; display: block; }
+  .home-sub { font-size: 11.5px; color: var(--muted); margin-top: 3px; display: block; }
+  .home-chev { margin-left: auto; color: var(--slate-7); flex: 0 0 auto; }
+  .home-chev svg { width: 20px; height: 20px; display: block; }
+  .home-card.soon { opacity: 0.55; border-style: dashed; cursor: default; }
+  .home-card.soon:active { transform: none; }
+  .home-card.soon .home-tile { background: transparent; border-style: dashed; }
+  body.in-home .status-dock { display: none; }
+  body.in-home .hall-tabs { display: none; }
+  body.in-home .toast { bottom: calc(96px + env(safe-area-inset-bottom)); }
   .crew-chip .chip-x { margin-left: 8px; color: #fda4af; font-weight: 900; }
   body.text-large { font-size: 16px; }
   body.text-large .side-id { font-size: 17px; }
@@ -387,8 +414,33 @@
 
 <div class="container">
 
+  <!-- ===================== HOME / LAUNCHER ===================== -->
+  <div id="panel-home" class="panel active">
+    <div class="card" style="margin-top:2px;">
+      <div class="card-title"><span>Tonight</span><span class="muted" id="homeMeta"></span></div>
+      <div id="homeWalkStatus" class="home-hero-line" style="font-size:13px; font-weight:700;"></div>
+    </div>
+    <div class="home-cards">
+      <button class="home-card" onclick="switchTab('walk')">
+        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/></svg></span>
+        <span style="min-width:0;">
+          <span class="home-name">Walkthrough &amp; Report</span>
+          <span class="home-sub" id="homeWalkSub">Nightly row stamping, crew, blockers, reports</span>
+        </span>
+        <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      </button>
+      <button class="home-card soon" disabled>
+        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+        <span style="min-width:0;">
+          <span class="home-name">Second tool</span>
+          <span class="home-sub">In the shop &mdash; coming soon</span>
+        </span>
+      </button>
+    </div>
+  </div>
+
   <!-- ===================== WALKTHROUGH ===================== -->
-  <div id="panel-walk" class="panel active">
+  <div id="panel-walk" class="panel">
     <div class="stat-bar" id="hallStats"></div>
     <div class="prog-row">
       <svg width="40" height="40" viewBox="0 0 36 36" class="prog-ring" aria-hidden="true">
@@ -602,10 +654,11 @@
     </div>
   </div>
   <nav class="bottom-nav">
-    <button class="nav-btn active" onclick="switchTab('walk', this)"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/></svg></span><span>Walkthrough</span></button>
-    <button class="nav-btn" onclick="switchTab('crew', this)"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg></span><span>Crew</span></button>
-    <button class="nav-btn" onclick="switchTab('blockers', this)"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span><span>Blockers</span></button>
-    <button class="nav-btn" onclick="switchTab('report', this)"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span><span>Report</span><span class="navdot" id="backupDot"></span></button>
+    <button class="nav-btn" data-tab="home" onclick="switchTab('home')"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span>Home</span></button>
+    <button class="nav-btn" data-tab="walk" onclick="switchTab('walk')"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/></svg></span><span>Walkthrough</span></button>
+    <button class="nav-btn" data-tab="crew" onclick="switchTab('crew')"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg></span><span>Crew</span></button>
+    <button class="nav-btn" data-tab="blockers" onclick="switchTab('blockers')"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span><span>Blockers</span></button>
+    <button class="nav-btn" data-tab="report" onclick="switchTab('report')"><span class="nav-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></span><span>Report</span><span class="navdot" id="backupDot"></span></button>
   </nav>
 </div>
 
@@ -630,7 +683,7 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v14';
+var APP_VERSION = 'v15';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1426,6 +1479,7 @@ function renderBackupStatus() {
   else el.textContent = 'Last backup: ' + nights + ' night' + (nights === 1 ? '' : 's') + ' ago' + (stale ? ' \u2014 back up tonight' : '');
   el.className = 'backup-status' + (stale ? ' stale' : '');
   if (dot) dot.classList.toggle('show', stale);
+  renderHome(); // keep the Home card's backup line fresh
 }
 
 /* ---------------- wake lock ---------------- */
@@ -1852,14 +1906,63 @@ function restoreFromPaste() {
 }
 
 /* ---------------- misc ---------------- */
+var TABS = ['home', 'walk', 'crew', 'blockers', 'report'];
+var currentTab = null;
 function switchTab(t, btn) {
+  if (TABS.indexOf(t) < 0) t = 'home';
+  currentTab = t;
   document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
   document.getElementById('panel-' + t).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(function (b) { b.classList.remove('active'); });
-  btn.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(function (b) {
+    b.classList.toggle('active', b.getAttribute('data-tab') === t);
+  });
+  document.body.classList.toggle('in-home', t === 'home');
+  try { history.replaceState(null, '', '#/' + t); } catch (e) {}
+  if (t === 'home') renderHome();
   if (t === 'crew' || t === 'blockers') renderCrewPanel();
   if (t === 'report') { renderReport(); renderHistory(); }
   window.scrollTo(0, 0);
+}
+function routeFromHash() {
+  var h = (location.hash || '').replace(/^#\/?/, '');
+  if (h === 'walkthrough') h = 'walk'; // older bookmarks
+  if (TABS.indexOf(h) < 0) h = 'home';
+  if (h !== currentTab) switchTab(h);
+}
+window.addEventListener('hashchange', routeFromHash);
+
+/* ---------------- home / launcher ---------------- */
+function hallPctHung(hall) {
+  var tot = 0, hung = 0;
+  if (!hall) return 0;
+  Object.keys(hall.rows).forEach(function (r) {
+    ['11', '13'].forEach(function (sd) {
+      CABLES.forEach(function (c) {
+        tot++;
+        if (hall.rows[r][sd] && hall.rows[r][sd][c] === 'hung') hung++;
+      });
+    });
+  });
+  return tot ? Math.round(100 * hung / tot) : 0;
+}
+function renderHome() {
+  var heroEl = document.getElementById('homeWalkStatus');
+  var metaEl = document.getElementById('homeMeta');
+  if (!heroEl && !metaEl) return;
+  var h = state.halls[state.activeHall];
+  if (!h) { var ks = Object.keys(state.halls); if (ks.length) h = state.halls[ks[0]]; }
+  var pct = hallPctHung(h);
+  var bl = (state.blockers || []).length;
+  var nights = state.settings.lastBackup ? Math.floor((Date.now() - state.settings.lastBackup) / 86400000) : -1;
+  var bk = nights < 0 ? 'no backup yet' : (nights < 1 ? 'backed up \u2713' : 'backup ' + nights + ' night' + (nights === 1 ? '' : 's') + ' ago');
+  var d = new Date();
+  var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var mons = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var hh = d.getHours(), mm = ('0' + d.getMinutes()).slice(-2);
+  var ampm = hh >= 12 ? 'PM' : 'AM';
+  var h12 = hh % 12 === 0 ? 12 : hh % 12;
+  if (heroEl) heroEl.textContent = h ? (h.name + ' \u00b7 ' + pct + '% ran & hung' + (bl ? ' \u00b7 ' + bl + ' blocker' + (bl === 1 ? '' : 's') : '')) : 'Ready when you are';
+  if (metaEl) metaEl.textContent = days[d.getDay()] + ', ' + mons[d.getMonth()] + ' ' + d.getDate() + ' \u00b7 ' + h12 + ':' + mm + ' ' + ampm + ' \u00b7 ' + bk;
 }
 function showToast(msg) {
   var t = document.getElementById('toast');
@@ -1883,7 +1986,7 @@ function dismissOnboarding() {
   } catch (e) {}
 }
 function renderAll() {
-  renderHallTabs(); renderWalk(); renderCrewPanel();
+  renderHallTabs(); renderWalk(); renderCrewPanel(); renderHome();
   if (document.getElementById('panel-report').classList.contains('active')) { renderReport(); renderHistory(); }
 }
 
@@ -1900,6 +2003,7 @@ function renderAll() {
     if (document.visibilityState === 'visible') requestWake();
   });
   renderAll();
+  routeFromHash(); // lands on Home unless a #/tool deep link was opened
   if (!state.settings.onboarded) document.getElementById('onboarding').style.display = 'flex';
   try {
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
