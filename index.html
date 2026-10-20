@@ -314,9 +314,9 @@
   .home-card.soon { opacity: 0.55; border-style: dashed; cursor: default; }
   .home-card.soon:active { transform: none; }
   .home-card.soon .home-tile { background: transparent; border-style: dashed; }
-  body.in-home .status-dock { display: none; }
-  body.in-home .hall-tabs { display: none; }
-  body.in-home .toast { bottom: calc(96px + env(safe-area-inset-bottom)); }
+  body.in-home .status-dock, body.in-dir .status-dock { display: none; }
+  body.in-home .hall-tabs, body.in-dir .hall-tabs { display: none; }
+  body.in-home .toast, body.in-dir .toast { bottom: calc(96px + env(safe-area-inset-bottom)); }
 
   /* ---- Data haul directory ---- */
   .dir-item { cursor: pointer; }
@@ -733,7 +733,7 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v22';
+var APP_VERSION = 'v23';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1988,6 +1988,9 @@ function switchTab(t, btn) {
     b.classList.toggle('active', b.getAttribute('data-tab') === t || (t === 'directory' && b.getAttribute('data-tab') === 'home'));
   });
   document.body.classList.toggle('in-home', t === 'home');
+  document.body.classList.toggle('in-dir', t === 'directory');
+  var at = document.querySelector('.app-title');
+  if (at) at.textContent = t === 'directory' ? 'Data Haul Directory' : 'MP Walkthrough & Shift Report';
   try { history.replaceState(null, '', '#/' + t); } catch (e) {}
   if (t === 'home') renderHome();
   if (t === 'directory') { dirInit(); }
