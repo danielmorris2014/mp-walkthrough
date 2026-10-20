@@ -10,6 +10,22 @@ jobs:
           python-version: "3.12"
       - run: pip install esprima
       - run: python tools/verify.py
+  gate:
+    # Full gate: static verify + report-format diff + browser probes
+    # (nav chrome, 16px fonts, clipboard, routing, layout/padding).
+    # Catches what static checks cannot — v35.2 shipped a broken tab bar
+    # with the old verify-only CI green.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install esprima playwright
+      - run: playwright install chromium --with-deps
+      - run: python tools/gate.py
+        env:
+          MP_BROWSER: chromium
   secrets-scan:
     runs-on: ubuntu-latest
     steps:

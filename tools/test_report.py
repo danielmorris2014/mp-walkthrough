@@ -2,7 +2,7 @@
 # against his target format (status-first bullets, numeric regrouping,
 # mixed-row grouping).
 from playwright.sync_api import sync_playwright
-import sys
+import os, sys
 
 SETUP = r"""(() => {
   const set = (hall, r, side, f, o, c) => { const s = state.halls[hall].rows[r][side]; s.F144=f; s.OCS=o; s.CAT6=c; };
@@ -71,7 +71,7 @@ EXPECT_SUBSTRINGS = [
 ]
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel="msedge", headless=True)
+    b = p.chromium.launch(channel=os.environ.get("MP_BROWSER", "msedge"), headless=True)
     pg = b.new_context(viewport={"width": 390, "height": 844}, color_scheme="dark").new_page()
     pg.goto("http://127.0.0.1:8123/index.html?rtest", wait_until="domcontentloaded")
     pg.wait_for_timeout(1500)

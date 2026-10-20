@@ -3,7 +3,7 @@
 # registry — the single source of truth for per-screen chrome.
 #   python tools/probes.py   (needs playwright + Edge; start from repo root;
 #   a dev server on 8123 is started automatically if absent)
-import sys, time
+import os, sys, time
 from playwright.sync_api import sync_playwright
 
 BASE = "http://127.0.0.1:8123"
@@ -17,7 +17,7 @@ def vis(el):
     return bool(el) and el.is_visible()
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel="msedge", headless=True)
+    b = p.chromium.launch(channel=os.environ.get("MP_BROWSER", "msedge"), headless=True)
     pg = b.new_context(viewport={"width": 390, "height": 844}, color_scheme="dark",
                        permissions=["clipboard-read", "clipboard-write"]).new_page()
     pg.goto(BASE + "/index.html?probes", wait_until="domcontentloaded")

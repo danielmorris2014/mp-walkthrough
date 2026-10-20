@@ -12,7 +12,7 @@ def shot(page, name):
     print("shot:", name)
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel="msedge", headless=True)
+    b = p.chromium.launch(channel=os.environ.get("MP_BROWSER", "msedge"), headless=True)
     ctx = b.new_context(
         viewport={"width": 390, "height": 844}, device_scale_factor=2,
         is_mobile=True, has_touch=True, locale="en-US",
