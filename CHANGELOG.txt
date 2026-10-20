@@ -2,7 +2,29 @@ CHANGELOG - MP Walkthrough & Shift Report
 ==========================================
 History of changes since the original Gemini-generated prototype HTML.
 
-v17 (current) - Guide rethemed to Graphite Pro + navigation fix
+v18 (current) - Guide identity fixes (found by screenshot audit)
+------------------------------------------------------------------
+- REAL bug: the guide was rendering in LIGHT mode on phones set to
+  light - their light-theme CSS rules out-specified our override
+  (:root[data-theme="light"] and :root:not([data-theme]) under
+  prefers-color-scheme:light, both 2x our specificity), so the
+  graphite retheme never showed. Override now mirrors their
+  selectors and wins on order; color-scheme forced dark.
+- REAL bug: the "< MP Kit" back button never appeared - its
+  observer script ran before their #app div existed and crashed.
+  Now DOMContentLoaded-guarded; button verified mounting and
+  surviving their screen re-renders.
+- Identity pass: Scan FAB and active tab now WHITE (our
+  primary-action language) instead of their fiber-yellow;
+  selection outlines white; redundant hamburger hidden (the More
+  tab already does its job); header is back-pill + logo + language.
+  Fiber/copper media colors stay semantic.
+- Audited via headless-browser screenshots of every page of both
+  apps at 390x844 (tools/shoot.py; MSIX-free Playwright + Edge).
+  Known leftovers (their code, phase-2 rewrite): walk-mode rack
+  drawing zoom shows dead space; help FAB floats over content.
+
+v17 - Guide rethemed to Graphite Pro + navigation fix
 ------------------------------------------------------------------
 - The Cable Field Guide now matches our app: its theme is fully
   CSS-variable driven, so a single override block remaps it onto

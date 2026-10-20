@@ -23,8 +23,11 @@ THEME = """
 <style id="mp-theme">
 /* ===== MP Kit "Graphite Pro" override (matches index.html) =====
    Radix slate surfaces, white accent, system font, tighter sizing.
-   Covers :root and any [data-theme] their theme switcher sets. */
-:root, [data-theme], [data-theme="light"], [data-theme="dark"] {
+   Selector list mirrors theirs (:root[data-theme...], :root:not(...))
+   so we match their specificity and win by document order — the app
+   stays graphite even if the phone is in light mode or their
+   settings pick light. */
+:root, :root[data-theme], :root[data-theme="light"], :root[data-theme="dark"], :root:not([data-theme]) {
   --bg:#111113; --surface:#18191b; --surface-2:#212225; --line:#363a3f;
   --text:#edeef0; --text-2:#b0b4ba; --text-3:#777b84;
   --fiber:#ffc53d; --fiber-t:#ffca16; --fiber-ink:#16120c;
@@ -38,6 +41,7 @@ THEME = """
   --font-head:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   --font-id:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --r1:10px; --r2:12px; --r3:14px;
+  color-scheme: dark;
 }
 body { font:400 14px/1.45 var(--font-ui); }
 .top { padding:calc(env(safe-area-inset-top,0px) + 6px) 12px 7px; gap:8px; }
@@ -56,11 +60,18 @@ body { font:400 14px/1.45 var(--font-ui); }
 #view { padding:12px 12px calc(86px + env(safe-area-inset-bottom,0px)); gap:12px; }
 .helpbtn { width:46px; height:46px; font:700 18px var(--font-ui); bottom:calc(78px + env(safe-area-inset-bottom,0px)); border-width:1.5px; }
 .mp-back {
-  min-height:36px; padding:0 12px 0 9px; border-radius:999px; flex:none;
+  min-height:38px; padding:0 12px 0 9px; border-radius:999px; flex:none;
   background:rgba(255,255,255,.055); border:1px solid var(--line); color:var(--text-2);
   font:800 12.5px var(--font-ui); cursor:pointer;
 }
 .mp-back:active { transform:scale(.96); }
+
+/* identity: white primary actions + neutral active states, like our app.
+   Fiber/copper media colors stay (they're status, not chrome). */
+.tab.cur { color: var(--text); }
+.tab.scan { background: var(--accent); color: var(--accent-ink); border-radius: 14px; box-shadow: 0 6px 18px rgba(255,255,255,.18); }
+.hl { border-color: var(--accent); }
+.burger { display: none; }
 @media (max-width:480px) { .brand span { display:none; } }
 </style>
 <script>
@@ -75,8 +86,14 @@ body { font:400 14px/1.45 var(--font-ui); }
     b.addEventListener('click', function () { window.location.href = './index.html#/home'; });
     h.insertBefore(b, h.firstChild);
   }
-  addBack();
-  new MutationObserver(addBack).observe(document.getElementById('app'), { childList: true });
+  function start() {
+    addBack();
+    var app = document.getElementById('app');
+    if (app) new MutationObserver(addBack).observe(app, { childList: true });
+    else document.addEventListener('DOMContentLoaded', start, { once: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+  else start();
 })();
 </script>
 """
