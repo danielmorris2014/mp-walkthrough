@@ -2,7 +2,26 @@ CHANGELOG - MP Walkthrough & Shift Report
 ==========================================
 History of changes since the original Gemini-generated prototype HTML.
 
-v15 (current) - Home launcher (multi-tool platform begins)
+v16 (current) - Cable Field Guide merged in as tool #2
+------------------------------------------------------------------
+- New guide.html: the Cable Field Guide single-file app, hosted in
+  our repo and opened from the Home launcher card. BUF102 site pack,
+  route/rack/cable lookup, walk mode, clean-fiber steps, hall map,
+  reports, and barcode scanner all work offline (the ZXing decoder
+  engine is embedded in the file).
+- Service worker precaches guide.html so it installs to the phone
+  on first load with signal; after that, zero signal needed.
+- Leaflet 1.9.4 (BSD-2) vendored at vendor/leaflet/ and precached:
+  the outside-plant map code now loads offline too (map/satellite
+  tiles themselves still need signal, like any map app).
+- Patched from the original copy: removed the icon/manifest links
+  that pointed at files never uploaded (no more 404s; the page
+  lives inside our PWA, so no separate icon is needed) and added a
+  floating "< Home" pill to return to the launcher.
+- Not carried over (require Claude's servers): phone-to-PC pairing,
+  cloud sign-in/approvals/time clock. They fail gracefully offline.
+
+v15 - Home launcher (multi-tool platform begins)
 ------------------------------------------------------------------
 - New Home tab (first of 5): the app now opens on a launcher with
   tool cards; the walkthrough is tool #1, a second tool slot is

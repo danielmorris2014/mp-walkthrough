@@ -429,10 +429,18 @@
         </span>
         <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
       </button>
+      <button class="home-card" onclick="openGuide()">
+        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M13 14h-2l-1.5 7h5z"/><path d="M8.5 8 5 11l1 4"/><path d="M15.5 8 19 11l-1 4"/><path d="M9 21h6"/></svg></span>
+        <span style="min-width:0;">
+          <span class="home-name">Cable Field Guide</span>
+          <span class="home-sub">Routes, racks, walk mode, clean-fiber &mdash; BUF102</span>
+        </span>
+        <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      </button>
       <button class="home-card soon" disabled>
         <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
         <span style="min-width:0;">
-          <span class="home-name">Second tool</span>
+          <span class="home-name">More tools</span>
           <span class="home-sub">In the shop &mdash; coming soon</span>
         </span>
       </button>
@@ -683,7 +691,7 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v15';
+var APP_VERSION = 'v16';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1932,6 +1940,7 @@ function routeFromHash() {
 window.addEventListener('hashchange', routeFromHash);
 
 /* ---------------- home / launcher ---------------- */
+function openGuide() { window.location.href = './guide.html'; }
 function hallPctHung(hall) {
   var tot = 0, hung = 0;
   if (!hall) return 0;
