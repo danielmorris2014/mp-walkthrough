@@ -4,9 +4,10 @@
 #    defined functions.
 # 3. Cross-checks getElementById('X') references against static HTML ids
 #    (whitelisting dynamically-built ids).
-import re, sys, esprima
+import os, re, sys, esprima
 
-src = open(r'C:\Users\DanielMorris\Downloads\fluidstack\walkthrough-app\index.html', encoding='utf-8').read()
+APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+src = open(os.path.join(APP, 'index.html'), encoding='utf-8').read()
 fail = []
 
 # --- extract main script (the last <script> block) ---
