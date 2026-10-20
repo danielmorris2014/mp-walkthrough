@@ -23,6 +23,7 @@ ships it live via GitHub Pages (CDN lag up to ~2 min).
 
 ## Checks
 
+- `python tools/gate.py` — one command, self-contained: static verify + report diff test (`--shots` adds every screenshot). Run it before shipping.
 - `tools/verify.py` — esprima syntax + onclick-handler/id cross-checks. Runs in CI (`.github/workflows/ci.yml`, with a credential scan) and pre-commit.
 - Hooks: `git config core.hooksPath scripts/hooks` (once per clone).
 - Local Playwright gates need `pip install playwright` and Edge (`channel='msedge'`).
