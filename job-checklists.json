@@ -1,0 +1,387 @@
+{
+  "version": 1,
+  "stages": [
+    {
+      "id": "plan",
+      "en": "Confirm the job",
+      "es": "Confirma el trabajo",
+      "rules": [
+        {
+          "en": "Match the building, hall, row and side to the task.",
+          "es": "Compara edificio, sala, fila y lado con la tarea.",
+          "detail_en": "CB4 routes toward DH4; CB5 routes toward DH1. MMR links need both building endpoints. A matching floor plan does not assign local ports.",
+          "detail_es": "CB4 va hacia DH4; CB5 hacia DH1. Los enlaces MMR necesitan ambos extremos. Un plano igual no asigna puertos locales.",
+          "pages": [
+            1
+          ]
+        },
+        {
+          "en": "Check A, Z and every intermediate point.",
+          "es": "Revisa A, Z y cada punto intermedio.",
+          "detail_en": "Use the current cutsheet and exact rack/device/port record. Confirm front versus rear. Record the revision and tray decision before starting.",
+          "detail_es": "Usa el cutsheet vigente y el rack/equipo/puerto exactos. Distingue frente y posterior. Registra revisión y bandeja antes de empezar.",
+          "pages": [
+            3,
+            14
+          ]
+        },
+        {
+          "en": "Match cable type, part number, quantity and space rating.",
+          "es": "Confirma tipo, número de parte, cantidad y clasificación.",
+          "detail_en": "Keep plenum, riser and LSZH requirements appropriate to the space. Check the jacket, packaging and connector protection before accepting the stock.",
+          "detail_es": "Comprueba los requisitos plenum, riser y LSZH del espacio. Revisa cubierta, embalaje y protección de conectores al recibir el material.",
+          "pages": [
+            2
+          ]
+        },
+        {
+          "en": "Confirm the tray tier and crew work plan.",
+          "es": "Confirma nivel de bandeja y plan de cuadrilla.",
+          "detail_en": "Use the site-approved tray assignment; tier numbers start at the bottom. The supplied guide gives conflicting CAT6 tier examples, so record the approved choice.",
+          "detail_es": "Usa la asignación aprobada del sitio; los niveles empiezan desde abajo. La guía contiene ejemplos CAT6 distintos: registra la decisión aprobada.",
+          "pages": [
+            8
+          ]
+        },
+        {
+          "en": "Stage the crew kit before leaving the material area.",
+          "es": "Prepara el equipo antes de salir del área de materiales.",
+          "detail_en": "Check the selected assemblies and approved length schedule, printed A/Z labels, compatible label stock, hook-and-loop, connector protection, approved pulling and bend-support equipment, and crew communications. Use the site work plan for access and required PPE. Stage inspection/cleaning and test tools for the later connection team.",
+          "detail_es": "Revisa conjuntos, listado de longitudes, etiquetas A/Z, material compatible, cintas de gancho y bucle, protección de conectores, equipo aprobado de tendido y curvatura y comunicación. Sigue el plan del sitio para acceso y EPP. Prepara inspección, limpieza y pruebas para la cuadrilla de conexión.",
+          "pages": []
+        }
+      ]
+    },
+    {
+      "id": "length",
+      "en": "Check length and cable limits",
+      "es": "Revisa longitud y límites",
+      "rules": [
+        {
+          "en": "Match the reel or assembly length to the approved run.",
+          "es": "Compara la longitud del rollo o conjunto con el tendido aprobado.",
+          "detail_en": "Exact run length comes from a measured route or the approved cable schedule, including vertical changes, approved slack and end allowances. Endpoint names do not determine length.",
+          "detail_es": "La longitud viene de una ruta medida o del listado aprobado e incluye cambios verticales, holgura y extremos. Los nombres de extremos no determinan la longitud.",
+          "pages": [
+            9
+          ]
+        },
+        {
+          "en": "Keep enough length for both ends without storing slack in trays.",
+          "es": "Deja longitud suficiente en ambos extremos sin almacenar holgura en bandejas.",
+          "detail_en": "For measured work, required length = route + approved slack + end allowance. Compare it with the available stock. For precut assemblies, record the approved schedule and matching part/length.",
+          "detail_es": "Para medición: longitud necesaria = ruta + holgura aprobada + margen de extremos. Compárala con el material disponible. Para conjuntos precortados, registra listado, parte y longitud.",
+          "pages": [
+            6,
+            8
+          ]
+        },
+        {
+          "en": "Record the manufacturer limits for this cable.",
+          "es": "Registra los límites del fabricante de este cable.",
+          "detail_en": "Use the actual outside diameter, pulling-force limit, pulling method and bend limits from the cable specification. The reference fiber values are 20× diameter under tension and 10× at rest; use a larger manufacturer minimum when specified.",
+          "detail_es": "Usa diámetro exterior, fuerza de tendido, método y curvatura de la ficha del cable. La referencia de fibra es 20× diámetro bajo tensión y 10× en reposo; aplica un mínimo mayor si lo exige el fabricante.",
+          "pages": [
+            2,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pull",
+      "en": "Brief the crew, then run the cable",
+      "es": "Coordina la cuadrilla y tiende el cable",
+      "rules": [
+        {
+          "en": "Assign feed, pull, corner and stop-call responsibilities.",
+          "es": "Asigna alimentación, tracción, esquinas y señal de parada.",
+          "detail_en": "Agree the route and stop signal before movement. Use the approved pulling method and supporting equipment for this assembly; do not use connector ends as pulling attachments.",
+          "detail_es": "Acuerda ruta y señal de parada. Usa método y equipo de apoyo aprobados para el conjunto; no uses los conectores como punto de tracción.",
+          "pages": [
+            2,
+            3
+          ]
+        },
+        {
+          "en": "Protect connectors and support every change of direction.",
+          "es": "Protege conectores y apoya cada cambio de dirección.",
+          "detail_en": "Keep unused ends protected and clear of dirt and floor contact. Use the approved bend-support method at tray transitions and rack entry.",
+          "detail_es": "Mantén extremos protegidos y sin suciedad ni contacto con el suelo. Usa soporte de curvatura aprobado en transiciones y entrada al rack.",
+          "pages": [
+            3,
+            5,
+            6
+          ]
+        },
+        {
+          "en": "Maintain the cable-specific pulling limit and bend radius.",
+          "es": "Respeta fuerza y radio de curvatura del cable.",
+          "detail_en": "For reference fiber, 12 mm diameter means 240 mm minimum radius while pulling and 120 mm at rest, before any stricter manufacturer requirement. Radius is not loop diameter.",
+          "detail_es": "Como referencia, fibra de 12 mm requiere radio mínimo de 240 mm al tender y 120 mm en reposo, salvo requisito mayor del fabricante. Radio no es diámetro del bucle.",
+          "pages": [
+            9
+          ]
+        },
+        {
+          "en": "Stop and report a snag, crushed jacket, sharp bend or damaged end.",
+          "es": "Detén y reporta atasco, cubierta aplastada, curva cerrada o extremo dañado.",
+          "detail_en": "Record the location and what happened. Resume only after the method or obstruction is corrected and the lead has resolved the issue. Do not force a run to finish a checkpoint.",
+          "detail_es": "Registra ubicación y lo ocurrido. Reanuda cuando se corrija el método u obstáculo y el responsable resuelva el problema. No fuerces el tendido para cerrar un control.",
+          "pages": [
+            2,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dress",
+      "en": "Support, dress and protect",
+      "es": "Sujeta, organiza y protege",
+      "rules": [
+        {
+          "en": "Bundle with ½-inch hook-and-loop; no nylon zip ties.",
+          "es": "Agrupa con cinta de gancho y bucle de ½ pulgada; sin bridas de nailon.",
+          "detail_en": "The source permits ¾-inch hook-and-loop on vertical tray. Keep the bundle supported without crushing the cable jacket.",
+          "detail_es": "La fuente permite cinta de ¾ pulgada en bandeja vertical. Apoya el conjunto sin aplastar la cubierta.",
+          "pages": [
+            2,
+            4,
+            5
+          ]
+        },
+        {
+          "en": "Check horizontal support and bundle spacing.",
+          "es": "Revisa apoyos horizontales y separación de cintas.",
+          "detail_en": "Source guidance: horizontal supports every 4–5 ft; bundle straps every 12–18 in. Attach to tray at bends, exits and vertical runs, with the documented three-point arrangement at corners/exits.",
+          "detail_es": "Referencia: apoyos horizontales cada 4–5 pies; cintas cada 12–18 pulgadas. Fija a bandeja en curvas, salidas y tramos verticales con los tres puntos indicados en esquinas/salidas.",
+          "pages": [
+            2,
+            4
+          ]
+        },
+        {
+          "en": "Support vertical weight and use waterfall guides.",
+          "es": "Apoya el peso vertical y usa guías de caída.",
+          "detail_en": "Every vertical transition needs bend protection. Align the rack exit with the vertical manager on the correct side. Do not leave the weight hanging over a horizontal transition.",
+          "detail_es": "Protege la curvatura en cada transición vertical. Alinea la salida con el organizador del lado correcto. No dejes el peso colgando sobre la transición horizontal.",
+          "pages": [
+            3,
+            5
+          ]
+        },
+        {
+          "en": "Store trunk slack above the rack; keep cables off the floor.",
+          "es": "Guarda holgura de troncal sobre el rack y aleja cables del suelo.",
+          "detail_en": "Above the furcation, store trunk slack on top of the rack, not permanently in trays. Place connection slack downstream; exit the vertical manager near the served device.",
+          "detail_es": "Sobre la bifurcación, guarda holgura encima del rack, no permanentemente en bandejas. Deja holgura del lado de destino y sal del organizador cerca del equipo atendido.",
+          "pages": [
+            6,
+            8
+          ]
+        },
+        {
+          "en": "Keep equipment, doors and service access clear.",
+          "es": "Deja libres equipos, puertas y acceso de mantenimiento.",
+          "detail_en": "Do not cross equipment that the cable does not serve. A device should be removable without disturbing other devices’ cable runs. Keep power/data separation to the approved site design.",
+          "detail_es": "No cruces equipos ajenos al cable. Debe poder retirarse un equipo sin alterar tendidos de otros. Conserva la separación eléctrica/datos del diseño aprobado.",
+          "pages": [
+            3,
+            6,
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "id": "label",
+      "en": "Label as you run",
+      "es": "Etiqueta durante el tendido",
+      "rules": [
+        {
+          "en": "Use the exact assigned ID and identical A/Z information at both ends.",
+          "es": "Usa el ID asignado exacto y la misma información A/Z en ambos extremos.",
+          "detail_en": "Line 1 identifies A device/port; line 2 identifies Z device/port. Preserve leading zeros, all shared-cable ports and the source notation for lists, ranges and channels.",
+          "detail_es": "Línea 1 identifica equipo/puerto A y línea 2 equipo/puerto Z. Conserva ceros iniciales, todos los puertos compartidos y la notación de listas, rangos y canales.",
+          "pages": [
+            23,
+            24,
+            25
+          ]
+        },
+        {
+          "en": "Use the right label material and machine-printed format.",
+          "es": "Usa material correcto y formato impreso a máquina.",
+          "detail_en": "Choose durable, environment-compatible stock. Use Calibri Bold: minimum 8 pt on 2-inch flag labels, 10 pt for larger flag labels. Keep text centered and readable.",
+          "detail_es": "Elige material duradero y compatible con el entorno. Usa Calibri negrita: mínimo 8 pt en banderas de 2 pulgadas y 10 pt en banderas mayores. Centra el texto legible.",
+          "pages": [
+            22,
+            24
+          ]
+        },
+        {
+          "en": "Check flag and wrap placement before applying the batch.",
+          "es": "Revisa ubicación de banderas y envolventes antes del lote.",
+          "detail_en": "Flags: 4 in from connector boot, printed on both faces with the barcode below the text; minimum printable area 2 × 0.75 in. Trunk wraps: 1–2 in from each end boot, minimum 10 pt and 1 in printable width.",
+          "detail_es": "Banderas: a 4 pulgadas del protector, ambas caras impresas y código debajo; área imprimible mínima 2 × 0.75 pulgadas. Envolventes de troncal: a 1–2 pulgadas, mínimo 10 pt y ancho imprimible de 1 pulgada.",
+          "pages": [
+            24,
+            26
+          ]
+        },
+        {
+          "en": "Identify each leg and spare separately.",
+          "es": "Identifica cada ramal y reserva por separado.",
+          "detail_en": "Preserve manufacturer IDs instead of inventing serials. Label every trunk leg. Use the approved TIA-598 sequence: blue, orange, green, brown, slate, white, red, black, yellow, violet, rose, aqua.",
+          "detail_es": "Conserva IDs del fabricante sin inventar series. Etiqueta cada ramal. Usa secuencia TIA-598 aprobada: azul, naranja, verde, marrón, gris pizarra, blanco, rojo, negro, amarillo, violeta, rosa, aguamarina.",
+          "pages": [
+            23,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "handoff",
+      "en": "Check the run and hand it over",
+      "es": "Revisa y entrega el tendido",
+      "rules": [
+        {
+          "en": "Compare both physical labels and the routed path with the task.",
+          "es": "Compara etiquetas físicas y ruta con la tarea.",
+          "detail_en": "Check the actual rack, side, cable type, quantity, panel face and all designated end positions. Record any changed route or label before handoff.",
+          "detail_es": "Revisa rack, lado, tipo, cantidad, cara de panel y posiciones de extremos. Registra cambios de ruta o etiqueta antes de entregar.",
+          "pages": [
+            14,
+            23
+          ]
+        },
+        {
+          "en": "Account for working legs, spares and damage findings.",
+          "es": "Cuenta ramales activos, reservas y daños.",
+          "detail_en": "Keep unused connectors protected, individually identifiable and stored using the lead-approved spare plan. Resolve the source guide’s conflicting OCS spare-storage note before handoff.",
+          "detail_es": "Protege e identifica conectores sin uso y guárdalos según el plan aprobado. Resuelve la nota contradictoria de almacenamiento de reservas OCS antes de entregar.",
+          "pages": [
+            6,
+            71,
+            72
+          ]
+        },
+        {
+          "en": "Record run/label progress and outstanding work.",
+          "es": "Registra avance del tendido/etiquetado y pendientes.",
+          "detail_en": "Preparation does not mean patched, tested or QC approved. Leave the next crew a clear task reference, location, remaining steps and any blocker.",
+          "detail_es": "Preparar no significa conectado, probado ni aprobado por QC. Deja referencia, ubicación, pasos pendientes y bloqueos claros.",
+          "pages": [
+            13,
+            14
+          ]
+        },
+        {
+          "en": "Send the finished checkpoint record for lead review.",
+          "es": "Entrega el registro de controles para revisión.",
+          "detail_en": "The lead reviews the completed run checklist. When testing is later authorized, the source requires calibrated/referenced equipment, applicable test procedures and native/PDF results within 24 hours. Keep that separate from this prep record.",
+          "detail_es": "El responsable revisa el checklist completado. Cuando se autoricen pruebas, la fuente exige equipo calibrado/referenciado, procedimientos aplicables y resultados nativos/PDF en 24 horas. Sepáralo de esta preparación.",
+          "pages": [
+            12,
+            13
+          ]
+        }
+      ]
+    }
+  ],
+  "special": {
+    "144F": [
+      {
+        "en": "Confirm the 144F assembly and its 18 MPO8 legs.",
+        "es": "Confirma el conjunto 144F y sus 18 ramales MPO8.",
+        "detail_en": "The supplied Large example uses 16 working legs and spares 17–18. Stage by the exact TOR/EOR assignment; do not infer a port from the leg number.",
+        "detail_es": "El ejemplo Large usa 16 ramales activos y reservas 17–18. Prepara según la asignación TOR/EOR exacta; no deduzcas puertos del número de ramal.",
+        "pages": [
+          35,
+          36,
+          77
+        ]
+      }
+    ],
+    "192F": [
+      {
+        "en": "Stage the 192F trunk, all 24 legs and designated spares.",
+        "es": "Prepara troncal 192F, sus 24 ramales y reservas.",
+        "detail_en": "The supplied Large layout reserves legs 19–24. Identify the AIO rear and DCN-PP rear from the cutsheet; rear column A is on the right. Keep reserved columns and the two-AIO shuffle grouping intact.",
+        "detail_es": "El plano Large reserva ramales 19–24. Identifica posteriores AIO y DCN-PP por cutsheet; la columna A posterior queda a la derecha. Conserva columnas reservadas y grupos de dos AIO.",
+        "pages": [
+          79,
+          81,
+          83
+        ]
+      }
+    ],
+    "OCS": [
+      {
+        "en": "Match the three OCS bundles and the assigned pp1 groups.",
+        "es": "Compara los tres mazos OCS y grupos pp1 asignados.",
+        "detail_en": "Reference: red group 1–8, orange 9–16, yellow 17–24. Each 18F Type B assembly has nine duplex legs: eight used and one spare. Follow the approved local assignment.",
+        "detail_es": "Referencia: rojo 1–8, naranja 9–16, amarillo 17–24. Cada conjunto 18F tipo B tiene nueve ramales dúplex: ocho en uso y uno de reserva. Sigue la asignación local aprobada.",
+        "pages": [
+          71
+        ]
+      },
+      {
+        "en": "Run OCS toward the TPU and check the breakout height.",
+        "es": "Tiende OCS hacia la TPU y revisa altura de bifurcación.",
+        "detail_en": "Pull from OCS rack toward TPU. The OCS split point is 12–18 in above the OCS rack; body slack is stored above the TPU rack. Check the approved spare-storage decision.",
+        "detail_es": "Tiende desde OCS hacia TPU. La bifurcación queda 12–18 pulgadas sobre el rack OCS; la holgura del cuerpo va sobre TPU. Revisa la decisión aprobada para reservas.",
+        "pages": [
+          72
+        ]
+      },
+      {
+        "en": "Keep the OCS leg lengths in their intended order.",
+        "es": "Conserva el orden previsto de longitudes OCS.",
+        "detail_en": "Documented breakout lengths: 1480, 1840, 2200 and 2560 mm. The shortest reaches the top shelf and longer legs reach lower shelves; these are breakout lengths, not the total run length.",
+        "detail_es": "Longitudes de derivación documentadas: 1480, 1840, 2200 y 2560 mm. La menor llega al estante superior; las mayores a los inferiores. No son la longitud total del tendido.",
+        "pages": [
+          71
+        ]
+      }
+    ],
+    "CAT6": [
+      {
+        "en": "Keep all six TPU copper home runs distinct.",
+        "es": "Distingue los seis tendidos de cobre de cada TPU.",
+        "detail_en": "Two from TOR and two from each RMU: management/GigE and console functions remain separate. Use the actual panel jack and function from the source record; rack integration can change RU positions.",
+        "detail_es": "Dos del TOR y dos de cada RMU: separa gestión/GigE y consola. Usa función y jack del registro real; la integración puede cambiar la RU.",
+        "pages": [
+          34,
+          58
+        ]
+      }
+    ],
+    "MGMT": [
+      {
+        "en": "Confirm whether this management trunk is 12F or 24F.",
+        "es": "Confirma si esta troncal de gestión es 12F o 24F.",
+        "detail_en": "The supplied Large examples use 12F for AIO EOR and 24F for AIO with BMS, including documented SPOCS uplinks. Confirm the approved schedule where a drawing disagrees; preserve unused duplex legs as spares.",
+        "detail_es": "Los ejemplos Large usan 12F para AIO EOR y 24F para AIO con BMS, incluidos enlaces SPOCS documentados. Confirma el listado cuando un dibujo difiera; conserva dúplex sin uso como reservas.",
+        "pages": [
+          59,
+          61,
+          73
+        ]
+      }
+    ],
+    "GENERAL": []
+  },
+  "sources": [
+    {
+      "title": "Corning SRP 005-011 — cable-specific tension, bend limits and pull planning",
+      "url": "https://www.corning.com/content/dam/corning/catalog/coc/documents/standard-recommended-procedures/005-011.pdf"
+    },
+    {
+      "title": "Fluke Networks — data-center inspection and testing",
+      "url": "https://www.flukenetworks.com/edocs/white-paper-data-center-where-and-what-am-i-testing"
+    }
+  ]
+}
