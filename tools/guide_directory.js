@@ -81,9 +81,13 @@
     var view = document.getElementById('view');
     if (!view || document.getElementById('mpDirCard')) return;
     var inp = view.querySelector('input[data-in]') || document.getElementById('rq') || document.getElementById('q');
-    if (!inp || !inp.offsetParent) return;
-    if (inp.type && inp.type !== 'text' && inp.type !== 'search') return;
-    var q = inp.value;
+    var q = '';
+    if (inp && inp.offsetParent && (!inp.type || inp.type === 'text' || inp.type === 'search')) q = inp.value;
+    if (!q || !q.trim()) {
+      /* newer guide builds show the query in the "Results: <query>" heading instead of keeping the input */
+      var rs = view.querySelector('.h2 > .id');
+      if (rs && /^(Results|Resultados)/.test(rs.parentNode.textContent)) q = rs.textContent;
+    }
     if (!q || !q.trim()) return;
     if (DIR_STATE === 'idle') dirLoad();
     var mount = function () {
@@ -104,6 +108,28 @@
         var it = e.target.closest('[data-i]');
         if (it && res[+it.getAttribute('data-i')]) detail(res[+it.getAttribute('data-i')]);
       });
+      var qn = String(q).trim().toUpperCase(), top = res[0];
+      var exact = !!top && (String(top[0]).toUpperCase() === qn || (/^#?\d{1,7}$/.test(qn) && parseInt(String(top[0]).replace(/\D/g, '').slice(-7), 10) === parseInt(qn.replace(/\D/g, ''), 10)));
+      if (exact) {
+        /* scanned/typed full barcode: put its A and Z ends from the database FIRST, big enough to read next to a small printed flag */
+        var endHtml = function (tag, lbl) {
+          var m = /^([A-Z0-9]{3,6})-([A-Z]{0,3}\d{1,2})-(R\d{4})-(.+)$/i.exec(lbl || '') || /^([A-Z0-9]{3,6}) \/ ([A-Z]{0,3}\d{1,2}) \/ (R\d{4}) \/ (.+)$/i.exec(lbl || '');
+          var rack = m ? m[3] : '', hall = m ? m[2] : '', dp = m ? m[4] : (lbl || ''), pm = /-([^-]+)$/.exec(dp), port = pm ? pm[1] : '', dev = pm ? dp.slice(0, dp.length - pm[0].length) : dp;
+          return '<div style="border:1px solid var(--line,#363a3f);border-radius:12px;padding:12px;margin-top:8px;">' +
+            '<div style="font:800 12px -apple-system,sans-serif;letter-spacing:.6px;color:var(--text-3,#777b84);">' + tag + ' END</div>' +
+            '<div style="font:800 26px/1.15 ui-monospace,monospace;color:var(--text,#edeef0);margin-top:4px;">' + esc(rack) + (hall ? ' <span style="font-size:15px;color:var(--text-2,#b0b4ba);">' + esc(hall) + '</span>' : '') + '</div>' +
+            '<div style="font:700 20px/1.25 ui-monospace,monospace;color:var(--text,#edeef0);word-break:break-all;margin-top:2px;">' + esc(dev) + '</div>' +
+            '<div style="font:800 30px/1.1 ui-monospace,monospace;color:var(--fiber-t,#ffca16);margin-top:4px;">' + esc(port) + '</div></div>';
+        };
+        var big = document.createElement('div');
+        big.id = 'mpDirCard'; big.className = 'card hl'; big.style.marginTop = '10px';
+        big.innerHTML = '<div class="eyebrow">\u{1F4CB} From the database \u00b7 ' + esc(top[0]) + ' \u00b7 ' + esc(top[3] || '') + '</div>' + endHtml('A', top[1]) + endHtml('Z', top[2]) +
+          '<div class="muted" style="font-size:12px;margin-top:8px;">Check these against the flag. If the flag is different, tap Wrong labels.</div>';
+        var h2 = view.querySelector('.h2');
+        if (h2) h2.insertAdjacentElement('afterend', big); else view.insertBefore(big, view.firstChild);
+        if (res.length > 1) { card.id = 'mpDirCard2'; view.appendChild(card); }
+        return;
+      }
       view.appendChild(card);
     };
     if (DIR_STATE === 'ready') mount();
