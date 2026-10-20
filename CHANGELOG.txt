@@ -2,7 +2,24 @@ CHANGELOG - MP Walkthrough & Shift Report
 ==========================================
 History of changes since the original Gemini-generated prototype HTML.
 
-v18 (current) - Guide identity fixes (found by screenshot audit)
+v19 (current) - Data Haul Directory (tool #3)
+------------------------------------------------------------------
+- New module from the Service Field Guide exports: search every
+  assigned barcode and preset A/Z connection path offline.
+  One search box takes barcode (full or last digits), rack
+  (R0131), device (mgmt-spn-1), or port (Eth38/1); family filter
+  chips (SASL<>MGMT, MLF<>MSPN, TRLF<>TRSPN, SASL<>DCSPN, ...).
+- Tap a result for a detail card: big barcode, family, A-end and
+  Z-end broken into hall/rack/device/port, plus Copy barcode /
+  Copy A / Copy Z buttons (iOS clipboard fallback chain).
+- Reached from the Home launcher (3rd card); no bottom-tab added
+  (stays at the iOS 5-tab max); Home stays highlighted inside.
+- NOTE: the pasted exports arrived truncated by the chat buffer -
+  currently 424 of 29,335 barcode records + 220 presets are
+  embedded. Same pipeline (tools/build_directory.py) ingests the
+  full files the moment they land in Downloads.
+
+v18 - Guide identity fixes (found by screenshot audit)
 ------------------------------------------------------------------
 - REAL bug: the guide was rendering in LIGHT mode on phones set to
   light - their light-theme CSS rules out-specified our override
