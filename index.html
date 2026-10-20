@@ -733,7 +733,7 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v24';
+var APP_VERSION = 'v25';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2078,7 +2078,7 @@ function dirFamCls(f) {
   return { 'SASL<>MGMT': 'df-saslmgmt', 'MLF<>MSPN': 'df-mlfmspn', 'TRLF<>TRSPN': 'df-trlftrspn', 'SASL<>DCSPN': 'df-sasldcspn', 'MGMT<>FSEDG': 'df-mgmtfsedg', 'SPOCS<>MGMT (INTRA)': 'df-spocs', 'SPOCS<>MGMT (UPLINK)': 'df-spocs', 'SASL<>OXIDE': 'df-sasldcspn' }[f] || 'df-mgmtfsedg';
 }
 function dirLabelParts(lbl) {
-  var m = /^([A-Z0-9]{3,6})-(DH\d{1,2})-(R\d{4})-(.+)$/i.exec(lbl || '') ||
+  var m = /^([A-Z0-9]{3,6})-([A-Z]{0,3}\d{1,2})-(R\d{4})-(.+)$/i.exec(lbl || '') ||
           /^([A-Z0-9]{3,6}) \/ (DH\d{1,2}) \/ (R\d{4}) \/ (.+)$/i.exec(lbl || '');
   return m ? { site: m[1].toUpperCase(), hall: m[2], rack: m[3], dev: m[4] } : null;
 }

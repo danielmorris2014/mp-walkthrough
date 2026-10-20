@@ -10,8 +10,8 @@ os.makedirs(OUTDIR, exist_ok=True)
 
 BARROW = re.compile(r"^([A-Z0-9]{3,8}#\d{4,})\t")
 PREROW = re.compile(r"^\t?([A-Z0-9/]+)-DH\d/LINK-")
-LBL_D = re.compile(r"^[A-Z0-9]{3,6}-DH\d{1,2}-R\d{4}-")
-LBL_S = re.compile(r"^[A-Z0-9]{3,6} / DH\d{1,2} / R\d{4} / ")
+LBL_D = re.compile(r"^[A-Z0-9]{3,6}-[A-Z]{0,3}\d{1,2}-R\d{4}-")
+LBL_S = re.compile(r"^[A-Z0-9]{3,6} / [A-Z]{0,3}\d{1,2} / R\d{4} / ")
 is_lbl = lambda s: bool(LBL_D.match(s or "") or LBL_S.match(s or ""))
 
 def parse_barcode_file(path):
