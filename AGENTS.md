@@ -61,6 +61,8 @@ These rules prevent stale-code overwrites. Follow them every time, no exceptions
 - No network at runtime, no CDNs, no dependencies. Everything works in the data halls with zero signal.
 - Report-engine changes must pass `tools/test_report.py` (Playwright diff vs Daniel's real report format).
 - UI changes get a rendered screenshot (`tools/shoot.py`, headless Edge) before shipping — static checks miss rendering bugs (v17 shipped a theme that never rendered).
+- **Fixed chrome owns the bottom of the screen.** Never hand-write a `padding-bottom` / `bottom` pixel constant for body, toasts, or overlays — `applyChromeHeight()` measures `.bottom-stack` and exposes `--chrome-h`; derive from it (`calc(var(--chrome-h) + ...)`). Probe 5 in `tools/probes.py` fails the gate if body padding doesn't clear the measured chrome on any screen (the v35.5 "blockers tab sizes weird" bug: 57px nav, 24px padding, 33px of content hidden).
+- Any new bottom-fixed element goes **inside `.bottom-stack`** so it's measured automatically — never a sibling `position: fixed; bottom: 0` element.
 - The guide's cloud features (login/pairing/time clock) are dead by design — Claude's servers. Degrade silently, don't restore.
 
 ## Checks
