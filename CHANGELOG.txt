@@ -2,7 +2,24 @@ CHANGELOG - MP Walkthrough & Shift Report
 ==========================================
 History of changes since the original Gemini-generated prototype HTML.
 
-v16 (current) - Cable Field Guide merged in as tool #2
+v17 (current) - Guide rethemed to Graphite Pro + navigation fix
+------------------------------------------------------------------
+- The Cable Field Guide now matches our app: its theme is fully
+  CSS-variable driven, so a single override block remaps it onto
+  our palette (graphite surfaces, white accent, system font
+  instead of Barlow, our status hues, our corner radii). Applies
+  even if their light-mode setting gets turned on.
+- Sizing normalized: 15-16px body text and 56px/17px buttons were
+  inflating everything next to our app - now 14px text, 44px
+  buttons, tighter header/cards/tab bar, slimmer help button.
+- Guide logo recolored to graphite + green (drops the teal/yellow).
+- Navigation fixed: the floating back pill is gone (it fought
+  their header); a proper "< MP Kit" button now sits first in the
+  guide's own header and survives all of its screen re-renders.
+- On narrow phones the guide's title text hides next to its logo
+  so the header never crowds.
+
+v16 - Cable Field Guide merged in as tool #2
 ------------------------------------------------------------------
 - New guide.html: the Cable Field Guide single-file app, hosted in
   our repo and opened from the Home launcher card. BUF102 site pack,
