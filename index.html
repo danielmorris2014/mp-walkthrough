@@ -386,7 +386,7 @@
   .toast {
     position: fixed; bottom: calc(186px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
     background: #1c1e21; border: 1px solid var(--slate-7); color: var(--slate-12); font-weight: 700;
-    padding: 10px 17px; border-radius: 999px; font-size: 12.5px; display: none; z-index: 100;
+    padding: 10px 17px; border-radius: 999px; font-size: 12.5px; display: none; z-index: 300;
     max-width: 90vw; text-align: center; box-shadow: var(--shadow-3);
   }
   .overlay {
@@ -733,7 +733,7 @@
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v23';
+var APP_VERSION = 'v24';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1990,7 +1990,7 @@ function switchTab(t, btn) {
   document.body.classList.toggle('in-home', t === 'home');
   document.body.classList.toggle('in-dir', t === 'directory');
   var at = document.querySelector('.app-title');
-  if (at) at.textContent = t === 'directory' ? 'Data Haul Directory' : 'MP Walkthrough & Shift Report';
+  if (at) at.textContent = t === 'directory' ? 'Data Haul Directory' : (t === 'home' ? 'MP Kit' : 'MP Walkthrough & Shift Report');
   try { history.replaceState(null, '', '#/' + t); } catch (e) {}
   if (t === 'home') renderHome();
   if (t === 'directory') { dirInit(); }
@@ -2247,16 +2247,26 @@ function dirDetail(i) {
 }
 function dirClose() { if (DIR_OV) { DIR_OV.remove(); DIR_OV = null; } }
 function dirCopy(txt) {
-  function fallback() {
+  function fb() {
+    // synchronous textarea copy stays inside the tap gesture on iOS,
+    // where an async execCommand silently fails
     var ta = document.getElementById('copyFallback');
-    ta.value = txt; ta.style.position = 'fixed'; ta.style.left = '0'; ta.style.top = '0'; ta.focus(); ta.select();
-    try { document.execCommand('copy'); } catch (err) {}
-    ta.style.position = ''; ta.style.left = '-9999px';
+    var ok = false;
+    try {
+      ta.value = txt;
+      ta.style.position = 'fixed'; ta.style.left = '0'; ta.style.top = '0'; ta.style.opacity = '1';
+      ta.focus(); ta.setSelectionRange(0, txt.length);
+      ok = document.execCommand('copy');
+      ta.style.left = '-9999px'; ta.style.opacity = '0';
+    } catch (e) {}
+    showToast(ok ? 'Copied \u2713 ' + txt.slice(0, 20) : 'Copy failed \u2014 long-press the code to copy');
   }
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(txt).then(function () { showToast('Copied'); }, fallback);
-  } else fallback();
-  showToast('Copied ' + txt.slice(0, 24));
+    navigator.clipboard.writeText(txt).then(
+      function () { showToast('Copied \u2713 ' + txt.slice(0, 20)); },
+      fb
+    );
+  } else fb();
 }
 
 /* ---- scanner (shared zxing engine from vendor/zxing) ---- */
