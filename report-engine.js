@@ -244,8 +244,9 @@ function formalHallLines2(hall) {
 }
 
 function reportDateStr(state) {
-  if (state.blockers.length && state.blockers[0].date) return state.blockers[0].date;
   var d = new Date();
+  // 2PM-2AM shift: before 2AM, the shift started yesterday
+  if (d.getHours() < 2) d = new Date(d.getTime() - 86400000);
   return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
 }
 

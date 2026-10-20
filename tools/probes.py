@@ -33,7 +33,7 @@ with sync_playwright() as p:
         out[t] = {
           dock: vis('.status-dock') === !!s.chrome.dock,
           bar: vis('.bottom-nav') === !!s.chrome.bar,
-          hallTabs: vis('.hall-tabs') === !!s.chrome.hallTabs,
+          hallTabs: vis('.hall-seg-wrap') === !!s.chrome.hallTabs,
           back: vis('.kit-back') === !!s.chrome.back,
           title: document.querySelector('.app-title').textContent === s.title,
           panel: document.getElementById(s.panel).classList.contains('active')

@@ -44,8 +44,13 @@ SETUP = r"""(() => {
   return document.getElementById('reportOutput').textContent;
 })()"""
 
+from datetime import datetime, timedelta
+_now = datetime.now()
+_sd = _now - timedelta(days=1) if _now.hour < 2 else _now
+EXPECTED_DATE = f"{_sd.month}/{_sd.day}/{_sd.year}"
+
 EXPECT_SUBSTRINGS = [
-    "Subject: Shift Update \u2013 10/19/2026 (2:00 PM \u2013 2:00 AM)",
+    "Subject: Shift Update \u2013 " + EXPECTED_DATE + " (2:00 PM \u2013 2:00 AM)",
     "SHIFT SUMMARY", "WORK PERFORMED", "BLOCKERS \u2013 10/19/2026", "AREAS OF CONCERN",
     "\u2022 Ran and hung: 111\u2013113, 211\u2013213, 311\u2013611",
     "\u2022 Ran: 313\u2013613, 711\u20131211, 713\u20131213, 1301\u20131311, 1601\u20131611",
