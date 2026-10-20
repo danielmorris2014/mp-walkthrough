@@ -919,7 +919,7 @@ hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v35.2';
+var APP_VERSION = 'v35.3';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1828,8 +1828,28 @@ var CABLE_SHORT = { F144: '144F', OCS: 'OCS', CAT6: 'CAT6' };
 // grouped tokens). Mixed rows sharing the same description share a bullet.
 
 /* ---------------- report templates ---------------- */
+/* Wrong labels logged in the Field Guide (same phone, same site origin) ride along in the report.
+   Only items not yet marked relabelled; nothing is added when the log is empty, so the
+   diff-tested report format is unchanged. */
+function wrongLabelLines() {
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem('spfg.mislabels') || '[]'); } catch (e) { list = []; }
+  if (!Array.isArray(list)) return '';
+  list = list.filter(function (r) { return r && !r.done; });
+  if (!list.length) return '';
+  var out = ['WRONG LABELS FOUND'];
+  list.forEach(function (r) {
+    var bits = [];
+    if (r.sa) bits.push('A end reads ' + r.sa + ' (database: ' + r.da + ')');
+    if (r.sz) bits.push('Z end reads ' + r.sz + ' (database: ' + r.dz + ')');
+    out.push('\u2022 ' + (r.id || 'Cable') + (r.title ? ' \u2013 ' + r.title : '') + ': ' + (bits.join('; ') || 'printed label does not match the database') + (r.note ? ' \u2013 ' + r.note : ''));
+  });
+  return out.join('\n');
+}
 function buildReport(style) {
-  return ReportEngine.buildReport(style, { state: state, numStyle: numStyle(), halls: effectiveHalls() });
+  var txt = ReportEngine.buildReport(style, { state: state, numStyle: numStyle(), halls: effectiveHalls() });
+  var wl = wrongLabelLines();
+  return wl ? txt.replace(/\s+$/, '') + '\n\n' + wl : txt;
 }
 function renderReport() {
   renderBaselineInfo();
