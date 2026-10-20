@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>MP Kit — Architecture Review</title>
+<script src="https://cdn.tailwindcss.com"></script><script src="https://mermaid.js.org/v10.min.js"></script>
+<style>body{background:#0e0f11;color:#edeef0;font-family:-apple-system,sans-serif}.badge{font:800 10px/1 sans-serif;letter-spacing:.5px;padding:4px 10px;border-radius:999px;text-transform:uppercase}.strong{background:#30a46c40;color:#3dd68c}.worth{background:#ffc53d40;color:#ffca16}.spec{background:rgba(255,255,255,.1);color:#b0b4ba}.mono{font-family:ui-monospace,Consolas,monospace}</style>
+</head><body class="p-6 max-w-5xl mx-auto">
+<h1 class="text-3xl font-black tracking-tight">MP Kit — Deepening Opportunities</h1>
+<p class="text-sm text-slate-400 mb-1">Architecture review · Oct 20, 2026 · scope from git hot spots (v15–v27) · vocabulary: module · interface · depth · seam · adapter · leverage · locality</p>
+<p class="text-xs text-slate-500 mb-8 mono">walkthrough-app @ d5e9a00 · explorer friction report + session bug history</p>
+
+<!-- CANDIDATE 1 -->
+<div class="rounded-2xl border border-slate-600 bg-slate-900/60 p-6 mb-6">
+  <div class="flex items-center gap-3 mb-2"><h2 class="text-xl font-bold">1 · The Screen Registry</h2><span class="badge strong">Strong</span></div>
+  <p class="text-xs text-slate-400 mb-3 mono">index.html — switchTab (1970–1997) · TABS · panel divs (451–595) · nav markup (697–702) · CSS chrome rules (317–327) · renderAll (2058)</p>
+  <p class="mb-2"><b class="text-amber-300">Problem.</b> A "screen" is not a module — it's an event scattered across <b>nine sites</b>. Chrome (title, bar, stamp dock, hall tabs, back pill) is toggled by if-branches inside <span class="mono">switchTab</span> plus eight CSS rules keyed to body classes. Interface ≈ implementation: zero depth. This exact shallowness shipped <b>three field bugs</b> (wrong dock on Directory, walkthrough bar everywhere, wrong titles). Dead directory branches still sit at 1978–1995 calling <span class="mono">dirInit</span>, which no longer exists anywhere.</p>
+  <p class="mb-2"><b class="text-emerald-300">Solution.</b> One declarative registry: <span class="mono">SCREENS = { walk: {title, panel, chrome:{bar,dock,hallTabs,back}, onShow} , … }</span>. <span class="mono">switchTab</span> becomes one generic loop over the registry; CSS keys off <span class="mono">data-screen</span> on &lt;body&gt;; the nav bar renders from the registry for the current tool.</p>
+  <p class="mb-3"><b class="text-emerald-300">Benefits.</b> <b>Locality:</b> a screen's whole definition lives in one entry — the wrong-chrome bug class becomes structurally impossible. <b>Leverage:</b> the checked-in nav probe tests the registry, not nine sites. Deletion test: deleting the scatter concentrates the complexity into the map — the signal we want.</p>
+  <div class="grid grid-cols-2 gap-4 text-xs">
+    <div class="rounded-xl bg-black/40 p-4"><div class="font-bold text-red-300 mb-2">BEFORE — one screen = 9 edits</div>
+      <div class="flex flex-wrap gap-1 text-[10px] mono">TABS[] · panel div · nav-btn · switchTab branch · body-class toggles · title ternary · render if-chain · renderAll case · hash alias · CSS×8</div>
+      <div class="mt-3 h-2 rounded bg-gradient-to-r from-red-500 to-orange-400" style="width:95%"></div><div class="text-slate-500 mt-1">interface ≈ implementation (shallow)</div></div>
+    <div class="rounded-xl bg-black/40 p-4"><div class="font-bold text-emerald-300 mb-2">AFTER — one screen = 1 entry</div>
+      <div class="mono text-[10px] bg-black/60 rounded p-2 leading-relaxed">SCREENS = {<br>&nbsp;&nbsp;walk: {title:'Walkthrough & Report',<br>&nbsp;&nbsp;&nbsp;chrome:{bar:1,dock:1,back:1},<br>&nbsp;&nbsp;&nbsp;onShow:renderWalk}</div>
+      <div class="mt-3 h-2 rounded bg-gradient-to-r from-emerald-500 to-teal-300" style="width:30%"></div><div class="text-slate-500 mt-1">small interface, deep generic switcher</div></div>
+  </div>
+</div>
+
+<!-- CANDIDATE 2 -->
+<div class="rounded-2xl border border-slate-600 bg-slate-900/60 p-6 mb-6">
+  <div class="flex items-center gap-3 mb-2"><h2 class="text-xl font-bold">2 · Report Engine on a Real Seam</h2><span class="badge strong">Strong</span></div>
+  <p class="text-xs text-slate-400 mb-3 mono">runsOf (1347) · fmt11/13/Both (1360–1390) · sideOverall (1399) · mixedDesc2 (1660) · formalHallLines2 (1694) · buildReport (1755) · test_report.py</p>
+  <p class="mb-2"><b class="text-amber-300">Problem.</b> The formatting core is already ~pure — the only impurities are <span class="mono">numStyle()</span> reading the DOM (1343) and <span class="mono">buildReport</span> reading global <span class="mono">state</span> + <span class="mono">effectiveHalls()</span> reading <span class="mono">#reportScope</span> (1619). Yet the diff-test needs Edge + Playwright + a dev server to exercise string logic. The seam exists in fact but not in code: no adapter, so tests pay the browser tax.</p>
+  <p class="mb-2"><b class="text-emerald-300">Solution.</b> Extract the core to <span class="mono">report-engine.js</span> taking <span class="mono">(state, opts)</span>; index.html keeps a 3-line adapter wiring DOM globals in; <span class="mono">tools/test_report.py</span> gets a second adapter running the same file in Node — the 21-line diff test becomes instant and CI-able.</p>
+  <p class="mb-3"><b class="text-emerald-300">Benefits.</b> One engine, two adapters (app + Node test) = a <i>real</i> seam by the two-adapter rule. Every future report-format change gets a sub-second gate instead of a 40-second browser run.</p>
+  <div class="grid grid-cols-2 gap-4 text-xs">
+    <div class="rounded-xl bg-black/40 p-4"><div class="font-bold text-red-300 mb-2">BEFORE</div><div class="mermaid">flowchart LR;T[test_report.py]-->B[Edge browser];B-->S[dev server];S-->E[engine inside index.html];style T fill:#7f1d1d;style B fill:#7f1d1d;style S fill:#7f1d1d;style E fill:#7f1d1d</div></div>
+    <div class="rounded-xl bg-black/40 p-4"><div class="font-bold text-emerald-300 mb-2">AFTER</div><div class="mermaid">flowchart LR;N[Node test]-->E[report-engine.js];A[index.html adapter]-->E;style N fill:#065f46;style E fill:#065f46;style A fill:#065f46</div></div>
+  </div>
+</div>
+
+<!-- CANDIDATE 3 -->
+<div class="rounded-2xl border border-slate-600 bg-slate-900/60 p-6 mb-6">
+  <div class="flex items-center gap-3 mb-2"><h2 class="text-xl font-bold">3 · Check In the Probe Suite</h2><span class="badge strong">Strong</span></div>
+  <p class="text-xs text-slate-400 mb-3 mono">lost probes: nav-per-screen · 16px font gate · copy round-trip · chrome probe — all run as throwaway python -c</p>
+  <p class="mb-2"><b class="text-amber-300">Problem.</b> The gates that caught the real bugs (v23–v27) were written as one-off scripts and evaporated. The 16px iOS-zoom rule survives as a fix, not a check. Tribal tests are no tests.</p>
+  <p class="mb-2"><b class="text-emerald-300">Solution.</b> <span class="mono">tools/probes.py</span>: the nav-chrome probe (registry-driven after #1), font gate, copy round-trip, title-per-screen — wired into <span class="mono">gate.py</span> next to verify + report-diff.</p>
+  <p class="mb-3"><b class="text-emerald-300">Benefits.</b> Locality: every "does the screen wear the right clothes" question has one permanent home. The three nav bugs this week would each have been a red gate before shipping.</p>
+</div>
+
+<!-- CANDIDATE 4 -->
+<div class="rounded-2xl border border-slate-600 bg-slate-900/60 p-6 mb-6">
+  <div class="flex items-center gap-3 mb-2"><h2 class="text-xl font-bold">4 · Guide Pipeline Layer Proofs</h2><span class="badge worth">Worth exploring</span></div>
+  <p class="text-xs text-slate-400 mb-3 mono">tools/integrate_guide.py — 5 patch layers, only final boolean checks · absolute SRC/DST paths ×4 scripts</p>
+  <p class="mb-2"><b class="text-amber-300">Problem.</b> The generator is a good deep module (one interface: run script → guide.html) but its patches aren't individually provable. Upstream changes break loudly (style-count assert, ZXing regex) or <b>silently</b> — THEME's foreign selectors (<span class="mono">.top .brand .tabs</span>) can stop matching with all checks green. That is the light-mode bug's genus.</p>
+  <p class="mb-3"><b class="text-emerald-300">Solution.</b> Per-layer output diffing + a selector-presence check ("THEME layer requires .top/.brand/.tabs in the output") + relative paths via <span class="mono">__file__</span>. Benefits: silent-break class dies; pipeline stays one-command.</p>
+</div>
+
+<!-- CANDIDATE 5 -->
+<div class="rounded-2xl border border-slate-600 bg-slate-900/60 p-6 mb-6">
+  <div class="flex items-center gap-3 mb-2"><h2 class="text-xl font-bold">5 · State Module: Version + One Shape</h2><span class="badge worth">Worth exploring</span></div>
+  <p class="text-xs text-slate-400 mb-3 mono">defaultState (781) · loadState (842) · snapshotCore (861) · doUndo (872) · applyRestore (1940)</p>
+  <p class="mb-2"><b class="text-amber-300">Problem.</b> <span class="mono">version:1</span> is written but never read — no migration seam, so any future shape change breaks old phones silently. The state shape is hand-enumerated in three places. Factory defaults ship real personnel names and pre-stamped rows — fixture welded to blank state.</p>
+  <p class="mb-3"><b class="text-emerald-300">Solution.</b> Read + migrate on load; one shape constant; split DEMO fixture from blank state. Benefits: future format changes become safe; restore/undo share one definition.</p>
+</div>
+
+<div class="rounded-2xl border border-emerald-700 bg-emerald-950/40 p-6">
+  <h2 class="text-xl font-bold mb-2">🏁 Top recommendation</h2>
+  <p><b>#1 Screen Registry</b> — strongest evidence (three shipped bugs from one shallowness), smallest blast radius, and it directly feeds #3 (the nav probe tests the registry). #2 is the best testability win and is independent. #1 → #3 together retire the entire wrong-chrome bug class permanently.</p>
+</div>
+<script>mermaid.initialize({startOnLoad:true,theme:'dark'});</script>
+</body></html>

@@ -78,3 +78,13 @@ The first pass produced a narrative; the skill wants **environment improvements 
 5. **Tool economy (low — no action).** No custom tooling worth changing; Playwright/Edge local runs are the cheapest adequate gate.
 
 **v22 (this push):** the zoom bug fixed — all focusable inputs in both apps now 16px+ (iOS auto-zooms the page when focusing sub-16px inputs, the cause of the accidental zoom / double scroll). Verified by a computed-font gate across every panel and guide page: zero inputs below 16px.
+
+## Retro addendum — v23→v27 (second environment pass, with the architecture review)
+
+New lessons since the first pass, several now formalized as architecture candidates (see tools/arch_report.html):
+
+1. **Screen chrome is scattered across ~9 sites** — three shipped field bugs (v23 dock/tabs on Directory, v24/26 bar-identity, dead dirInit branches) all trace to this one shallowness. Candidate #1 (Screen Registry) retires the class.
+2. **Throwaway probes are tribal tests** — nav-per-screen, 16px font gate, copy round-trip all existed only as one-off scripts; they caught every real bug this stretch and then evaporated. Candidate #3 checks them in.
+3. **Silent breakage class in the guide pipeline** — patch layers verify only at the end; upstream class renames would pass all checks while the theme stops applying (the v18 light-mode bug's genus). Candidate #4 adds per-layer proofs.
+4. **When a data source declares a count, assert ingest equals it** (learned v25, now enforced in build_directory_full by practice — should become an assert in the script).
+5. **Search UX note**: the guide searches on submit, not keystroke — any augmentation hooking rendering needs an input-event listener too (cost: one debugging round).
