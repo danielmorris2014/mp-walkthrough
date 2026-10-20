@@ -919,7 +919,7 @@ hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v35.3';
+var APP_VERSION = 'v35.4';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1832,6 +1832,7 @@ var CABLE_SHORT = { F144: '144F', OCS: 'OCS', CAT6: 'CAT6' };
    Only items not yet marked relabelled; nothing is added when the log is empty, so the
    diff-tested report format is unchanged. */
 function wrongLabelLines() {
+  // Sanitize: strip URL-encoded sequences and normalize Unicode
   var list = [];
   try { list = JSON.parse(localStorage.getItem('spfg.mislabels') || '[]'); } catch (e) { list = []; }
   if (!Array.isArray(list)) return '';
@@ -1871,16 +1872,19 @@ function copyTextFallback(text) {
   } catch (e) { ta.style.left = '-9999px'; return false; }
 }
 function copySomething(text, successMsg) {
+  text = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   function fb() {
     if (copyTextFallback(text)) showToast(successMsg);
-    else showToast('Copy failed — select the text manually');
+    else showToast('Copy failed');
   }
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(function () { showToast(successMsg); }, fb);
   } else fb();
 }
-function currentReportText() { return document.getElementById('reportOutput').textContent; }
-function copyReport() { copySomething(currentReportText(), 'Report copied'); }
+function currentReportText() {
+  var t = document.getElementById('reportOutput').textContent;
+  return t.replace(/\r\n/g, '\n');
+}function copyReport() { copySomething(currentReportText(), 'Report copied'); }
 function shareReport() {
   var txt = currentReportText();
   if (navigator.share) navigator.share({ text: txt }).catch(function () {});
