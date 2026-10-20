@@ -1,0 +1,22 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install esprima
+      - run: python tools/verify.py
+  secrets-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for credential-shaped strings
+        run: |
+          if grep -rEn --exclude-dir=.git "ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|x-access-""token:|Authorization: Basic [A-Za-z0-9+/=]{30,}" .; then
+            echo "::error::credential-shaped string found in repo"
+            exit 1
+          fi
