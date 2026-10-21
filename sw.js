@@ -1,6 +1,6 @@
 // MP Walkthrough — minimal offline-first service worker.
 // Bump CACHE_VERSION whenever index.html/icons change so every phone picks up the update.
-var CACHE_VERSION = 'mp-walk-v51';
+var CACHE_VERSION = 'mp-walk-v52';
 
 self.addEventListener('message', function (event) {
   if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
@@ -50,11 +50,15 @@ self.addEventListener('activate', function (event) {
 
 self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return;
+  // media streams over Range requests return 206 partials - caching one
+  // under the full URL would corrupt offline playback. Never cache media.
+  var u = event.request.url;
+  if (/\.(mp4|m4v|webm|mp3|wav)(\?|$)/i.test(u)) return;
   event.respondWith(
     caches.match(event.request).then(function (cached) {
       if (cached) return cached;
       return fetch(event.request).then(function (resp) {
-        if (resp && resp.ok && new URL(event.request.url).origin === location.origin) {
+        if (resp && resp.ok && !event.request.headers.get('range') && new URL(event.request.url).origin === location.origin) {
           var copy = resp.clone();
           caches.open(CACHE_VERSION).then(function (cache) { cache.put(event.request, copy); });
         }
