@@ -900,7 +900,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v53';
+var APP_VERSION = 'v54';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2047,8 +2047,12 @@ var KIT_PAGES = [
     url: './reference.html', precache: true },
   { name: 'Training', sub: '17-lesson course + reference guide', icon: 'bars',
     url: './training/DataHall4_Cable_Training/START_HERE.html', precache: false },
+  { name: 'Knowledge Cards', sub: 'Flashcards from the Data Hall 4 glossary', icon: 'book',
+    url: './flashcards.html', precache: true },
   { name: 'Flag labels', sub: 'A/Z flag labels with barcode + serial', icon: 'lines',
     url: './labels.html', precache: true },
+  { name: 'Read a Label', sub: 'Offline OCR when the barcode won’t scan', icon: 'search',
+    url: './ocr.html', precache: true },
   { name: 'Find a cable', sub: 'Barcode, rack, port or dry-run line', icon: 'search',
     guide: 'find' },
   { name: 'Wrong labels', sub: 'Log cables whose label is wrong', icon: 'flag',

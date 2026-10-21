@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Read a Label</title>
+<link rel="stylesheet" href="./chrome.css">
+<style>
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 400 14px/1.45 -apple-system, "SF Pro Text", system-ui, sans-serif;
+  padding: calc(var(--top-chrome, 116px) + 14px) 14px calc(20px + env(safe-area-inset-bottom));
+  touch-action: manipulation; }
+.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(11,12,14,.96); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line); padding: calc(6px + env(safe-area-inset-top)) 10px 8px; }
+.row1 { display: flex; align-items: center; gap: 8px; }
+.h1 { font: 800 17px/1.1 -apple-system, sans-serif; }
+.h1 small { display: block; font: 600 10.5px -apple-system, sans-serif; color: var(--dim); margin-top: 2px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-top: 10px; }
+.ct { font: 800 11px -apple-system, sans-serif; letter-spacing: .8px; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+.shoot { display: block; width: 100%; min-height: 56px; border: 0; border-radius: 14px;
+  background: #fff; color: #111; font: 800 15px -apple-system, sans-serif; cursor: pointer; }
+.shoot:active { transform: scale(.98); }
+input[type=file] { display: none; }
+#preview { width: 100%; border-radius: 12px; margin-top: 10px; display: none; }
+.status { font: 700 12px -apple-system, sans-serif; color: var(--muted); margin-top: 10px; }
+.chiprow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.pchip { border: 1px solid var(--line); border-radius: 999px; padding: 8px 13px;
+  font: 700 12.5px ui-monospace, monospace; color: var(--text); background: var(--card2); cursor: pointer; }
+.pchip:active { transform: scale(.96); }
+.pchip small { color: var(--dim); font: 700 9.5px -apple-system, sans-serif; display: block; letter-spacing: .5px; }
+.rawtext { font: 600 12px/1.6 ui-monospace, monospace; color: var(--muted);
+  word-break: break-all; white-space: pre-wrap; max-height: 180px; overflow-y: auto; }
+.copybtn { margin-top: 10px; width: 100%; min-height: 44px; border: 0; border-radius: 10px;
+  background: rgba(255,255,255,.07); border: 1px solid var(--line); color: var(--text);
+  font: 700 13px -apple-system, sans-serif; }
+.hint { color: var(--dim); font-size: 12px; margin-top: 10px; line-height: 1.5; }
+.kit-err, .kit-retry { margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="topbar" id="topbar">
+  <div class="row1">
+    <a class="mp-back-pill" style="position:static" href="./index.html#/home">&#8249; MP Kit</a>
+    <div class="h1">Read a Label<small>offline OCR \u2014 when the barcode won't scan</small></div>
+  </div>
+</div>
+<div id="mount">
+  <div class="card">
+    <div class="ct">Photograph the printed label</div>
+    <label class="shoot" for="snap">Take photo / choose image</label>
+    <input type="file" id="snap" accept="image/*" capture="environment">
+    <img id="preview" alt="">
+    <div class="status" id="status">Fill the frame with the label text. Runs fully offline.</div>
+  </div>
+  <div id="results"></div>
+</div>
+<script src="./kit-data.js"></script>
+<script src="./vendor/tesseract/tesseract.min.js"></script>
+<script>
+'use strict';
+/* Read a Label - offline OCR fallback for damaged or unreadable barcodes.
+   Tesseract.js runs fully on-device (SIMD wasm core + English model are
+   vendored). Recognized text is parsed for the kit's label grammar
+   (racks, halls, barcodes, devices) and every hit links straight into
+   the BUF103 cutsheet or the barcode directory. */
+var WORKER_READY = false;
+function setStatus(t) { document.getElementById('status').textContent = t; }
+
+document.getElementById('snap').addEventListener('change', function (e) {
+  var f = e.target.files && e.target.files[0];
+  if (!f) return;
+  var url = URL.createObjectURL(f);
+  var img = document.getElementById('preview');
+  img.src = url; img.style.display = 'block';
+  setStatus('Preparing image\u2026');
+  img.onload = function () { recognize(img); };
+});
+
+function recognize(img) {
+  setStatus('Loading OCR engine\u2026');
+  var t0 = Date.now();
+  Tesseract.recognize(img, 'eng', {
+    corePath: './vendor/tesseract/',
+    langPath: './vendor/tesseract',
+    workerPath: './vendor/tesseract/worker.min.js',
+    logger: function (m) { if (m.status === 'recognizing text') setStatus('Reading\u2026 ' + Math.round(m.progress * 100) + '%'); }
+  }).then(function (res) {
+    var text = (res && res.data && res.data.text) || '';
+    setStatus('Done in ' + ((Date.now() - t0) / 1000).toFixed(1) + 's');
+    renderResults(text);
+  }).catch(function (err) {
+    setStatus('OCR failed: ' + (err && err.message ? err.message : err));
+  });
+}
+
+function parseLabel(text) {
+  var out = [];
+  var push = function (kind, val) {
+    if (val && !out.some(function (o) { return o.val === val; })) out.push({ kind: kind, val: val });
+  };
+  var upper = text.toUpperCase();
+  // monospace labels OCR with classic confusions (O<->0, I/L<->1, S<->5) -
+  // pattern-extract from a normalized copy so R0o411 still finds R0411
+  var norm = upper.replace(/O/g, '0').replace(/[IL|]/g, '1').replace(/S/g, '5');
+  [upper, norm].forEach(function (src) {
+    (src.match(/BUF\d+#\d+/g) || []).forEach(function (b) { push('barcode', b); });
+    (src.match(/BUF\d+-DH\d+-R\d{4}/g) || []).forEach(function (r) { push('location', r); });
+    (src.match(/\bR\s?\d{4}\b/g) || []).forEach(function (r) { push('rack', r.replace(/\s/g, '')); });
+  });
+  (upper.match(/\bDH\s?\d\b/g) || []).forEach(function (h) { push('hall', h.replace(/\s/g, '')); });
+  // misreads that CHANGE the digit count (R0411 read as R0o411 -> 5 digits):
+  // offer every 4-digit single-deletion form - the user taps the right one
+  (norm.match(/\bR[\d]{5,6}\b/g) || []).forEach(function (r) {
+    var digits = r.slice(1);
+    for (var i = 0; i < digits.length; i++) {
+      var cand = 'R' + digits.slice(0, i) + digits.slice(i + 1);
+      if (cand.length === 5) push('rack?', cand);
+    }
+  });
+  (upper.match(/ETH[\w/.:-]*|\bQSFP\d?\b|\bMPO-?\d?\b/g) || []).forEach(function (p) { push('port', p); });
+  return out;
+}
+
+function renderResults(text) {
+  var box = document.getElementById('results');
+  var hits = parseLabel(text);
+  var html = '';
+  if (hits.length) {
+    html += '<div class="card"><div class="ct">Found in the text \u2014 tap to look it up</div><div class="chiprow">';
+    hits.forEach(function (h) {
+      var target = '';
+      if (h.kind === 'barcode') target = './guide.html#/find';
+      else target = './buf103.html';
+      html += '<a class="pchip" href="' + target + '" onclick="goSearch(\'' + h.val.replace(/'/g, '') + '\', ' +
+        (h.kind === 'barcode' ? 'true' : 'false') + ');return false;">' + KitData.esc(h.val) +
+        '<small>' + h.kind + ' \u00b7 search</small></a>';
+    });
+    html += '</div></div>';
+  }
+  html += '<div class="card"><div class="ct">Raw text</div>' +
+    '<div class="rawtext">' + (KitData.esc(text.trim()) || '(nothing recognized \u2014 try more light / closer)') + '</div>' +
+    '<button class="copybtn" id="copyAll">Copy text</button></div>';
+  box.innerHTML = html;
+  document.getElementById('copyAll').onclick = function () {
+    var b = this;
+    KitData.copy(text.trim(), function (ok) { b.textContent = ok ? 'Copied \u2713' : 'Copy failed'; });
+  };
+}
+
+function goSearch(q, isBarcode) {
+  try { sessionStorage.setItem('mp.ocrq', q); } catch (e) {}
+  if (isBarcode) location.href = './guide.html';
+  else location.href = './buf103.html';
+}
+KitData.watchFixedTop('.topbar');
+</script>
+</body>
+</html>

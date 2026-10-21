@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Knowledge Cards</title>
+<link rel="stylesheet" href="./chrome.css">
+<style>
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 400 14px/1.45 -apple-system, "SF Pro Text", system-ui, sans-serif;
+  padding: calc(var(--top-chrome, 110px) + 14px) 14px calc(20px + env(safe-area-inset-bottom));
+  touch-action: manipulation; }
+.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(11,12,14,.96); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line); padding: calc(6px + env(safe-area-inset-top)) 10px 8px; }
+.row1 { display: flex; align-items: center; gap: 8px; }
+.h1 { font: 800 17px/1.1 -apple-system, sans-serif; }
+.h1 small { display: block; font: 600 10.5px -apple-system, sans-serif; color: var(--dim); margin-top: 2px; }
+.progressbar { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); margin-top: 10px; overflow: hidden; }
+.progressbar div { height: 100%; background: var(--green); border-radius: 3px; transition: width .3s; }
+.count { font: 800 11px -apple-system, sans-serif; color: var(--dim); margin-top: 6px; }
+.cardbox { position: relative; margin-top: 16px; min-height: 300px; perspective: 1200px; }
+.fcard { position: absolute; inset: 0; background: var(--card); border: 1px solid var(--line);
+  border-radius: 20px; padding: 22px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; cursor: pointer;
+  transform-style: preserve-3d; transition: transform .45s cubic-bezier(.2,.7,.3,1);
+  -webkit-user-select: none; user-select: none; }
+.fcard.flipped { transform: rotateY(180deg); }
+.face { backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex;
+  flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.face.back { position: absolute; inset: 0; transform: rotateY(180deg); padding: 20px; overflow-y: auto; }
+.term { font: 800 24px/1.2 -apple-system, sans-serif; letter-spacing: -.3px; }
+.termfull { font: 600 12px -apple-system, sans-serif; color: var(--muted); }
+.def { font: 400 14.5px/1.55 -apple-system, sans-serif; color: var(--text); text-align: left; }
+.src { font: 600 10px -apple-system, sans-serif; color: var(--dim); margin-top: 10px; }
+.hint { font: 600 11px -apple-system, sans-serif; color: var(--dim); margin-top: 12px; }
+.btnrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.btnrow button { min-height: 52px; border-radius: 14px; border: 0; font: 800 14px -apple-system, sans-serif; cursor: pointer; }
+.btn-again { background: rgba(255,255,255,.07); border: 1px solid var(--line) !important; color: var(--text); }
+.btn-know { background: #fff; color: #111; }
+.btnrow button:active { transform: scale(.97); }
+.done { text-align: center; padding: 40px 10px; }
+.done h2 { font: 800 22px -apple-system, sans-serif; margin: 0 0 8px; }
+.restart { margin-top: 16px; min-height: 52px; width: 100%; border: 0; border-radius: 14px;
+  background: #fff; color: #111; font: 800 14px -apple-system, sans-serif; }
+.kit-err, .kit-retry { margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="topbar" id="topbar">
+  <div class="row1">
+    <a class="mp-back-pill" style="position:static" href="./index.html#/home">&#8249; MP Kit</a>
+    <div class="h1">Knowledge Cards<small id="meta">Data Hall 4 glossary</small></div>
+  </div>
+  <div class="progressbar"><div id="pbar" style="width:0%"></div></div>
+  <div class="count" id="count"></div>
+</div>
+<div id="mount"><div class="count" style="margin-top:14px">Loading cards&hellip;</div></div>
+<script src="./kit-data.js"></script>
+<script>
+'use strict';
+/* Knowledge Cards - flip-card drill over the course glossary (103 terms,
+   extracted from the training package by the build pipeline). Simple
+   spaced repetition: "know" retires a card for the session, "review
+   again" requeues it; per-term stats persist in localStorage. */
+var CARDS = null, DECK = [], IDX = 0, KNOWN = 0;
+var LS = 'mp.flashcards';
+function stats() { try { return JSON.parse(localStorage.getItem(LS) || '{}'); } catch (e) { return {}; } }
+function saveStat(term, know) {
+  var s = stats(); var e = s[term] || { seen: 0, known: 0 };
+  e.seen++; if (know) e.known++;
+  s[term] = e;
+  try { localStorage.setItem(LS, JSON.stringify(s)); } catch (x) {}
+}
+function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function startDeck(fresh) {
+  var s = stats();
+  // least-known first: unseen cards first, then fewest known, then random
+  DECK = CARDS.slice().sort(function (x, y) {
+    var sx = s[x.term] || { seen: 0, known: 0 }, sy = s[y.term] || { seen: 0, known: 0 };
+    return (sx.seen - sx.known) - (sy.seen - sy.known);
+  });
+  shuffle(DECK.filter(function (c, i) { return true; })); // shuffle base order
+  // stable-ish: keep the sort priority but within it random is fine - simple: fully shuffled, unseen prioritized
+  DECK = shuffle(CARDS.slice());
+  DECK.sort(function (x, y) {
+    var sx = (s[x.term] || { seen: 0 }).seen, sy = (s[y.term] || { seen: 0 }).seen;
+    return sx - sy;
+  });
+  IDX = 0; KNOWN = 0; render();
+}
+function render() {
+  var mount = document.getElementById('mount');
+  if (IDX >= DECK.length) {
+    mount.innerHTML = '<div class="done"><h2>Deck complete \u2713</h2>' +
+      '<div class="count">' + KNOWN + ' known \u00b7 ' + (DECK.length - KNOWN) + ' requeued for next round</div>' +
+      '<button class="restart" onclick="startDeck()">Go again</button></div>';
+    updateMeta(); return;
+  }
+  var c = DECK[IDX];
+  var knownPct = Math.round((IDX / DECK.length) * 100);
+  mount.innerHTML =
+    '<div class="cardbox"><div class="fcard" id="fcard" onclick="flip()">' +
+      '<div class="face"><div class="term">' + KitData.esc(c.term) + '</div>' +
+        (c.full && c.full !== c.term ? '<div class="termfull">' + KitData.esc(c.full) + '</div>' : '') +
+        '<div class="hint">Tap to flip</div></div>' +
+      '<div class="face back"><div class="def">' + KitData.esc(c.def) + '</div>' +
+        (c.src ? '<div class="src">' + KitData.esc(c.src) + '</div>' : '') + '</div>' +
+    '</div></div>' +
+    '<div class="btnrow">' +
+      '<button class="btn-again" onclick="answer(false)">Review again</button>' +
+      '<button class="btn-know" onclick="answer(true)">Know it</button>' +
+    '</div>';
+  document.getElementById('pbar').style.width = knownPct + '%';
+  updateMeta();
+}
+function flip() { document.getElementById('fcard').classList.toggle('flipped'); }
+function answer(know) {
+  var c = DECK[IDX];
+  saveStat(c.term, know);
+  if (know) KNOWN++; else DECK.push(c); // requeue at the end
+  IDX++;
+  render();
+}
+function updateMeta() {
+  document.getElementById('count').textContent =
+    DECK.length ? (Math.min(IDX + 1, DECK.length) + ' / ' + DECK.length + ' \u00b7 ' + KNOWN + ' known') : '';
+}
+KitData.load('./data/glossary.json.gz', 'cards', 'mount').then(function (d) {
+  CARDS = d;
+  document.getElementById('meta').textContent = d.length + ' terms \u00b7 Data Hall 4 glossary';
+  startDeck();
+});
+KitData.watchFixedTop('.topbar');
+</script>
+</body>
+</html>

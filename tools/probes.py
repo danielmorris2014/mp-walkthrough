@@ -254,6 +254,8 @@ with sync_playwright() as p:
         ("/buf103.html", 6000, "buf103"),
         ("/reference.html", 3500, "reference"),
         ("/labels.html", 2500, "labels"),
+        ("/flashcards.html", 3000, "flashcards"),
+        ("/ocr.html", 2500, "ocr"),
     ]
     for path, wait, name in standalone:
         sp = b.new_context(viewport={"width": 390, "height": 844}, color_scheme="dark").new_page()

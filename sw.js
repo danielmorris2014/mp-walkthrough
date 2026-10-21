@@ -1,6 +1,6 @@
 // MP Walkthrough — minimal offline-first service worker.
 // Bump CACHE_VERSION whenever index.html/icons change so every phone picks up the update.
-var CACHE_VERSION = 'mp-walk-v53';
+var CACHE_VERSION = 'mp-walk-v54';
 
 self.addEventListener('message', function (event) {
   if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
@@ -23,6 +23,12 @@ var PRECACHE = [
   './kit-data.js',
   './buf103.html',
   './reference.html',
+  './flashcards.html',
+  './ocr.html',
+  './vendor/tesseract/tesseract.min.js',
+  './vendor/tesseract/worker.min.js',
+  './vendor/tesseract/tesseract-core-simd-lstm.wasm.js',
+  './vendor/tesseract/eng.traineddata.gz',
   './vendor/leaflet/leaflet.js',
   './vendor/leaflet/leaflet.css',
   './vendor/leaflet/images/layers.png',
@@ -32,6 +38,7 @@ var PRECACHE = [
   './vendor/leaflet/images/marker-shadow.png',
   './data/directory.json.gz',
   './data/buf103.json.gz',
+  './data/glossary.json.gz',
   './training/manifest.json',
   './vendor/zxing/reader.js',
   './vendor/zxing/zxing_reader.wasm'
