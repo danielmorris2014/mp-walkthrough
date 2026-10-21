@@ -265,7 +265,7 @@
     position: fixed; inset: 0; z-index: 170; background: rgba(17,17,19,0.88);
     display: none; align-items: flex-end; justify-content: center;
   }
-  .palette-sheet.open { display: flex; }
+  .palette-sheet.ov-open { display: flex; }
   .palette-card {
     background: var(--card); border: 1px solid var(--border2); border-radius: 20px 20px 0 0;
     padding: 16px; width: 100%; max-height: 70vh; overflow-y: auto;
@@ -290,7 +290,7 @@
     position: fixed; inset: 0; z-index: 160; background: rgba(17,17,19,0.88);
     display: none; align-items: flex-end; justify-content: center;
   }
-  .hall-menu.open { display: flex; }
+  .hall-menu.ov-open { display: flex; }
   .hall-menu-card {
     background: var(--card); border: 1px solid var(--border2); border-radius: 20px 20px 0 0;
     padding: 16px; width: 100%; max-height: 70vh; overflow-y: auto;
@@ -551,8 +551,9 @@
   .overlay {
     position: fixed; inset: 0; z-index: 200; background: rgba(3,6,12,0.88);
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-    display: flex; align-items: center; justify-content: center; padding: 18px;
+    display: none; padding: 18px;
   }
+  .overlay.ov-open { display: flex; align-items: center; justify-content: center; }
   .overlay-card {
     background: var(--card); border: 1px solid var(--border2); border-radius: 20px;
     padding: 20px; max-width: 420px; width: 100%; max-height: 84vh; overflow-y: auto;
@@ -570,6 +571,9 @@
   .undo-btn .glyph { width: 13px; height: 13px; }
   .muted { color: var(--muted); font-size: 11.5px; }
   #copyFallback { position: fixed; left: -9999px; top: 0; opacity: 0; }
+  #hallEditor { display: none; }
+  #hallEditor.ov-open { display: block; }
+  .update-banner.ov-open { display: flex; }
 </style>
 </head>
 <body>
@@ -851,13 +855,13 @@
 <span id="activeBrushLabel" style="display:none;"></span>
 <span id="cableStats" style="display:none;"></span>
 <span id="gotoRow" style="display:none;"></span>
-<span id="hallEditor" style="display:none;"></span>
+<span id="hallEditor"></span>
 <span id="hallStats" style="display:none;"></span>
 <span id="progPct" style="display:none;"></span>
 <span id="progRing" style="display:none;"></span>
 <textarea id="copyFallback" aria-hidden="true" tabindex="-1"></textarea>
 
-<div class="overlay" id="nightOverlay" style="display:none;">
+<div class="overlay" id="nightOverlay">
   <div class="overlay-card">
     <h2>Wrap the night?</h2>
     <ul id="nightChecklist"></ul>
@@ -894,7 +898,7 @@
   </nav>
 </div>
 
-<div class="overlay" id="onboarding" style="display:none;" onclick="if(event.target===this)dismissOnboarding()">
+<div class="overlay" id="onboarding" onclick="if(event.target===this)dismissOnboarding()">
   <button class="btn btn-ghost" style="position:absolute; top:calc(env(safe-area-inset-top,0px) + 14px); right:14px; z-index:2; min-height:44px;" onclick="dismissOnboarding()">Skip</button>
   <div class="overlay-card">
     <h2>Install on your phone (one time)</h2>
@@ -923,7 +927,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v43';
+var APP_VERSION = 'v44';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -931,7 +935,7 @@ function showUpdateBanner(text, showBtn) {
   if (!b) return;
   document.getElementById('updateBannerText').textContent = text;
   document.getElementById('updateNowBtn').style.display = showBtn ? '' : 'none';
-  b.style.display = 'flex';
+  Overlay.open('updateBanner');
   document.body.classList.add('has-update-banner');
 }
 function applyUpdateNow() {
@@ -994,6 +998,23 @@ var WalkView = (function () {
     renderWalkStats(hall);
   }
   return { update: update, glow: glow };
+})();
+
+/* ---------------- Overlay: the one overlay owner ---------------- */
+// Every full-screen/sheet overlay opens and closes through here via the
+// single .ov-open class (CSS keeps each overlay's hidden default). The v34
+// bug — an overlay invisibly eating every tap — is structurally dead: probe 8
+// asserts all overlays are display:none after boot unless deliberately open.
+var Overlay = (function () {
+  function open(id) { var e = document.getElementById(id); if (e) e.classList.add('ov-open'); }
+  function close(id) { var e = document.getElementById(id); if (e) e.classList.remove('ov-open'); }
+  function isOpen(id) { var e = document.getElementById(id); return !!(e && e.classList.contains('ov-open')); }
+  function toggle(id) { if (isOpen(id)) close(id); else open(id); }
+  function closeAll() {
+    document.querySelectorAll('.ov-open').forEach(function (e) { e.classList.remove('ov-open'); });
+  }
+  function anyOpen() { return !!document.querySelector('.ov-open'); }
+  return { open: open, close: close, isOpen: isOpen, toggle: toggle, closeAll: closeAll, anyOpen: anyOpen };
 })();
 
 function emptyRow() { return { '11': Side.empty(), '13': Side.empty() }; }
@@ -1197,7 +1218,7 @@ function toggleHallMenu() {
   var mEl = document.getElementById('hallMenu');
   var b = document.getElementById('hallMenuBody');
   if (!mEl || !b) return;
-  if (mEl.classList.contains('open')) { mEl.classList.remove('open'); return; }
+  if (Overlay.isOpen('hallMenu')) { Overlay.close('hallMenu'); return; }
   var halls = Object.values(state.halls);
   b.innerHTML =
     '<div class="card-title" style="margin-bottom:12px;">Manage halls</div>' +
@@ -1211,7 +1232,7 @@ function toggleHallMenu() {
     }).join('') +
     '<button class="btn" style="width:100%; margin-top:12px; min-height:48px;" onclick="addHallPrompt()">+ Add ' + (halls.length === 3 ? 'CB/DH' : 'hall') + '</button>' +
     '<button class="btn btn-ghost" style="width:100%; margin-top:8px;" onclick="toggleHallMenu()">Close</button>';
-  mEl.classList.add('open');
+  Overlay.open('hallMenu');
 }
 function switchHall(id) {
   state.activeHall = id; saveState();
@@ -1467,9 +1488,8 @@ function removeNote(i) {
 
 /* ---------------- hall editor ---------------- */
 function toggleEditor() {
-  var el = (document.getElementById('hallEditor') || {});
-  if (el.style.display === 'none') { renderEditor(); el.style.display = 'block'; }
-  else el.style.display = 'none';
+  if (Overlay.isOpen('hallEditor')) { Overlay.close('hallEditor'); return; }
+  renderEditor(); Overlay.open('hallEditor');
 }
 function renderEditor() {
   var hall = state.halls[state.activeHall];
@@ -1548,7 +1568,7 @@ function deleteHall() {
   pushUndo();
   delete state.halls[state.activeHall];
   state.activeHall = Object.keys(state.halls)[0];
-  (document.getElementById('hallEditor') || {}).style.display = 'none';
+  Overlay.close('hallEditor');
   saveState(); renderAll();
 }
 function addHallPrompt() {
@@ -1706,10 +1726,10 @@ function endOfNight() {
     '<li>Report archived to history \u2713</li>' +
     '<li>Baseline saved \u2014 tomorrow can show changes-only \u2713</li>' +
     '<li>Now: copy the report, send it, and save a backup file.</li>';
-  document.getElementById('nightOverlay').style.display = 'flex';
+  Overlay.open('nightOverlay');
 }
 function closeNightOverlay() {
-  document.getElementById('nightOverlay').style.display = 'none';
+  Overlay.close('nightOverlay');
   showToast('Night wrapped \u2014 get home safe');
 }
 
@@ -2099,12 +2119,10 @@ function updateSyncStatus() {
   } catch (e) { el.textContent = ''; }
 }
 function openSettings() {
-  var s = document.getElementById('settingsSheet');
-  if (s) { s.classList.add('open'); renderCrewPanel(); }
+  Overlay.open('settingsSheet'); renderCrewPanel();
 }
 function closeSettings() {
-  var s = document.getElementById('settingsSheet');
-  if (s) s.classList.remove('open');
+  Overlay.close('settingsSheet');
 }
 function resumeWalk() { switchTab('walk'); }
 function renderHome() {
@@ -2231,7 +2249,7 @@ function disconnectSite() {
 function dismissOnboarding() {
   state.settings.onboarded = true;
   saveState();
-  document.getElementById('onboarding').style.display = 'none';
+  Overlay.close('onboarding');
   try {
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
   } catch (e) {}
@@ -2284,7 +2302,7 @@ function renderAll() {
     });
     if (hasData && !state.settings.onboarded) { state.settings.onboarded = true; saveState(); }
     if (!state.settings.onboarded) {
-      document.getElementById('onboarding').style.display = 'flex';
+      Overlay.open('onboarding');
       // in the installed app, hide install steps and lead with the site code
       var isInstalled = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
       if (isInstalled) {

@@ -173,6 +173,38 @@ with sync_playwright() as p:
     for k, ok in res7.items():
         check(f"merge.{k}", ok)
 
+    # --- 8. OVERLAY GATE: every overlay is display:none after boot unless
+    #    opened through the Overlay owner; an open overlay really intercepts
+    #    taps; closing really hides it (the v34 invisible-overlay bug class). ---
+    res8 = pg.evaluate("""() => {
+      const out = {};
+      const ids = ['updateBanner','hallMenu','hallEditor','nightOverlay','onboarding','settingsSheet'];
+      out.allHiddenAfterBoot = ids.every(id => {
+        const e = document.getElementById(id);
+        return !e || getComputedStyle(e).display === 'none';
+      });
+      const hit = document.elementFromPoint(innerWidth/2, innerHeight/3);
+      out.nothingIntercepts = !(hit && (hit.closest && hit.closest('.overlay, .hall-menu, .palette-sheet, .update-banner')));
+      Overlay.open('onboarding');
+      const e2 = document.elementFromPoint(innerWidth/2, innerHeight/2);
+      out.openIntercepts = !!(e2 && (e2.id === 'onboarding' || (e2.closest && e2.closest('#onboarding'))));
+      Overlay.close('onboarding');
+      out.closeHides = getComputedStyle(document.getElementById('onboarding')).display === 'none';
+      out.settingsRoundTrip = (() => {
+        Overlay.open('settingsSheet');
+        const vis = getComputedStyle(document.getElementById('settingsSheet')).display !== 'none';
+        Overlay.close('settingsSheet');
+        return vis && getComputedStyle(document.getElementById('settingsSheet')).display === 'none';
+      })();
+      out.closeAllClears = (() => {
+        Overlay.open('hallMenu'); Overlay.open('settingsSheet'); Overlay.closeAll();
+        return !Overlay.anyOpen();
+      })();
+      return out;
+    }""")
+    for k, ok in res8.items():
+        check(f"overlay.{k}", ok)
+
     b.close()
 
 print("\n" + ("PROBES: ALL PASS" if not fails else "PROBES FAILED: " + ", ".join(fails)))
