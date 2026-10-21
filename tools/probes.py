@@ -243,6 +243,62 @@ with sync_playwright() as p:
     for k, ok in res10.items():
         check(f"hall.{k}", ok)
 
+    # --- 11. PAGE GATE: every standalone page loads clean. index.html has
+    #    probes 1-10; buf103/reference/labels/guide had NOTHING - and three
+    #    field bugs shipped through that hole (reference horizontal scroll,
+    #    buf103 topbar overlap, dead guide training route). Now every page
+    #    must: load with zero JS errors, have zero sideways scroll, keep
+    #    focusable inputs >= 16px, and guide's launcher routes must render
+    #    real content instead of the cloud dead-end message. ---
+    standalone = [
+        ("/buf103.html", 6000, "buf103"),
+        ("/reference.html", 3500, "reference"),
+        ("/labels.html", 2500, "labels"),
+    ]
+    for path, wait, name in standalone:
+        sp = b.new_context(viewport={"width": 390, "height": 844}, color_scheme="dark").new_page()
+        perrs = []
+        sp.on("pageerror", lambda e: perrs.append(str(e)[:100]))
+        sp.goto(BASE + path, wait_until="domcontentloaded")
+        sp.wait_for_timeout(wait)
+        r = sp.evaluate("""() => ({
+          scrollX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          smallInputs: Array.from(document.querySelectorAll('input, select, textarea'))
+            .filter(el => el.offsetParent !== null && parseFloat(getComputedStyle(el).fontSize) < 16).length,
+          bodyText: document.body.innerText.slice(0, 400)
+        })""")
+        check(f"page[{name}].noJsErrors", not perrs, "; ".join(perrs[:2]))
+        check(f"page[{name}].noHorizontalScroll", r["scrollX"] <= 1, f"scrollX={r['scrollX']}")
+        check(f"page[{name}].inputs16px", r["smallInputs"] == 0, f"{r['smallInputs']} small")
+        if name == "buf103":
+            check("page[buf103].dataLoaded", "cables" in r["bodyText"], r["bodyText"][:60])
+        sp.close()
+
+    # guide launcher routes: content, not the cloud dead-end
+    for route in ["train", "mislabel", "clean", "find"]:
+        sp = b.new_context(viewport={"width": 390, "height": 844}, color_scheme="dark").new_page()
+        perrs = []
+        sp.on("pageerror", lambda e: perrs.append(str(e)[:100]))
+        sp.goto(BASE + f"/guide.html#/{route}", wait_until="domcontentloaded")
+        sp.wait_for_timeout(3000)
+        if route == "find":
+            # the search form lives on the guide's HOME card, not the results
+            # view - submit from there like a user, which lands on #/find
+            sp.goto(BASE + "/guide.html", wait_until="domcontentloaded")
+            sp.wait_for_timeout(3000)
+            sp.evaluate("""() => {
+              const inp = document.querySelector('#app input[type=search], #app input[type=text]');
+              if (inp) { inp.value = 'BUF102#0028354';
+                (inp.closest('form')||inp).dispatchEvent(new Event('submit', {bubbles:true, cancelable:true})); }
+            }""")
+            sp.wait_for_timeout(3000)
+        r = sp.evaluate(
+            "() => (document.getElementById('view')||{textContent:''}).textContent")
+        check(f"guide[{route}].renders", len(r.strip()) > 40, r.strip()[:60])
+        check(f"guide[{route}].noCloudDeadEnd",
+              "needs the online site" not in r and "Enter the crew code" not in r, r.strip()[:60])
+        sp.close()
+
     b.close()
 
 print("\n" + ("PROBES: ALL PASS" if not fails else "PROBES FAILED: " + ", ".join(fails)))
