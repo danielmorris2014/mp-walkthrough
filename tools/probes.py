@@ -87,6 +87,47 @@ with sync_playwright() as p:
         check(f"layout[{t}]: padding clears chrome", r["padB"] >= need,
               f"padB={r['padB']} stackH={r['stackH']} chromeOn={r['chromeOn']}")
 
+    # --- 6. STAMP ENGINE: one toggle rule everywhere, attribution recorded,
+    #    undo restores, the DOM card patches in place (v41 architecture). ---
+    res6 = pg.evaluate("""() => {
+      const out = {};
+      switchTab('walk');
+      const hall = () => state.halls[state.activeHall];
+      const seg = (r, s) => hall().rows[r][s];
+      state.brush = 'hung'; state.scope = 'ALL';
+      const r0 = Object.keys(hall().rows).map(Number).sort((a,b)=>a-b)[0];
+      // neutral start: defaultState ships demo stamps (rows 1-2 hung) — the
+      // engine's toggle rule is atomic per target, so tests begin from 'none'
+      const reset = (r, s) => { const g = hall().rows[r][s]; ['F144','OCS','CAT6'].forEach(c => g[c] = 'none'); if (g._st) g._st = {}; };
+      reset(r0, '11'); reset(r0, '13');
+      // single side tap: sets, then tap-again clears
+      tapSide(r0, '11');
+      out.set = seg(r0,'11').F144 === 'hung' && seg(r0,'11').CAT6 === 'hung';
+      out.attr = !!(seg(r0,'11')._st && seg(r0,'11')._st.F144 && seg(r0,'11')._st.F144.by && seg(r0,'11')._st.F144.at);
+      out.domPatched = !!document.querySelector('#walkGrid .side-card[data-r="'+r0+'"][data-side="11"] .stb-hung');
+      tapSide(r0, '11');
+      out.toggleClear = seg(r0,'11').F144 === 'none';
+      out.attrCleared = !(seg(r0,'11')._st && seg(r0,'11')._st.F144);
+      // pod stamp: set then clear (Daniel's Q2 rule — pods toggle like rows)
+      const pod = (hall().groups || [])[0];
+      const rows = pod ? pod.rows.filter(r => hall().rows[r]).slice(0,3) : [];
+      if (rows.length) {
+        rows.forEach(r => { reset(r, '11'); reset(r, '13'); });
+        stampRows(rows, 'both', true);
+        out.podSet = rows.every(r => seg(r,'11').F144 === 'hung' && seg(r,'13').F144 === 'hung');
+        stampRows(rows, 'both', true);
+        out.podToggleClear = rows.every(r => seg(r,'11').F144 === 'none' && seg(r,'13').F144 === 'none');
+      } else { out.podSet = true; out.podToggleClear = true; }
+      // undo restores the pre-stamp state (incl. attribution)
+      const before = JSON.stringify(hall().rows[r0]);
+      tapBoth(r0);
+      doUndo();
+      out.undoRestores = JSON.stringify(hall().rows[r0]) === before;
+      return out;
+    }""")
+    for k, ok in res6.items():
+        check(f"stamp.{k}", ok)
+
     b.close()
 
 print("\n" + ("PROBES: ALL PASS" if not fails else "PROBES FAILED: " + ", ".join(fails)))

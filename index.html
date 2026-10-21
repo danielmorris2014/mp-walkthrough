@@ -915,6 +915,7 @@
 
 <script src="report-engine.js"></script>
 <script src="sync-engine.js"></script>
+<script src="stamp-engine.js"></script>
 <script>var STATUS_META = ReportEngine.STATUS_META, STATUS_ORDER = ReportEngine.STATUS_ORDER,
 REPORT_STATUS_ORDER = ReportEngine.REPORT_STATUS_ORDER, CABLES = ReportEngine.CABLES,
 CABLE_LABEL = ReportEngine.CABLE_LABEL, sideOverall = ReportEngine.sideOverall,
@@ -922,7 +923,7 @@ hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v40';
+var APP_VERSION = 'v41';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -941,15 +942,59 @@ var BRUSH_LABEL = { hung: 'Ran & Hung', ran: 'Ran (Pulled)', prog: 'In Progress'
 var STATUS_COLOR = { none: '#5a6169', staged: '#0090ff', prog: '#ffc53d', ran: '#6e56cf', hung: '#30a46c', remed: '#e5484d' };
 
 // Brief glow on a side card after a stamp lands (the "feels alive" feedback).
-function glowSide(r, side, status) {
-  var el = document.querySelector('.side-card[onclick="tapSide(' + r + ', \'' + side + '\')"]');
-  if (!el) return;
-  el.style.setProperty('--glow', STATUS_COLOR[status] || STATUS_COLOR.none);
-  el.classList.remove('landed');
-  void el.offsetWidth;
-  el.classList.add('landed');
-  setTimeout(function () { el.classList.remove('landed'); }, 600);
-}
+/* ---------------- WalkView: the walk screen's render seam ---------------- */
+// update(changed) patches ONLY the side-cards a stamp touched (one card per
+// tap instead of rebuilding the hall); full(state) rebuilds everything.
+// Falls back to a full render if a changed card isn't in the DOM.
+var WalkView = (function () {
+  function cardEl(r, side) {
+    return document.querySelector('#walkGrid .side-card[data-r="' + r + '"][data-side="' + side + '"]');
+  }
+  function glow(el, status) {
+    if (!el) return;
+    el.style.setProperty('--glow', STATUS_COLOR[status] || STATUS_COLOR.none);
+    el.classList.remove('landed');
+    void el.offsetWidth;
+    el.classList.add('landed');
+    setTimeout(function () { el.classList.remove('landed'); }, 600);
+  }
+  function update(changed) {
+    var hall = state.halls[state.activeHall];
+    if (!hall) { renderWalk(); return; }
+    for (var i = 0; i < changed.length; i++) {
+      var ch = changed[i];
+      var el = cardEl(ch.r, ch.side);
+      if (!el) { renderWalk(); return; } // card not on screen (hall/pod changed) -> full render
+      var tmp = document.createElement('div');
+      tmp.innerHTML = buildSideHtml(hall, ch.r, ch.side);
+      var fresh = tmp.firstElementChild;
+      el.parentNode.replaceChild(fresh, el);
+      glow(fresh, ch.status);
+    }
+    updateWalkDerived(hall); // strip, segment bars, pod counts, menu stats
+  }
+  // everything derived from hall state that a stamp can move — shared by the
+  // patch path and the full render so they can never disagree
+  function updateWalkDerived(hall) {
+    renderHallStrip();
+    renderHallTabs();
+    // pod header hung-counts (headers are appended in groups order)
+    var pods = document.querySelectorAll('#walkGrid .pod-header');
+    (hall.groups || []).forEach(function (g, i) {
+      var ph = pods[i];
+      if (!ph) return;
+      var existing = g.rows.filter(function (r) { return !!hall.rows[r]; });
+      var done = 0;
+      existing.forEach(function (r) {
+        ['11', '13'].forEach(function (s) { if (sideSummary(hall.rows[r][s]).status === 'hung') done++; });
+      });
+      var cnt = ph.querySelector('.pod-count');
+      if (cnt) cnt.textContent = done + '/' + (existing.length * 2) + ' hung';
+    });
+    renderWalkStats(hall);
+  }
+  return { update: update, glow: glow };
+})();
 
 function emptySide() { return { F144: 'none', OCS: 'none', CAT6: 'none' }; }
 function emptyRow() { return { '11': emptySide(), '13': emptySide() }; }
@@ -1123,49 +1168,28 @@ function updateBrushLabel() {
 }
 
 /* ---------------- stamping ---------------- */
-function activeCables() { return state.scope === 'ALL' ? CABLES.slice() : [state.scope]; }
-
-function tapSide(r, side) {
+// The shell: undo -> Stamp.apply -> save -> patch the changed cards.
+// The rule itself (tap-again-to-clear) lives in stamp-engine.js — once.
+function stampAndRender(target, opts) {
   pushUndo();
-  var seg = state.halls[state.activeHall].rows[r][side];
-  var br = state.brush, cs = activeCables();
-  var alreadyAll = cs.every(function (c) { return seg[c] === br; });
-  var next = alreadyAll ? 'none' : br;
-  cs.forEach(function (c) { seg[c] = next; });
-  saveState(); renderWalk();
-  glowSide(r, side, next === 'none' ? 'none' : br);
+  var res = Stamp.apply(state.halls[state.activeHall], target, state.brush, opts);
+  saveState();
+  WalkView.update(res.changed);
+  return res;
+}
+function tapSide(r, side) {
+  stampAndRender({ rows: [r], sides: [side], scope: state.scope });
 }
 function tapPill(e, r, side, cable) {
   if (e) e.stopPropagation();
-  pushUndo();
-  var seg = state.halls[state.activeHall].rows[r][side];
-  seg[cable] = (seg[cable] === state.brush) ? 'none' : state.brush;
-  saveState(); renderWalk();
-  glowSide(r, side, seg[cable]);
+  stampAndRender({ rows: [r], sides: [side], cables: [cable] });
 }
 function tapBoth(r) {
-  pushUndo();
-  var hall = state.halls[state.activeHall];
-  var br = state.brush, cs = activeCables();
-  var allMatch = ['11', '13'].every(function (s) {
-    return cs.every(function (c) { return hall.rows[r][s][c] === br; });
-  });
-  var next = allMatch ? 'none' : br;
-  ['11', '13'].forEach(function (s) { cs.forEach(function (c) { hall.rows[r][s][c] = next; }); });
-  saveState(); renderWalk();
-  glowSide(r, '11', next === 'none' ? 'none' : br);
-  glowSide(r, '13', next === 'none' ? 'none' : br);
+  stampAndRender({ rows: [r], sides: ['11', '13'], scope: state.scope });
 }
 function stampRows(rows, sideMode, quiet) {
-  pushUndo();
-  var hall = state.halls[state.activeHall];
-  var br = state.brush, cs = activeCables();
   var sides = sideMode === 'both' ? ['11', '13'] : [sideMode];
-  rows.forEach(function (r) {
-    if (!hall.rows[r]) return;
-    sides.forEach(function (s) { cs.forEach(function (c) { hall.rows[r][s][c] = br; }); });
-  });
-  saveState(); renderWalk();
+  stampAndRender({ rows: rows, sides: sides, scope: state.scope });
   if (!quiet) showToast('Stamped ' + rows.length + ' row' + (rows.length === 1 ? '' : 's'));
 }
 
@@ -1329,36 +1353,8 @@ function renderWalk() {
       '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:28px;" onclick="removeNote(' + i + ')">\u2715</button></div>';
   }).join('');
 
-  // stats
-  var counts = { hung: 0, ran: 0, prog: 0, staged: 0, remed: 0 };
-  var totalSides = 0;
-  var cableDone = { F144: 0, OCS: 0, CAT6: 0 };
-  Object.keys(hall.rows).forEach(function (r) {
-    ['11', '13'].forEach(function (side) {
-      totalSides++;
-      var sum = sideSummary(hall.rows[r][side]);
-      if (sum.uniform && counts[sum.status] !== undefined) counts[sum.status]++;
-      CABLES.forEach(function (c) {
-        var st = hall.rows[r][side][c];
-        if (st === 'hung' || st === 'ran' || st === 'remed') cableDone[c]++;
-      });
-    });
-  });
-  var hsEl = (document.getElementById('hallStats') || {});
-  if (hsEl) hsEl.innerHTML =
-    ['hung', 'ran', 'prog', 'staged', 'remed'].map(function (k) {
-      return '<div class="stat-cell"><div class="stat-num" style="color:var(--st-' + k + ')">' + counts[k] + '</div>' +
-        '<div class="stat-lbl">' + STATUS_META[k].badge.replace('Ran & ', 'R&').replace('In Progress', 'Prog') + '</div></div>';
-    }).join('');
-  var csEl = (document.getElementById('cableStats') || {});
-  if (csEl) csEl.textContent =
-    CABLES.map(function (c) { return CABLE_LABEL[c] + ' ' + cableDone[c] + '/' + totalSides + ' sides ran+'; }).join(' \u00b7 ') +
-    ' \u00b7 ' + totalSides + ' sides total';
-  var pct = totalSides ? counts.hung / totalSides : 0;
-  var ring = (document.getElementById('progRing') || {});
-  if (ring) ring.style.strokeDashoffset = (94.2 * (1 - pct)).toFixed(1);
-  var pctEl = (document.getElementById('progPct') || {});
-  if (pctEl) pctEl.textContent = Math.round(pct * 100) + '%';
+  // stats (shared with WalkView.update so patch and full render agree)
+  renderWalkStats(hall);
   var grid = document.getElementById('walkGrid');
   grid.innerHTML = '';
 
@@ -1406,6 +1402,39 @@ function gotoRowFn() {
   (document.getElementById('gotoRow') || {}).value = '';
 }
 
+// hall-level counters — called by the full render AND the tap patch path
+function renderWalkStats(hall) {
+  var counts = { hung: 0, ran: 0, prog: 0, staged: 0, remed: 0 };
+  var totalSides = 0;
+  var cableDone = { F144: 0, OCS: 0, CAT6: 0 };
+  Object.keys(hall.rows).forEach(function (r) {
+    ['11', '13'].forEach(function (side) {
+      totalSides++;
+      var sum = sideSummary(hall.rows[r][side]);
+      if (sum.uniform && counts[sum.status] !== undefined) counts[sum.status]++;
+      CABLES.forEach(function (c) {
+        var st = hall.rows[r][side][c];
+        if (st === 'hung' || st === 'ran' || st === 'remed') cableDone[c]++;
+      });
+    });
+  });
+  var hsEl = document.getElementById('hallStats');
+  if (hsEl) hsEl.innerHTML =
+    ['hung', 'ran', 'prog', 'staged', 'remed'].map(function (k) {
+      return '<div class="stat-cell"><div class="stat-num" style="color:var(--st-' + k + ')">' + counts[k] + '</div>' +
+        '<div class="stat-lbl">' + STATUS_META[k].badge.replace('Ran & ', 'R&').replace('In Progress', 'Prog') + '</div></div>';
+    }).join('');
+  var csEl = document.getElementById('cableStats');
+  if (csEl) csEl.textContent =
+    CABLES.map(function (c) { return CABLE_LABEL[c] + ' ' + cableDone[c] + '/' + totalSides + ' sides ran+'; }).join(' \u00b7 ') +
+    ' \u00b7 ' + totalSides + ' sides total';
+  var pct = totalSides ? counts.hung / totalSides : 0;
+  var ring = document.getElementById('progRing');
+  if (ring) ring.style.strokeDashoffset = (94.2 * (1 - pct)).toFixed(1);
+  var pctEl = document.getElementById('progPct');
+  if (pctEl) pctEl.textContent = Math.round(pct * 100) + '%';
+}
+
 function buildSideHtml(hall, r, side) {
   var seg = hall.rows[r][side];
   var sum = sideSummary(seg);
@@ -1419,7 +1448,7 @@ function buildSideHtml(hall, r, side) {
     var lbl = c === 'CAT6' ? 'CAT6' : CABLE_LABEL[c];
     return '<div class="mini-pill ' + m.pillCls + '" onclick="tapPill(event, ' + r + ', \'' + side + '\', \'' + c + '\')">' + lbl + ': ' + m.short + '</div>';
   }).join('');
-  return '<div class="side-card ' + cardCls + '" onclick="tapSide(' + r + ', \'' + side + '\')">' +
+  return '<div class="side-card ' + cardCls + '" data-r="' + r + '" data-side="' + side + '" onclick="tapSide(' + r + ', \'' + side + '\')">' +
     '<div><div class="side-top"><span class="side-id">' + r + side + '</span><span class="side-span">' + span + '</span></div>' +
     '<span class="side-status-badge stb-' + (sum.uniform ? sum.status : 'mixed') + '">' + badge + '</span></div>' +
     '<div class="mini-cables">' + pills + '</div></div>';
