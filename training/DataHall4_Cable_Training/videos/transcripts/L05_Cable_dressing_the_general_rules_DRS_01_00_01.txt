@@ -1,0 +1,108 @@
+Lesson 5 video: Cable dressing: the general rules (DRS 01.00.01)
+Length 10:03 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] This video covers the general rules for dressing cable.
+[0:06] They come from DRS 01.00.01, General Fiber Cable Dressing.
+[0:15] Lesson 5B covers the tray and the front of the rack.
+[0:20] We will cover the six rules, the standards behind them, Velcro and bend radius, rated cable, and what to ask your lead.
+
+[0:33] THE SIX RULES
+[0:34] To dress a cable means to route and fasten it so it hangs neatly, keeps a safe bend, and stays out of the way of other equipment.
+[0:46] Four DRS sheets cover dressing so far.
+[0:50] DRS 01.00.01 has the general rules for every cable you dress.
+[1:00] DRS 01.00.03 covers the basket tray, 01.00.03.01 vertical runs, and 01.00.02 the front of the rack.
+[1:18] Those three are in lesson 5B.
+[1:22] Have the sheets on hand when you dress cable.
+[1:26] Rule one.
+[1:28] Cables are dressed in accordance with three industry standards: ANSI/TIA-568, TIA-606, and TIA-942.
+[1:43] Rule two.
+[1:45] Use half-inch hook and loop straps, which everyone calls Velcro.
+[1:51] Nylon zip ties are not allowed.
+[1:55] Rule three.
+[1:57] Bend radius.
+[1:59] Follow the manufacturer's spec, with a minimum of twenty times the cable diameter under tension, and ten times with no tension.
+[2:11] Rule four.
+[2:13] Supports must not damage the cable.
+[2:17] No metal staples.
+[2:20] Rule five.
+[2:22] Support cable every four to five feet on horizontal runs.
+[2:28] The sheet gives this as the TIA-568 recommendation.
+[2:35] And rule six.
+[2:38] Use cable rated for the space: plenum, riser, or low smoke zero halogen where local code requires.
+
+[2:50] THE STANDARDS BEHIND IT
+[2:51] Rule one names three standards.
+[2:54] You will not be handed these on site, but you should know what each one covers.
+[3:01] TIA-568 is the standard for telecom cabling in buildings: how cable is installed and supported.
+[3:12] Rule five, support every four to five feet, comes from it.
+[3:19] TIA-606 is the administration standard: identifiers, labels and records.
+[3:27] Your label rules from lesson four are part of that work.
+[3:33] TIA-942 is the standard for data center infrastructure, including cabling and pathways like the trays your cables run in.
+[3:47] And the fire ratings in rule six come from the NEC, the National Electrical Code.
+[3:55] When you explain why a cable is dressed a certain way, cite the DRS rule.
+[4:02] For example: DRS 01.00.01, rule 2, Velcro only.
+
+[4:13] VELCRO AND BENDS
+[4:14] Back to rule two.
+[4:16] Why Velcro?
+[4:18] A zip tie pulled tight squeezes the cable and can damage the fiber inside.
+[4:25] Hook and loop holds the bundle without crushing it.
+[4:30] Now rule three.
+[4:32] The bend radius is how tightly a cable is allowed to curve, measured from the center of the curve out to the cable.
+[4:43] When the cable is loaded, meaning under tension, such as while you pull it, the minimum is twenty times its diameter.
+[4:54] When it is unloaded, with no tension, the minimum is ten times.
+[5:00] The manufacturer's spec always applies too.
+[5:04] If the spec gives a bigger number, use the bigger number.
+[5:09] DRS 01.00.03 says it again: keep the manufacturer's recommended bend radius at all times.
+[5:22] For example, a cable a quarter inch across needs at least five inches of radius while you pull it, and two and a half inches once it is in place.
+[5:35] Why it matters: a tight bend lets light leak out of the fiber, and can crack the glass.
+[5:42] You will not see the damage.
+[5:45] One thing to ask about.
+[5:48] The guide also recommends fifteen times for long-term installed cable.
+[5:55] That number is not on DRS 01.00.01, which points to DRS 01.00.07 for fiber bend radius.
+[6:10] Never go below the DRS minimums.
+
+[6:16] RATED CABLE
+[6:17] Rule six is about where a cable is allowed to run.
+[6:22] Every cable jacket has a fire rating printed on it.
+[6:27] A plenum space is part of the building's air-handling system, such as some spaces above ceilings.
+[6:36] Smoke there would travel through the air system.
+[6:40] Only plenum-rated cable may run there: OFNP for fiber, CMP for copper.
+[6:49] A riser is a vertical path between floors.
+[6:54] It needs riser-rated cable: OFNR for fiber, CMR for copper.
+[7:02] Where local code requires it, use LSZH, which stands for low smoke zero halogen.
+[7:11] A higher rating can replace a lower one, but never the other way around.
+[7:17] Plenum can go where riser is called for.
+[7:21] Riser can never go in a plenum space.
+[7:26] If the rating on the jacket does not match the space, stop and ask your lead.
+
+[7:35] WORKED EXAMPLE
+[7:36] Let us work out one example.
+[7:39] Use your own cable's diameter and spec sheet on the job.
+[7:44] Say the cable is 0.4 inches across.
+[7:49] While you pull it, it is loaded: twenty times 0.4 is eight inches of radius.
+[7:57] Once it is in place with no tension: ten times 0.4 is four inches.
+[8:05] If the spec sheet says five inches, five is bigger than four, so you use five.
+[8:13] And remember, the radius is half the width of the loop.
+[8:17] A five inch radius makes a loop about ten inches across.
+
+[8:25] VELCRO SIZES, AND ONE QUESTION
+[8:26] First, Velcro sizes, because two sizes appear in the documents.
+[8:33] To bundle cables together, use half-inch Velcro everywhere.
+[8:38] Three DRS sheets say so, and DRS 01.00.03 says half-inch for all cable bundling.
+[8:50] Three-quarter inch Velcro may be used to secure cable to a vertical tray.
+[8:57] That is DRS 01.00.03.01, and the guide says the same.
+[9:06] Lesson 5B covers vertical runs.
+[9:11] One question for your lead.
+[9:14] The guide recommends fifteen times bend radius for the long term.
+[9:20] The DRS gives twenty and ten, and points to another sheet for fiber.
+[9:26] Where the guide and the DRS differ, the DRS is the requirement.
+[9:33] Follow it, and tell your lead about the difference.
+
+[9:39] WRAP-UP
+[9:40] In lesson five of the course, explore the six rules, work out bend radius, match each requirement to its rule, and spot the mistakes.
+[9:52] Then take the lesson check, and go on to lesson 5B: the tray and the front of the rack.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

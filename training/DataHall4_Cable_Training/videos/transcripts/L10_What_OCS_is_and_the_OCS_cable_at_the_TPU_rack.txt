@@ -1,0 +1,108 @@
+Lesson 10 video: What OCS is, and the OCS cable at the TPU rack
+Length 8:16 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] This video explains the optical circuit switch, or OCS, and how the OCS cables connect at the TPU rack.
+[0:12] We will cover what an optical circuit switch does, the SPOCS racks, the OCS cable itself, what each color means, how to plug in at the OCS panel, and how to spot a wrong connection.
+
+[0:31] WHAT OCS DOES
+[0:32] OCS stands for Optical Circuit Switch.
+[0:36] The guide describes it as a shelf that steers light between fibers.
+[0:43] Light comes in on one fiber, and the switch points it out on another fiber.
+[0:49] Change the setting, and the same light goes somewhere else, without anyone touching a cable.
+[0:57] Public research from Google describes how: the switch uses tiny movable mirrors to point the light.
+[1:07] This lets the system link the TPU racks of one pod together in different shapes, for different jobs.
+[1:16] Here is why that matters to you.
+[1:19] The switch can only steer light it actually receives.
+[1:24] If a leg is in the wrong port, that link simply does not exist.
+
+[1:32] SPOCS RACKS
+[1:33] The OCS shelves live in SPOCS racks.
+[1:38] SPOCS stands for Super Pod OCS rack.
+[1:42] Each one holds four OCS shelves.
+[1:47] Each pod has three SPOCS racks, color coded.
+[1:52] Red is SPOCS rack one.
+[1:55] Orange is SPOCS rack two.
+[1:59] And yellow is SPOCS rack three.
+[2:03] Every TPU rack in the pod sends one OCS cable to each of these three racks.
+[2:10] One hundred forty-four TPU racks, three cables each.
+
+[2:18] THE OCS CABLE
+[2:19] This is an OCS cable.
+[2:22] This one has an orange jacket, so it is OCS cable two.
+[2:29] It has eighteen fibers, and nine LC legs at each end.
+[2:34] Each leg is an LC duplex, two fibers, with the angled APC polish.
+[2:42] Nine times two is eighteen.
+[2:46] Eight legs are used.
+[2:48] The ninth leg, the yellow one, is the spare.
+[2:53] The legs are labeled with the number of the OCS panel port they plug into.
+[3:00] On cable two, the labels are nine through sixteen.
+[3:05] The cable is called type B.
+[3:08] In each pair, one fiber sends and one receives, and a type B cable crosses them over so sending meets receiving.
+[3:18] The cutsheet already accounts for it.
+[3:22] You do not swap anything.
+[3:26] Each cable is cut to length for its rack.
+[3:30] Before you pull it, check the part number and the length on the reel against the cutsheet.
+
+[3:39] WHAT COLORS MEAN
+[3:40] There are three kinds of color, and a number, on every OCS cable.
+[3:46] Let us sort them out.
+[3:49] The jacket color tells you which cable it is, and which SPOCS rack it goes to.
+[3:56] Red goes to one, orange to two, yellow to three.
+[4:01] The leg colors, blue through black, tell you each leg's position in its cable, from one to eight.
+[4:10] A yellow leg is position nine: the spare.
+[4:15] And the number on the leg label is the OCS panel port it plugs into.
+[4:21] Use the label to pick the port, and the color as a check.
+
+[4:29] THE OCS PANEL
+[4:30] This is the OCS panel on the TPU rack, called pp1.
+[4:36] It has twenty-four ports, spread across both sides of the rack.
+[4:42] OCS cable one, the red one, plugs into the left group of eight: ports one to eight, on side A.
+[4:52] OCS cable two, orange, spans both sides.
+[4:57] Ports nine to twelve are on side A, and thirteen to sixteen are on side B.
+[5:05] OCS cable three, yellow, plugs into the right group: ports seventeen to twenty-four, on side B.
+[5:15] In each group, the blue leg goes in the lowest port, and the black leg goes in the highest.
+[5:23] The yellow spare is not plugged in.
+[5:26] The drawings show the ports on two sides, but the cutsheet lists them as one panel, pp1.
+[5:35] Go by the port numbers.
+
+[5:40] WORKED EXAMPLE
+[5:41] Let us plug in OCS cable two.
+[5:45] The orange jacket tells us it is cable two, going to SPOCS rack two.
+[5:51] In pod ten that is rack 612.
+[5:55] We already checked the reel against the cutsheet.
+[6:00] On side A: leg nine, blue, goes in port nine.
+[6:05] Leg ten, orange, in port ten.
+[6:09] Then eleven, green, and twelve, brown.
+[6:13] Then on side B: leg thirteen, slate, in port thirteen.
+[6:19] Fourteen, white.
+[6:21] Fifteen, red.
+[6:23] And sixteen, black.
+[6:26] Each leg is scoped and cleaned before it goes in.
+[6:31] The bundle gets a wrap-around label, and each leg gets a flag label.
+[6:37] And the yellow spare?
+[6:40] The guide flags a conflict.
+[6:43] The drawings say to coil it on top of the rack, but the reference cutsheet says it is left hanging.
+[6:50] Follow what your site decided, and ask your lead if you are not sure.
+
+[6:59] FIND THE MISTAKE
+[7:00] Now you try.
+[7:02] Look at this panel.
+[7:04] The chips show which leg is in each port.
+[7:08] One thing is wrong.
+[7:10] Pause the video and look for it.
+[7:16] Check the color order in each group: blue, orange, green, brown.
+[7:22] Look at ports nine to twelve.
+[7:26] Ports ten and eleven are swapped.
+[7:29] Leg eleven, green, is in port ten, and leg ten, orange, is in port eleven.
+[7:37] Why does it matter, if both legs are from the same cable?
+[7:42] Because each port is a specific link to a specific shelf at the far end.
+[7:49] A swap connects the wrong fibers.
+[7:52] Swap them back.
+
+[7:57] WRAP-UP
+[7:58] In lesson ten of the course, plug OCS legs into the right ports yourself and find wrong connections.
+[8:07] Then the next video follows these cables to the SPOCS racks.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

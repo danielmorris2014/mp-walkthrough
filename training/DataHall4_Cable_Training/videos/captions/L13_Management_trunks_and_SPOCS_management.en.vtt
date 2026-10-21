@@ -1,0 +1,310 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:06.619
+The copper runs reach the management switches
+in the end of row rack.
+
+2
+00:00:07.369 --> 00:00:12.425
+This video covers how those switches reach the
+management spines.
+
+3
+00:00:13.775 --> 00:00:20.225
+We will look at the LC panel at RU
+thirty-nine, the two trunk sizes, what each
+
+4
+00:00:20.225 --> 00:00:26.511
+fiber pair carries, how to land the trunks,
+and how the SPOCS racks connect.
+
+5
+00:00:30.661 --> 00:00:38.625
+Every end of row rack has a one rack unit LC
+panel at RU thirty-nine, for its management
+
+6
+00:00:38.625 --> 00:00:39.258
+trunks.
+
+7
+00:00:40.658 --> 00:00:45.842
+It has columns A to L, each with two
+positions, in three rows.
+
+8
+00:00:46.592 --> 00:00:48.661
+Row one is at the bottom.
+
+9
+00:00:50.011 --> 00:00:52.763
+The trunk lands on the rear of the panel.
+
+10
+00:00:53.513 --> 00:00:56.031
+Switch cords plug into the front.
+
+11
+00:00:56.781 --> 00:01:01.453
+The switch cords are two-fiber LC duplex patch
+cords.
+
+12
+00:01:02.803 --> 00:01:09.203
+Each end of row rack connects to each of the
+two management spines with one trunk.
+
+13
+00:01:09.953 --> 00:01:14.667
+The management spine racks are 131 and 204.
+
+14
+00:01:18.817 --> 00:01:23.148
+A standard end of row rack uses twelve-fiber
+trunks.
+
+15
+00:01:23.898 --> 00:01:27.077
+Twelve fibers is six duplex pairs.
+
+16
+00:01:28.427 --> 00:01:34.784
+The spine one trunk uses positions A1 and A2,
+in all three rows.
+
+17
+00:01:36.134 --> 00:01:42.598
+The spine two trunk uses positions C5 and C6,
+in all three rows.
+
+18
+00:01:43.948 --> 00:01:49.324
+On the drawing, the duplex numbers count up
+each column from the bottom.
+
+19
+00:01:50.074 --> 00:01:52.975
+So duplex one is A1, row one.
+
+20
+00:01:54.325 --> 00:01:58.251
+Duplex one carries the management leaf uplink.
+
+21
+00:01:59.001 --> 00:02:02.414
+Duplex two carries the TROSS leaf uplink.
+
+22
+00:02:03.164 --> 00:02:05.084
+Three to six are spares.
+
+23
+00:02:05.834 --> 00:02:09.802
+The cutsheet gives the exact position for each
+cord.
+
+24
+00:02:13.952 --> 00:02:24.782
+The six end of row racks with BMS, 611, 613,
+1411, 1413, 2211 and 2213, use
+
+25
+00:02:24.782 --> 00:02:29.547
+twenty-four-fiber trunks instead.
+
+26
+00:02:30.297 --> 00:02:32.643
+That is twelve duplex pairs.
+
+27
+00:02:33.993 --> 00:02:39.497
+Their spine one trunk uses A1 through B4, rows
+one to three.
+
+28
+00:02:40.247 --> 00:02:44.407
+Their spine two trunk uses C5 through D8.
+
+29
+00:02:45.757 --> 00:02:51.731
+Duplex one and two are the same as before:
+management leaf and TROSS leaf.
+
+30
+00:02:53.081 --> 00:02:58.201
+Duplex three carries the FB0 BMS switch
+uplink.
+
+31
+00:02:58.951 --> 00:03:03.303
+That is the building management system, lesson
+fourteen.
+
+32
+00:03:04.653 --> 00:03:11.597
+Duplex four to nine are for the SPOCS racks'
+management uplinks, and ten to twelve are
+
+33
+00:03:11.597 --> 00:03:12.162
+spares.
+
+34
+00:03:13.512 --> 00:03:17.523
+One drawing says these racks use twelve-fiber
+trunks.
+
+35
+00:03:18.273 --> 00:03:24.737
+The guide corrected it to twenty-four, based
+on the patching drawing and the patch data.
+
+36
+00:03:25.487 --> 00:03:31.076
+If you see a twelve-fiber trunk headed for one
+of these racks, stop and ask.
+
+37
+00:03:35.226 --> 00:03:38.511
+Here are the steps for landing management
+trunks.
+
+38
+00:03:39.511 --> 00:03:41.837
+First, confirm the rack type.
+
+39
+00:03:42.587 --> 00:03:46.064
+BMS racks get twenty-four fiber trunks.
+
+40
+00:03:46.814 --> 00:03:48.883
+All the others get twelve.
+
+41
+00:03:50.233 --> 00:03:57.307
+On the rear, land the spine one trunk and the
+spine two trunk on their positions, in rows
+
+42
+00:03:57.307 --> 00:03:58.340
+one to three.
+
+43
+00:03:59.690 --> 00:04:08.185
+On the front, plug in the switch cords: duplex
+one for the management leaf, two for the TROSS
+
+44
+00:04:08.185 --> 00:04:12.661
+leaf, and on BMS racks, three for the FB0
+switch.
+
+45
+00:04:14.011 --> 00:04:16.763
+Store trunk slack on top of the rack.
+
+46
+00:04:17.513 --> 00:04:22.270
+Wrap-around labels on the trunks, flag labels
+on the cords.
+
+47
+00:04:23.620 --> 00:04:28.228
+At the management spine rack, each trunk lands
+on a panel.
+
+48
+00:04:28.978 --> 00:04:38.124
+From the panel front, a breakout harness joins
+four LC legs into one MPO-8 plug at the spine
+
+49
+00:04:38.124 --> 00:04:38.621
+port.
+
+50
+00:04:39.971 --> 00:04:46.865
+And that final patching at the spine rack must
+be done before the rack is turned up, meaning
+
+51
+00:04:46.865 --> 00:04:48.888
+powered and brought online.
+
+52
+00:04:53.038 --> 00:04:56.729
+The SPOCS racks need management connections
+too.
+
+53
+00:04:57.479 --> 00:05:06.725
+Each SPOCS rack has two pre-installed
+management switches near the top, called mgmt1
+
+54
+00:05:06.725 --> 00:05:07.825
+and mgmt2.
+
+55
+00:05:09.175 --> 00:05:18.306
+mgmt1 connects to the BMS end of row rack at
+spot eleven, in its pod's BMS row.
+
+56
+00:05:19.656 --> 00:05:26.248
+Mgmt two connects to the BMS end of row rack
+at spot thirteen.
+
+57
+00:05:27.598 --> 00:05:31.523
+Each uplink is a long two-fiber LC cord.
+
+58
+00:05:32.273 --> 00:05:39.302
+It runs straight to the front of that rack's
+RU thirty-nine panel, into a position whose
+
+59
+00:05:39.302 --> 00:05:42.577
+rear carries the twenty-four fiber trunk.
+
+60
+00:05:43.327 --> 00:05:45.695
+The cutsheet gives the position.
+
+61
+00:05:47.045 --> 00:05:52.507
+From there, the twenty-four fiber trunks carry
+them to the management spines.
+
+62
+00:05:53.257 --> 00:05:57.246
+Each switch has two uplinks, one toward each
+spine.
+
+63
+00:05:58.596 --> 00:06:06.258
+One open question: the table reserves six
+positions for SPOCS uplinks on each trunk, but
+
+64
+00:06:06.258 --> 00:06:09.305
+the description works out to three.
+
+65
+00:06:10.055 --> 00:06:15.794
+Use the cutsheet's exact positions, and ask
+your lead if they do not match.
+
+66
+00:06:19.944 --> 00:06:27.622
+In lesson thirteen of the course, practice
+finding positions on the LC panel and routing
+
+67
+00:06:27.622 --> 00:06:29.629
+SPOCS management cords.
+

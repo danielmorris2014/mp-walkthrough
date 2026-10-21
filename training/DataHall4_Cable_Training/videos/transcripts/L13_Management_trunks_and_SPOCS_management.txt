@@ -1,0 +1,72 @@
+Lesson 13 video: Management trunks and SPOCS management
+Length 6:33 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] The copper runs reach the management switches in the end of row rack.
+[0:07] This video covers how those switches reach the management spines.
+[0:13] We will look at the LC panel at RU thirty-nine, the two trunk sizes, what each fiber pair carries, how to land the trunks, and how the SPOCS racks connect.
+
+[0:29] THE RU 39 PANEL
+[0:30] Every end of row rack has a one rack unit LC panel at RU thirty-nine, for its management trunks.
+[0:40] It has columns A to L, each with two positions, in three rows.
+[0:46] Row one is at the bottom.
+[0:50] The trunk lands on the rear of the panel.
+[0:53] Switch cords plug into the front.
+[0:56] The switch cords are two-fiber LC duplex patch cords.
+[1:02] Each end of row rack connects to each of the two management spines with one trunk.
+[1:09] The management spine racks are 131 and 204.
+
+[1:17] TWO TRUNK SIZES
+[1:18] A standard end of row rack uses twelve-fiber trunks.
+[1:23] Twelve fibers is six duplex pairs.
+[1:28] The spine one trunk uses positions A1 and A2, in all three rows.
+[1:36] The spine two trunk uses positions C5 and C6, in all three rows.
+[1:43] On the drawing, the duplex numbers count up each column from the bottom.
+[1:50] So duplex one is A1, row one.
+[1:54] Duplex one carries the management leaf uplink.
+[1:59] Duplex two carries the TROSS leaf uplink.
+[2:03] Three to six are spares.
+[2:05] The cutsheet gives the exact position for each cord.
+[2:13] The six end of row racks with BMS, 611, 613, 1411, 1413, 2211 and 2213, use twenty-four-fiber trunks instead.
+[2:30] That is twelve duplex pairs.
+[2:33] Their spine one trunk uses A1 through B4, rows one to three.
+[2:40] Their spine two trunk uses C5 through D8.
+[2:45] Duplex one and two are the same as before: management leaf and TROSS leaf.
+[2:53] Duplex three carries the FB0 BMS switch uplink.
+[2:58] That is the building management system, lesson fourteen.
+[3:04] Duplex four to nine are for the SPOCS racks' management uplinks, and ten to twelve are spares.
+[3:13] One drawing says these racks use twelve-fiber trunks.
+[3:18] The guide corrected it to twenty-four, based on the patching drawing and the patch data.
+[3:25] If you see a twelve-fiber trunk headed for one of these racks, stop and ask.
+
+[3:34] LANDING THE TRUNKS
+[3:35] Here are the steps for landing management trunks.
+[3:39] First, confirm the rack type.
+[3:42] BMS racks get twenty-four fiber trunks.
+[3:46] All the others get twelve.
+[3:50] On the rear, land the spine one trunk and the spine two trunk on their positions, in rows one to three.
+[3:59] On the front, plug in the switch cords: duplex one for the management leaf, two for the TROSS leaf, and on BMS racks, three for the FB0 switch.
+[4:14] Store trunk slack on top of the rack.
+[4:17] Wrap-around labels on the trunks, flag labels on the cords.
+[4:23] At the management spine rack, each trunk lands on a panel.
+[4:28] From the panel front, a breakout harness joins four LC legs into one MPO-8 plug at the spine port.
+[4:39] And that final patching at the spine rack must be done before the rack is turned up, meaning powered and brought online.
+
+[4:52] SPOCS MANAGEMENT
+[4:53] The SPOCS racks need management connections too.
+[4:57] Each SPOCS rack has two pre-installed management switches near the top, called mgmt1 and mgmt2.
+[5:09] mgmt1 connects to the BMS end of row rack at spot eleven, in its pod's BMS row.
+[5:19] Mgmt two connects to the BMS end of row rack at spot thirteen.
+[5:27] Each uplink is a long two-fiber LC cord.
+[5:32] It runs straight to the front of that rack's RU thirty-nine panel, into a position whose rear carries the twenty-four fiber trunk.
+[5:43] The cutsheet gives the position.
+[5:47] From there, the twenty-four fiber trunks carry them to the management spines.
+[5:53] Each switch has two uplinks, one toward each spine.
+[5:58] One open question: the table reserves six positions for SPOCS uplinks on each trunk, but the description works out to three.
+[6:10] Use the cutsheet's exact positions, and ask your lead if they do not match.
+
+[6:18] WRAP-UP
+[6:19] In lesson thirteen of the course, practice finding positions on the LC panel and routing SPOCS management cords.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

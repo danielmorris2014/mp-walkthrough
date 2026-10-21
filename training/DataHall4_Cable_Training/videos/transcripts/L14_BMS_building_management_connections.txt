@@ -1,0 +1,65 @@
+Lesson 14 video: BMS: building management connections
+Length 5:49 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] This video explains BMS, the building management system, and how its network connections fit into your work.
+[0:11] We will cover what a building management system is, what the guide says about it, how its information travels, what you do, and what to ask.
+
+[0:25] WHAT A BMS IS
+[0:26] BMS stands for Building Management System.
+[0:30] It is a control system that monitors and manages a building's mechanical and electrical systems.
+[0:40] In general, that means things like power and cooling equipment, water leak detection, fire safety, lighting and access.
+[0:51] Sensors and controllers send their readings over a network to the BMS, which shows them on screens and raises an alarm when something goes outside its safe range.
+[1:06] So a BMS can only see what its network can reach.
+[1:11] That is where your cabling comes in.
+[1:15] That was general background.
+[1:18] The guide itself only describes the BMS network connections in the end of row racks.
+[1:26] It does not list which building systems are monitored in this hall.
+
+[1:34] WHAT THE GUIDE SAYS
+[1:35] There are two types of end of row rack: the standard one, and the one with BMS.
+[1:42] There are six BMS racks: 611 and 613 in pod ten.
+[1:50] Then 1411 and 1413 in pod eleven, and 2211 and 2213 in pod twelve.
+[2:01] Each pair is in the middle SPOCS row of its pod.
+[2:06] A BMS rack adds two things: an FB0 BMS switch, and a copper panel for it.
+[2:16] Its management trunks are twenty-four fiber, and duplex three on each one carries the FB0 uplink.
+[2:25] The guide also lists blue copper as BMS, if your site stocks it.
+
+[2:34] HOW BMS INFORMATION TRAVELS
+[2:35] Let us trace BMS information through the hall.
+[2:39] It starts at BMS devices, which connect by copper to the FB0 switch and its copper panel.
+[2:49] The guide does not say which devices these are, or who runs those cables.
+[2:56] The FB0 switch uplinks with a two-fiber LC cord into the front of the RU thirty-nine LC panel, at the duplex three position.
+[3:09] Behind that position, a twenty-four fiber trunk carries it to management spine one, and another carries it to management spine two.
+[3:21] Why two?
+[3:23] Every end of row rack connects to both management spines, so the management network, BMS included, has two paths.
+[3:34] Past the spines, the information reaches the systems that collect and display it.
+[3:41] That part is not yours.
+
+[3:47] WHAT YOU DO
+[3:48] So what do you actually do at a BMS rack?
+[3:52] Identify it.
+[3:54] It is marked EOR BMS on the map, and you should find the FB0 switch and an extra copper panel.
+[4:04] Connect it.
+[4:06] Land the twenty-four fiber trunks on the rear of the RU thirty-nine panel, and plug the switch cords into the front, including duplex three for the FB0 switch.
+[4:21] Label it: wrap-around labels on the trunks, and flag labels on the cords.
+[4:28] And verify it.
+[4:31] Both trunks are twenty-four fiber.
+[4:34] The FB0 cord is in duplex three for both spines, per the cutsheet.
+[4:41] The SPOCS cords are in.
+[4:44] And the far ends are patched before turn-up.
+
+[4:50] ASK YOUR LEAD
+[4:51] Some BMS details are simply not in the guide.
+[4:56] Bring these questions to your lead.
+[4:59] Which rack unit the FB0 switch and its copper panel use.
+[5:06] Which BMS devices connect to it, where their cables come from, and whether your crew runs them.
+[5:14] What FB0 stands for, and whether any testing is required on BMS links.
+[5:23] Do not guess.
+[5:25] A missing BMS connection may not show up until the day someone needs an alarm.
+
+[5:34] WRAP-UP
+[5:35] In lesson fourteen of the course, trace the BMS uplink step by step and answer a question at each stop.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

@@ -1,0 +1,362 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:09.307
+The 192-fiber trunks end in the network rows,
+at the DCN patch panel racks.
+
+2
+00:00:10.057 --> 00:00:13.854
+This video follows them there, and on to the
+spines.
+
+3
+00:00:15.204 --> 00:00:22.065
+We will look at the patch panel rack, how to
+find the right panel and lane, how to land a
+
+4
+00:00:22.065 --> 00:00:28.772
+trunk, what the shuffle module does, the cords
+to the spines, and one complete example.
+
+5
+00:00:32.922 --> 00:00:41.946
+A DCN patch panel rack, or DCN-PP, is a
+passive rack in network rows one and two.
+
+6
+00:00:42.696 --> 00:00:46.600
+Passive means it has no switches, only panels.
+
+7
+00:00:48.000 --> 00:00:55.356
+It holds eight patch panels, each four rack
+units tall, laid out like the end of row
+
+8
+00:00:55.356 --> 00:01:00.523
+panel: twelve rows, and columns A to L with
+two ports each.
+
+9
+00:01:01.873 --> 00:01:07.931
+Large sites like this one use two-by-two
+shuffle modules in these panels.
+
+10
+00:01:08.681 --> 00:01:11.135
+We will see what they do in a moment.
+
+11
+00:01:12.485 --> 00:01:16.602
+The 192-fiber trunks land on the back.
+
+12
+00:01:17.352 --> 00:01:21.043
+Short MPO cords leave the front for the
+spines.
+
+13
+00:01:25.193 --> 00:01:32.702
+For every 192-fiber trunk, the trunk landing
+sheet answers three questions.
+
+14
+00:01:33.702 --> 00:01:34.875
+Which rack?
+
+15
+00:01:35.625 --> 00:01:37.865
+You learned this in lesson eight.
+
+16
+00:01:38.615 --> 00:01:45.463
+The column picks the patch panel pair, and the
+end of row rack's spot picks north or south.
+
+17
+00:01:46.813 --> 00:01:48.072
+Which panel?
+
+18
+00:01:48.822 --> 00:01:55.883
+End of row racks in rows three to fourteen
+land in the panel at RU thirty-five.
+
+19
+00:01:56.633 --> 00:02:02.159
+Rows fifteen to twenty-six land in the panel
+at RU thirty-nine.
+
+20
+00:02:03.509 --> 00:02:04.725
+Which lane?
+
+21
+00:02:05.475 --> 00:02:11.405
+The sheet writes it like this: AIO-PP3, CD,
+number one.
+
+22
+00:02:12.155 --> 00:02:18.960
+That means the trunk's slot number on the
+panel, the pair of columns it uses, and lane
+
+23
+00:02:18.960 --> 00:02:20.859
+one or two of that pair.
+
+24
+00:02:22.209 --> 00:02:31.160
+For example, end of row rack 511 lands in the
+RU thirty-five panel, slot three, columns C
+
+25
+00:02:31.160 --> 00:02:32.769
+and D, lane one.
+
+26
+00:02:33.519 --> 00:02:38.021
+The same panel and lane apply to all eight of
+its columns.
+
+27
+00:02:42.171 --> 00:02:44.923
+This is the back of one patch panel.
+
+28
+00:02:45.673 --> 00:02:49.598
+Again, facing the rear, column A is on the
+right.
+
+29
+00:02:50.348 --> 00:02:52.033
+Work right to left.
+
+30
+00:02:53.433 --> 00:02:56.335
+A trunk uses one pair of columns.
+
+31
+00:02:57.085 --> 00:03:02.119
+Its odd legs go in the first column of the
+pair, here column A.
+
+32
+00:03:02.869 --> 00:03:06.859
+Its even legs go in the second column, column
+B.
+
+33
+00:03:08.209 --> 00:03:15.796
+The legs go up: legs one and two in row one,
+up to legs twenty-three and twenty-four in row
+
+34
+00:03:15.796 --> 00:03:16.379
+twelve.
+
+35
+00:03:17.729 --> 00:03:21.868
+Each trunk uses only one lane of the column
+pair.
+
+36
+00:03:22.618 --> 00:03:27.674
+The next end of row rack's trunk uses the lane
+right beside it.
+
+37
+00:03:29.024 --> 00:03:34.229
+Legs nineteen to twenty-four, in the top three
+rows, are spares.
+
+38
+00:03:34.979 --> 00:03:38.521
+And one panel holds twelve end of row trunks.
+
+39
+00:03:42.671 --> 00:03:47.513
+Behind each column pair sits a two-by-two
+shuffle module.
+
+40
+00:03:48.263 --> 00:03:54.819
+It takes two eight-fiber inputs on the back,
+and gives two eight-fiber outputs on the
+
+41
+00:03:54.819 --> 00:03:55.282
+front.
+
+42
+00:03:56.632 --> 00:04:01.432
+The trick is that each output carries fibers
+from both inputs.
+
+43
+00:04:02.182 --> 00:04:04.870
+The two inputs are shuffled together.
+
+44
+00:04:06.220 --> 00:04:10.039
+There are two of these shuffles inside every
+module.
+
+45
+00:04:11.389 --> 00:04:18.344
+That is why the two lanes of a column pair
+must hold trunks from two different end of row
+
+46
+00:04:18.344 --> 00:04:18.813
+racks.
+
+47
+00:04:19.563 --> 00:04:24.299
+The shuffle spreads every TPU rack across all
+the spines.
+
+48
+00:04:25.649 --> 00:04:27.398
+One important check.
+
+49
+00:04:28.148 --> 00:04:34.505
+Large sites use part number 760262482.
+
+50
+00:04:35.255 --> 00:04:41.613
+If a module reads 760262479, stop.
+
+51
+00:04:42.363 --> 00:04:47.632
+That is a four-by-four module, and these
+instructions do not apply.
+
+52
+00:04:51.782 --> 00:04:54.129
+Now the front of the same panel.
+
+53
+00:04:54.879 --> 00:04:57.631
+Each module has four front ports.
+
+54
+00:04:58.981 --> 00:05:06.680
+In every module, those four ports go to spines
+one, two, three and four of that patch panel's
+
+55
+00:05:06.680 --> 00:05:08.005
+group, in order.
+
+56
+00:05:09.355 --> 00:05:15.136
+Each port takes one eight-fiber MPO cord to
+one spine port.
+
+57
+00:05:16.486 --> 00:05:19.771
+Patch panel A feeds spines one to four.
+
+58
+00:05:20.521 --> 00:05:22.591
+B feeds five to eight.
+
+59
+00:05:23.341 --> 00:05:28.930
+And so on, up to H, which feeds spines
+twenty-nine to thirty-two.
+
+60
+00:05:30.280 --> 00:05:36.893
+Each row of the panel lands on the next line
+card port of those same four spines.
+
+61
+00:05:37.643 --> 00:05:41.953
+A line card is a slot in the spine that holds
+ports.
+
+62
+00:05:42.703 --> 00:05:46.649
+The cutsheet gives the exact port for every
+cord.
+
+63
+00:05:50.799 --> 00:05:57.818
+Let us put it all together for one trunk: end
+of row rack 1411, column E.
+
+64
+00:05:59.018 --> 00:06:00.191
+Which rack?
+
+65
+00:06:00.941 --> 00:06:03.501
+Column E means patch panel E.
+
+66
+00:06:04.251 --> 00:06:06.854
+Spot eleven means the north rack.
+
+67
+00:06:07.604 --> 00:06:09.780
+That is rack 207.
+
+68
+00:06:11.130 --> 00:06:12.389
+Which panel?
+
+69
+00:06:13.139 --> 00:06:19.389
+Row fourteen is in rows three to fourteen, so
+the RU thirty-five panel.
+
+70
+00:06:20.739 --> 00:06:21.955
+Which lane?
+
+71
+00:06:22.705 --> 00:06:27.783
+The landing sheet says slot twelve, columns K
+and L, lane two.
+
+72
+00:06:29.133 --> 00:06:37.985
+The K and L module mixes this trunk with slot
+eleven in lane one, which is end of row rack
+
+73
+00:06:37.985 --> 00:06:38.477
+1311.
+
+74
+00:06:39.227 --> 00:06:41.509
+Two different end of row racks.
+
+75
+00:06:42.259 --> 00:06:43.305
+Correct.
+
+76
+00:06:44.655 --> 00:06:51.947
+And on the front, that module's four ports go
+to spines seventeen, eighteen, nineteen and
+
+77
+00:06:51.947 --> 00:06:55.961
+twenty, at the line card port the cutsheet
+gives.
+
+78
+00:07:00.111 --> 00:07:07.080
+In lesson nine of the course, practice using
+the landing sheet to find the rack, panel and
+
+79
+00:07:07.080 --> 00:07:09.093
+lane for different trunks.
+

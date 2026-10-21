@@ -1,0 +1,357 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:06.299
+This is the OCS cable we plugged into the TPU
+rack.
+
+2
+00:00:07.049 --> 00:00:10.974
+Now we follow it to the other end: the SPOCS
+rack.
+
+3
+00:00:12.324 --> 00:00:20.026
+We will look inside a SPOCS rack, at the OCS
+shelf and its ports, which leg goes to which
+
+4
+00:00:20.026 --> 00:00:26.949
+slot, the X and X plus one rule, a worked
+example, and how to pull and dress the
+
+5
+00:00:26.949 --> 00:00:27.641
+bundles.
+
+6
+00:00:31.791 --> 00:00:36.890
+A SPOCS rack holds four OCS shelves, one in
+each slot.
+
+7
+00:00:37.640 --> 00:00:40.264
+Only these four shelves are yours.
+
+8
+00:00:41.614 --> 00:00:44.238
+The slots count from the top down.
+
+9
+00:00:44.988 --> 00:00:47.207
+Slot one is the top shelf.
+
+10
+00:00:48.557 --> 00:00:51.117
+And slot four is the bottom shelf.
+
+11
+00:00:52.467 --> 00:00:57.928
+The power, TROSS, rectifier and battery
+shelves are pre-installed.
+
+12
+00:00:58.678 --> 00:01:00.257
+They are not yours.
+
+13
+00:01:04.407 --> 00:01:08.055
+Each shelf has three hundred twenty LC ports.
+
+14
+00:01:08.805 --> 00:01:14.479
+They are numbered with three digits, from zero
+zero one to three twenty.
+
+15
+00:01:15.879 --> 00:01:23.154
+Each box on this drawing is a pair of ports:
+the odd port on top, the even port below.
+
+16
+00:01:23.904 --> 00:01:27.808
+Like zero zero one and zero zero two.
+
+17
+00:01:29.158 --> 00:01:35.494
+The numbers count down a column of twenty,
+then move to the next column to the right.
+
+18
+00:01:36.844 --> 00:01:42.689
+Ports one forty-five to one sixty, shown in
+grey, are not used.
+
+19
+00:01:44.039 --> 00:01:51.122
+The left half, ports one to one sixty, is for
+TPU racks one to seventy-two.
+
+20
+00:01:51.872 --> 00:01:59.323
+The right half, one sixty-one to three twenty,
+is for TPU racks seventy-three to one
+
+21
+00:01:59.323 --> 00:02:00.299
+forty-four.
+
+22
+00:02:04.449 --> 00:02:10.017
+Here is one OCS bundle arriving at a SPOCS
+rack from above.
+
+23
+00:02:10.767 --> 00:02:13.412
+The legs come in four different lengths.
+
+24
+00:02:14.812 --> 00:02:21.768
+Legs one and two, blue and orange, are the
+shortest: fourteen hundred eighty millimeters,
+
+25
+00:02:21.768 --> 00:02:23.879
+about four feet ten inches.
+
+26
+00:02:24.629 --> 00:02:27.338
+They go to slot one, the top shelf.
+
+27
+00:02:28.688 --> 00:02:34.576
+Legs three and four, green and brown, are
+eighteen hundred forty millimeters.
+
+28
+00:02:35.326 --> 00:02:36.627
+Slot two.
+
+29
+00:02:37.977 --> 00:02:43.396
+Legs five and six, slate and white, are
+twenty-two hundred millimeters.
+
+30
+00:02:44.146 --> 00:02:45.511
+Slot three.
+
+31
+00:02:46.861 --> 00:02:53.688
+And legs seven and eight, red and black, are
+the longest: twenty-five sixty millimeters.
+
+32
+00:02:54.438 --> 00:02:56.678
+Slot four, the bottom shelf.
+
+33
+00:02:58.028 --> 00:03:02.060
+The lengths are built so each pair just
+reaches its shelf.
+
+34
+00:03:02.810 --> 00:03:09.445
+If a leg seems far too short or too long for
+its slot, it is probably the wrong leg.
+
+35
+00:03:13.595 --> 00:03:15.749
+Now, which port on each shelf?
+
+36
+00:03:16.499 --> 00:03:20.254
+The cutsheet gives your TPU rack a port
+number.
+
+37
+00:03:21.004 --> 00:03:22.860
+The guide calls it X.
+
+38
+00:03:24.260 --> 00:03:30.169
+Each slot gets two legs: one on port X, and
+one on port X plus one.
+
+39
+00:03:30.919 --> 00:03:33.501
+The odd-numbered leg goes on X.
+
+40
+00:03:34.851 --> 00:03:39.053
+So legs one, three, five and seven go on port
+X.
+
+41
+00:03:39.803 --> 00:03:44.283
+Legs two, four, six and eight go on port X
+plus one.
+
+42
+00:03:45.633 --> 00:03:48.215
+And here is the part people forget.
+
+43
+00:03:48.965 --> 00:03:55.983
+Your TPU rack uses the same X on every slot,
+and on all three SPOCS racks.
+
+44
+00:03:57.333 --> 00:04:03.384
+The guide checked this pattern on all eight
+thousand six hundred forty bundles in the
+
+45
+00:04:03.384 --> 00:04:04.736
+reference cutsheet.
+
+46
+00:04:08.886 --> 00:04:16.524
+The guide's own drawing uses ports zero
+seventeen and zero eighteen as its example, so
+
+47
+00:04:16.524 --> 00:04:17.590
+we will too.
+
+48
+00:04:18.340 --> 00:04:21.071
+Your real X comes from the cutsheet.
+
+49
+00:04:22.421 --> 00:04:27.221
+Leg one, blue, goes to slot one, port zero
+seventeen.
+
+50
+00:04:27.971 --> 00:04:32.835
+Leg two, orange, goes to slot one, port zero
+eighteen.
+
+51
+00:04:34.185 --> 00:04:41.873
+Leg three goes to slot two, port zero
+seventeen, and leg four to slot two, port zero
+
+52
+00:04:41.873 --> 00:04:42.697
+eighteen.
+
+53
+00:04:43.447 --> 00:04:46.604
+The same two ports, one shelf lower.
+
+54
+00:04:47.954 --> 00:04:53.821
+Then legs five and six on slot three, and legs
+seven and eight on slot four.
+
+55
+00:04:54.571 --> 00:04:58.261
+Always zero seventeen and zero eighteen.
+
+56
+00:04:59.611 --> 00:05:06.838
+Then you do exactly the same with the orange
+cable at SPOCS rack two, and the yellow cable
+
+57
+00:05:06.838 --> 00:05:08.443
+at SPOCS rack three.
+
+58
+00:05:09.793 --> 00:05:17.984
+Port zero seventeen is in the left half, so
+this TPU rack is in TPU one to seventy-two,
+
+59
+00:05:17.984 --> 00:05:21.185
+and its bundles dress on the left.
+
+60
+00:05:25.335 --> 00:05:27.810
+Finally, pulling and dressing.
+
+61
+00:05:28.560 --> 00:05:35.259
+Pull the OCS bundles starting at the OCS rack,
+toward the TPU rack.
+
+62
+00:05:36.459 --> 00:05:43.959
+The split point, where the bundle breaks into
+legs, sits twelve to eighteen inches above the
+
+63
+00:05:43.959 --> 00:05:45.589
+top of the OCS rack.
+
+64
+00:05:46.939 --> 00:05:54.552
+Bundles from TPU racks one to seventy-two
+leave the tray on the left side of the OCS
+
+65
+00:05:54.552 --> 00:05:57.542
+rack and are dressed on the left.
+
+66
+00:05:58.292 --> 00:06:02.196
+Seventy-three to one forty-four go on the
+right.
+
+67
+00:06:03.546 --> 00:06:06.853
+OCS cables run in the tier one tray.
+
+68
+00:06:07.603 --> 00:06:14.807
+Secure them to the tray only at corners and
+exits, three times each, and use waterfalls
+
+69
+00:06:14.807 --> 00:06:18.781
+centered over the rack's vertical cable
+manager.
+
+70
+00:06:19.531 --> 00:06:24.545
+Bundle with half-inch Velcro every twelve to
+eighteen inches.
+
+71
+00:06:25.295 --> 00:06:30.265
+That is DRS 01.00.03.
+
+72
+00:06:31.015 --> 00:06:33.063
+Zip ties are not allowed.
+
+73
+00:06:34.413 --> 00:06:39.939
+Store OCS slack on top of the TPU rack, never
+in the tray.
+
+74
+00:06:40.689 --> 00:06:46.214
+Label and coil the spare legs, or handle them
+as your site decided.
+
+75
+00:06:47.564 --> 00:06:54.903
+And label it all: a wrap-around label on the
+bundle near each end, and a flag label on
+
+76
+00:06:54.903 --> 00:06:55.756
+every leg.
+
+77
+00:06:59.906 --> 00:07:07.377
+In lesson eleven of the course, practice
+matching legs to slots and ports, and deciding
+
+78
+00:07:07.377 --> 00:07:10.039
+which side a bundle dresses on.
+

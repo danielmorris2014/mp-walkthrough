@@ -1,0 +1,494 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:02.245
+Welcome.
+
+2
+00:00:02.995 --> 00:00:09.886
+Before you touch a single cable, you need to
+know about one kind of document: the DRS.
+
+3
+00:00:11.236 --> 00:00:18.308
+We will cover what a DRS is, what is in it,
+the standards it names, how it fits with the
+
+4
+00:00:18.308 --> 00:00:25.541
+guide and the cutsheet, how to get the right
+one, how to read one, and the rule for having
+
+5
+00:00:25.541 --> 00:00:26.425
+it on site.
+
+6
+00:00:30.575 --> 00:00:34.522
+DRS stands for Deployment Requirement Sheet.
+
+7
+00:00:36.122 --> 00:00:43.461
+A DRS is one of Fluidstack's technical
+standards for how installation work must be
+
+8
+00:00:43.461 --> 00:00:47.578
+done, in every data center Fluidstack deploys.
+
+9
+00:00:48.928 --> 00:00:51.488
+Here is the most important point.
+
+10
+00:00:52.238 --> 00:00:55.651
+DRS documents are not guidelines.
+
+11
+00:00:56.401 --> 00:00:58.044
+They are requirements.
+
+12
+00:00:58.794 --> 00:01:00.885
+A guideline is advice.
+
+13
+00:01:01.635 --> 00:01:05.859
+A requirement is the way it must be done,
+every time.
+
+14
+00:01:07.459 --> 00:01:14.797
+Every task you do on site has a matching DRS
+that says exactly how it must be done.
+
+15
+00:01:15.547 --> 00:01:20.945
+If something on site does not seem to fit the
+DRS, stop and ask.
+
+16
+00:01:25.095 --> 00:01:32.952
+A DRS contains step-by-step installation
+requirements, technical specifications, the
+
+17
+00:01:32.952 --> 00:01:36.039
+approved materials, and diagrams.
+
+18
+00:01:37.389 --> 00:01:41.997
+It also points to the industry standards the
+work must meet.
+
+19
+00:01:42.747 --> 00:01:44.709
+We will look at those next.
+
+20
+00:01:46.059 --> 00:01:47.787
+Why does it exist?
+
+21
+00:01:48.537 --> 00:01:55.801
+So every deployment meets the same quality
+standard, no matter which contractor or which
+
+22
+00:01:55.801 --> 00:01:57.369
+site does the work.
+
+23
+00:01:58.119 --> 00:02:05.211
+That protects the equipment and lowers the
+risk of an outage, which means a network or
+
+24
+00:02:05.211 --> 00:02:06.695
+system going down.
+
+25
+00:02:08.045 --> 00:02:14.381
+Every DRS is reviewed and approved by
+Fluidstack ICT leadership.
+
+26
+00:02:15.131 --> 00:02:20.294
+ICT means information and communications
+technology.
+
+27
+00:02:21.644 --> 00:02:23.884
+Standards change over time.
+
+28
+00:02:24.634 --> 00:02:31.979
+When one changes, a new revision of the DRS is
+issued, and you are notified through the
+
+29
+00:02:31.979 --> 00:02:32.570
+portal.
+
+30
+00:02:33.320 --> 00:02:35.645
+Always use the current version.
+
+31
+00:02:36.395 --> 00:02:39.553
+Check the revision date on the cover page.
+
+32
+00:02:43.703 --> 00:02:49.228
+These are the industry standards named in the
+DRS sheets so far.
+
+33
+00:02:49.978 --> 00:02:52.495
+You do not need to memorize them.
+
+34
+00:02:53.245 --> 00:02:56.765
+The DRS turns them into the rules you follow.
+
+35
+00:02:57.515 --> 00:02:59.862
+But you should recognize the names.
+
+36
+00:03:01.462 --> 00:03:09.807
+ANSI/TIA standards are written by the
+Telecommunications Industry Association, and
+
+37
+00:03:09.807 --> 00:03:13.878
+approved as American National Standards.
+
+38
+00:03:16.178 --> 00:03:26.034
+TIA-568 covers telecom cabling in buildings,
+such as how cable is installed and supported.
+
+39
+00:03:27.384 --> 00:03:35.601
+TIA-606 covers administration: the
+identifiers, labels and records that let
+
+40
+00:03:35.601 --> 00:03:37.901
+anyone trace a cable.
+
+41
+00:03:39.251 --> 00:03:47.251
+And TIA-942 covers the infrastructure of data
+centers and computer rooms.
+
+42
+00:03:48.601 --> 00:03:55.641
+The NEC, the National Electrical Code, is the
+U.S. electrical safety code.
+
+43
+00:03:56.391 --> 00:04:02.834
+It sets the fire ratings printed on cable
+jackets, such as plenum and riser.
+
+44
+00:04:05.134 --> 00:04:12.614
+BICSI is a professional association for this
+industry that writes design and installation
+
+45
+00:04:12.614 --> 00:04:13.454
+standards.
+
+46
+00:04:14.204 --> 00:04:21.936
+NEMA, the National Electrical Manufacturers
+Association, sets standards for electrical
+
+47
+00:04:21.936 --> 00:04:25.532
+products like enclosures and cable tray.
+
+48
+00:04:26.882 --> 00:04:30.551
+On site, you cite the DRS rule itself.
+
+49
+00:04:31.301 --> 00:04:37.659
+For example: DRS 01.00.01, rule 2.
+
+50
+00:04:41.809 --> 00:04:46.801
+So how does the DRS fit with the other
+documents you will use?
+
+51
+00:04:48.001 --> 00:04:51.307
+The DRS says how each task must be done.
+
+52
+00:04:52.657 --> 00:04:55.644
+The cutsheet says where each cable goes.
+
+53
+00:04:56.394 --> 00:04:59.146
+It is the final word on any port.
+
+54
+00:05:00.496 --> 00:05:07.591
+The installation guide was built from the DRS,
+and from the patch panel data behind the
+
+55
+00:05:07.591 --> 00:05:08.325
+cutsheet.
+
+56
+00:05:09.675 --> 00:05:13.494
+This course, and the Field Kit app, are
+training aids.
+
+57
+00:05:14.244 --> 00:05:16.313
+They explain the documents.
+
+58
+00:05:17.063 --> 00:05:20.263
+They never replace the DRS on site.
+
+59
+00:05:21.613 --> 00:05:29.613
+If this course or the guide ever differs from
+the current DRS, the DRS is the requirement.
+
+60
+00:05:30.363 --> 00:05:33.585
+Follow it, and tell your lead about the
+difference.
+
+61
+00:05:37.735 --> 00:05:41.767
+Before each task, find the DRS for that task.
+
+62
+00:05:43.117 --> 00:05:47.383
+The primary source is Fluidstack's Confluence
+portal.
+
+63
+00:05:48.133 --> 00:05:56.503
+Log in at fluidstack.atlassian.net, open the
+LVC Deployment space, then Deployment
+
+64
+00:05:56.503 --> 00:05:58.544
+Requirements Sheets.
+
+65
+00:06:00.844 --> 00:06:08.844
+If you cannot reach the portal, contact your
+assigned Fluidstack project manager, your PM,
+
+66
+00:06:08.844 --> 00:06:10.977
+or your site supervisor.
+
+67
+00:06:11.727 --> 00:06:15.546
+They can send you the document or restore your
+access.
+
+68
+00:06:16.896 --> 00:06:18.624
+Then check the version.
+
+69
+00:06:19.374 --> 00:06:25.411
+Look at the revision date on the cover page,
+and make sure it is the current revision.
+
+70
+00:06:26.761 --> 00:06:32.265
+Have it on hand where you work: printed, or on
+a device you can read there.
+
+71
+00:06:33.015 --> 00:06:34.637
+Then you can start.
+
+72
+00:06:35.987 --> 00:06:37.096
+One tip.
+
+73
+00:06:37.846 --> 00:06:44.246
+The portal needs a login and a connection, and
+data halls often have weak signal.
+
+74
+00:06:44.996 --> 00:06:50.628
+Get or print the DRS for the day's tasks
+before you go onto the floor.
+
+75
+00:06:54.778 --> 00:06:57.957
+Here is how a DRS sheet is laid out.
+
+76
+00:06:58.707 --> 00:07:09.160
+This is a redrawn version of DRS 01.00.01, the
+general cable dressing sheet.
+
+77
+00:07:10.560 --> 00:07:12.501
+Every sheet has a number.
+
+78
+00:07:13.251 --> 00:07:17.518
+This one is 01.00.01.
+
+79
+00:07:18.268 --> 00:07:22.513
+Use the number to find it, to ask about it,
+and to cite it.
+
+80
+00:07:23.863 --> 00:07:29.495
+The title says which task it covers: General
+Fiber Cable Dressing.
+
+81
+00:07:30.845 --> 00:07:33.149
+Next is the revision date.
+
+82
+00:07:33.899 --> 00:07:38.273
+This sheet was revised on 6/9/2026.
+
+83
+00:07:39.023 --> 00:07:41.881
+Check it against the portal every time.
+
+84
+00:07:43.231 --> 00:07:47.583
+The approval block shows who approved the
+sheet for Fluidstack.
+
+85
+00:07:48.933 --> 00:07:52.624
+And every sheet is marked Internal Use Only.
+
+86
+00:07:53.374 --> 00:07:55.187
+It is confidential.
+
+87
+00:07:55.937 --> 00:07:59.564
+Use it for the work, and do not share or post
+it.
+
+88
+00:08:00.914 --> 00:08:03.282
+The body holds numbered rules.
+
+89
+00:08:04.032 --> 00:08:06.571
+A crossed-out picture means never.
+
+90
+00:08:07.321 --> 00:08:10.307
+Here, never use nylon zip ties.
+
+91
+00:08:11.657 --> 00:08:14.068
+A sheet can point to another sheet.
+
+92
+00:08:14.818 --> 00:08:23.351
+This one says to see DRS 01.00.07 for fiber
+bend radius.
+
+93
+00:08:24.101 --> 00:08:27.579
+When you do that part of the work, get that
+sheet too.
+
+94
+00:08:31.729 --> 00:08:33.563
+Now the on-site rule.
+
+95
+00:08:34.563 --> 00:08:39.769
+You must have the DRS for the work on hand at
+the work location.
+
+96
+00:08:40.519 --> 00:08:46.023
+A printed copy, or a digital copy on a device
+you can read there.
+
+97
+00:08:47.373 --> 00:08:54.387
+Working from memory alone is not acceptable,
+even if you have done the task a hundred
+
+98
+00:08:54.387 --> 00:08:54.882
+times.
+
+99
+00:08:56.232 --> 00:09:01.757
+If you do not have the DRS, stop work, and get
+it before you go on.
+
+100
+00:09:03.107 --> 00:09:07.481
+This is a Fluidstack site requirement on all
+deployments.
+
+101
+00:09:11.631 --> 00:09:13.551
+Three common mistakes.
+
+102
+00:09:14.351 --> 00:09:16.505
+Working from an old printout.
+
+103
+00:09:17.255 --> 00:09:22.375
+A newer revision may have changed a rule, so
+check the revision date.
+
+104
+00:09:23.725 --> 00:09:31.085
+Using this course, a photo from another site,
+or a coworker's word instead of the DRS.
+
+105
+00:09:31.835 --> 00:09:34.545
+Only the current DRS counts.
+
+106
+00:09:35.895 --> 00:09:39.095
+And sharing a DRS outside the job.
+
+107
+00:09:39.845 --> 00:09:42.127
+It is Internal Use Only.
+
+108
+00:09:46.277 --> 00:09:53.834
+In lesson zero of the course, put the
+before-you-start steps in order, explore a DRS
+
+109
+00:09:53.834 --> 00:09:59.141
+sheet, and decide what to do in a few
+realistic situations.
+
+110
+00:09:59.891 --> 00:10:01.982
+Then take the lesson check.
+

@@ -1,0 +1,294 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:02.245
+Welcome.
+
+2
+00:00:02.995 --> 00:00:09.673
+This first video gives you the big picture of
+the job, before we look at any single cable.
+
+3
+00:00:11.023 --> 00:00:18.287
+We will cover what this hall is for, the three
+jobs your cables do, the five cable paths you
+
+4
+00:00:18.287 --> 00:00:23.972
+install, what you never touch, and one rule
+that beats every other rule.
+
+5
+00:00:28.122 --> 00:00:31.919
+A data hall is one large room full of racks.
+
+6
+00:00:32.669 --> 00:00:37.619
+A rack is a tall metal cabinet that holds
+computer equipment.
+
+7
+00:00:38.969 --> 00:00:43.875
+Most of the racks in Data Hall 4 are called
+TPU racks.
+
+8
+00:00:44.625 --> 00:00:48.145
+TPU stands for Tensor Processing Unit.
+
+9
+00:00:48.895 --> 00:00:56.784
+It is a computer chip built for artificial
+intelligence work, and one TPU rack holds many
+
+10
+00:00:56.784 --> 00:00:57.493
+of them.
+
+11
+00:00:59.093 --> 00:01:01.695
+One rack on its own is powerful.
+
+12
+00:01:02.445 --> 00:01:08.099
+But the real work happens when hundreds of
+racks act as one big machine.
+
+13
+00:01:09.449 --> 00:01:12.371
+Your cables are how they work together.
+
+14
+00:01:13.121 --> 00:01:19.991
+Every cable you install connects one piece of
+equipment to another, on an exact port.
+
+15
+00:01:24.141 --> 00:01:27.042
+Here is the whole job on one page.
+
+16
+00:01:27.792 --> 00:01:31.333
+It comes from page four of the installation
+guide.
+
+17
+00:01:32.083 --> 00:01:34.238
+Take a moment to look at it.
+
+18
+00:01:36.238 --> 00:01:39.438
+Your cables build three separate systems.
+
+19
+00:01:40.188 --> 00:01:42.684
+The first is the data network.
+
+20
+00:01:43.434 --> 00:01:47.978
+The guide calls it the DCN, for Data Center
+Network.
+
+21
+00:01:50.278 --> 00:01:58.256
+Data leaves each TPU rack on one thick fiber
+cable, goes to the rack at the end of the row,
+
+22
+00:01:58.256 --> 00:02:03.078
+then on to patch panels and big switches
+called spines.
+
+23
+00:02:04.428 --> 00:02:08.375
+The second system is the optical switch
+fabric.
+
+24
+00:02:09.125 --> 00:02:16.827
+Each TPU rack sends three cables to three
+special racks called SPOCS racks, which hold
+
+25
+00:02:16.827 --> 00:02:19.066
+optical circuit switches.
+
+26
+00:02:20.416 --> 00:02:23.893
+The third system is the management network.
+
+27
+00:02:24.643 --> 00:02:31.043
+It is a smaller, separate network that people
+use to set up and watch the equipment.
+
+28
+00:02:33.343 --> 00:02:35.157
+Why keep them separate?
+
+29
+00:02:35.907 --> 00:02:38.253
+Each one has a different job.
+
+30
+00:02:39.003 --> 00:02:45.576
+And if the main data network has a problem,
+the management network is still there to reach
+
+31
+00:02:45.576 --> 00:02:46.598
+the equipment.
+
+32
+00:02:50.748 --> 00:02:55.143
+Now let us name the five cable paths your crew
+installs.
+
+33
+00:02:55.893 --> 00:02:57.855
+We will go one at a time.
+
+34
+00:02:59.255 --> 00:03:00.429
+Path one.
+
+35
+00:03:01.179 --> 00:03:08.027
+One 144-fiber trunk from each TPU rack to its
+end of row rack.
+
+36
+00:03:09.377 --> 00:03:10.614
+Path two.
+
+37
+00:03:11.364 --> 00:03:20.008
+Eight 192-fiber trunks from each end of row
+rack to the DCN patch panels, and short cords
+
+38
+00:03:20.008 --> 00:03:22.436
+from there to the spines.
+
+39
+00:03:23.786 --> 00:03:25.087
+Path three.
+
+40
+00:03:25.837 --> 00:03:33.005
+Three OCS cables from each TPU rack, one to
+each of its three SPOCS racks.
+
+41
+00:03:34.355 --> 00:03:35.635
+Path four.
+
+42
+00:03:36.385 --> 00:03:41.868
+Six copper cables from each TPU rack to its
+end of row rack.
+
+43
+00:03:43.218 --> 00:03:44.562
+Path five.
+
+44
+00:03:45.312 --> 00:03:52.731
+Management trunks from each end of row rack to
+the management spines, plus management cords
+
+45
+00:03:52.731 --> 00:03:54.443
+from the SPOCS racks.
+
+46
+00:03:55.793 --> 00:03:57.115
+Five paths.
+
+47
+00:03:57.865 --> 00:04:04.031
+Every lesson after this one follows one of
+these paths from its start to its finish.
+
+48
+00:04:08.181 --> 00:04:11.637
+Just as important is what you do not touch.
+
+49
+00:04:12.437 --> 00:04:17.877
+Anything inside the TPU rack is already cabled
+when it arrives.
+
+50
+00:04:18.627 --> 00:04:24.771
+That includes the machines, the trays, the
+short internal cables, and the batteries.
+
+51
+00:04:25.521 --> 00:04:27.078
+Leave them alone.
+
+52
+00:04:28.428 --> 00:04:30.711
+And your work ends at the spines.
+
+53
+00:04:31.461 --> 00:04:35.066
+Anything past the spines belongs to someone
+else.
+
+54
+00:04:36.416 --> 00:04:39.104
+Here is a simple test from the guide.
+
+55
+00:04:39.854 --> 00:04:43.993
+If a cable never leaves the rack, it is not
+yours.
+
+56
+00:04:48.393 --> 00:04:51.827
+Finally, the rule that beats every other rule.
+
+57
+00:04:52.577 --> 00:04:56.716
+Your site's cutsheet is the final word on any
+port.
+
+58
+00:04:58.116 --> 00:05:04.196
+The cutsheet is the spreadsheet that lists
+every cable and every stop it makes.
+
+59
+00:05:05.546 --> 00:05:12.266
+If a label, the guide, or this course ever
+disagrees with the cutsheet, do not guess.
+
+60
+00:05:13.016 --> 00:05:14.936
+Stop and ask your lead.
+
+61
+00:05:16.286 --> 00:05:22.750
+This course teaches you the patterns, so you
+understand why each cable goes where it goes.
+
+62
+00:05:23.500 --> 00:05:26.231
+The cutsheet tells you exactly where.
+
+63
+00:05:30.381 --> 00:05:32.343
+That is the big picture.
+
+64
+00:05:33.093 --> 00:05:40.353
+Next, open lesson one in the course to explore
+the diagram yourself, match each cable to
+
+65
+00:05:40.353 --> 00:05:43.653
+where it goes, and take the short check.
+

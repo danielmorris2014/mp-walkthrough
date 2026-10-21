@@ -1,0 +1,93 @@
+Lesson 8 video: The other end: the AIO panel and the 192F trunks
+Length 7:25 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] In the last video we plugged the 144-fiber trunk into the top of rack switch.
+[0:09] Now we follow it to the other end.
+[0:12] We will look at the end of row rack, its big panel, the front where the trunks from the TPU racks land, the back where 192-fiber trunks leave, how the two sides line up, and where those trunks go.
+
+[0:33] THE AIO RACK
+[0:34] The rack at the end of your row has two names.
+[0:37] End of row, or EOR.
+[0:40] And all-in-one, or AIO.
+[0:43] It is the same rack.
+[0:47] The most important part for this lesson is the MPO four RU panel, at RU thirty-two.
+[0:56] RU means rack unit, one slot of the rack.
+[1:02] The trunks from the TPU racks land on its front.
+[1:07] The 192-fiber trunks leave from its back.
+[1:12] You will also see copper panels at RU thirty, twenty-four and twenty-two, and an LC panel at RU thirty-nine.
+[1:23] Those are lessons twelve and thirteen.
+[1:27] The switches are pre-installed.
+[1:30] And note: this drawing is not to scale.
+[1:34] Go by the checked RU numbers and the rack integration spec.
+
+[1:42] THE FRONT
+[1:43] Here is that panel from the front.
+[1:46] It has twelve rows, numbered from the bottom, row one, up to row twelve at the top.
+[1:54] And twelve columns, A to L.
+[1:57] Each column has two ports, so each row has twenty-four ports.
+[2:03] Each port is pre-labeled with its column, its port number, and its row.
+[2:10] The first port here is A1 dash 1: column A, port one, row one.
+[2:17] Rule one for the front: one TPU rack per row.
+[2:22] The lowest numbered TPU rack goes on the bottom row.
+[2:28] Rows ten, eleven and twelve are reserved as spares, and columns J, K and L are left open for the future.
+[2:42] Now the legs.
+[2:44] They go left to right, lowest number on the left.
+[2:49] Legs one and two go in column A.
+[2:52] Legs three and four in column B.
+[2:56] Five and six in column C.
+[2:59] And so on, until legs fifteen and sixteen in column H.
+[3:06] Legs seventeen and eighteen, the spares, go in column I.
+[3:12] So the third TPU rack's leg five would go in column C, port five, row three.
+[3:19] Label C5 dash 3.
+[3:23] One note.
+[3:25] For end of row rack 511, which serves racks 502 to 510, this rule puts 502 on row one and 510 on row nine.
+[3:38] Confirm on your cutsheet.
+
+[3:43] THE BACK
+[3:44] Now walk around to the back of the rack.
+[3:47] Everything is mirrored.
+[3:50] Facing the rear, column A is on the right.
+[3:54] You work right to left.
+[3:57] Each 192-fiber trunk takes one column.
+[4:03] Column A goes to DCN patch panel one.
+[4:07] Column B to patch panel two.
+[4:10] Up to column H, patch panel eight.
+[4:15] So every end of row rack sends eight 192-fiber trunks.
+[4:22] The trunk's twenty-four legs go up the column, two per row.
+[4:27] Legs one and two in row one, all the way to legs twenty-three and twenty-four in row twelve.
+[4:36] Odd legs go on the right port, even legs on the left port, as seen from the rear.
+[4:44] Legs nineteen to twenty-four, the top three rows, are spares to the patch panel.
+
+[4:54] HOW IT LINES UP
+[4:55] Here is the key idea.
+[4:57] Each port goes straight through the panel.
+[5:01] The front of a port and the back of the same port are joined.
+[5:07] So TPU rack three, on front row three, meets every 192-fiber trunk in rear row three.
+[5:17] Its legs one and two sit in column A.
+[5:21] Behind them is the column A trunk, which goes to patch panel one.
+[5:28] Its legs three and four sit in column B, so they go to patch panel two.
+[5:35] And its legs fifteen and sixteen, in column H, go to patch panel eight.
+[5:42] That is true for every TPU rack.
+[5:45] Legs one and two of every rack go to patch panel one, and so on.
+[5:52] And this is why the rear view puts odd legs on the right.
+[5:57] From the front, the first port of a column is on the left.
+[6:02] From behind, that same port is on the right.
+[6:06] The odd legs land right behind it.
+
+[6:12] WHICH DCN-PP RACK?
+[6:13] Which rack does each column's trunk go to?
+[6:16] The trunk landing sheet in the guide answers that.
+[6:21] End of row racks at spot eleven, on the north side, land in the north rack of each pair.
+[6:29] Racks at spot thirteen land in the south rack.
+[6:34] So column A from a spot eleven rack goes to rack 107.
+[6:40] From a spot thirteen rack, it goes to 108.
+[6:45] And column H goes to 227 or 228.
+[6:51] The guide numbers these patch panels one to eight in one place, and letters them A to H in another.
+[7:00] Patch panel one is patch panel A.
+
+[7:06] WRAP-UP
+[7:07] In lesson eight of the course, you will pick front ports for TPU legs, and work out where 192-fiber legs land and which patch panel rack they go to.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

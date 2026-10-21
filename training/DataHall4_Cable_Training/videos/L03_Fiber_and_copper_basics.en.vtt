@@ -1,0 +1,385 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:08.133
+Before we connect anything, we need some basic
+vocabulary for fiber and copper cable.
+
+2
+00:00:09.483 --> 00:00:17.070
+This video covers what a fiber is, how trunks
+break out into legs, the connectors you will
+
+3
+00:00:17.070 --> 00:00:23.393
+handle, the fiber color code, copper cable,
+and how to handle fiber safely.
+
+4
+00:00:27.543 --> 00:00:32.513
+An optical fiber is a strand of glass about as
+thin as a hair.
+
+5
+00:00:33.263 --> 00:00:37.231
+Equipment sends data through it as pulses of
+light.
+
+6
+00:00:38.631 --> 00:00:41.106
+Fibers usually work in pairs.
+
+7
+00:00:41.856 --> 00:00:45.291
+One fiber sends, and the other one receives.
+
+8
+00:00:46.641 --> 00:00:49.713
+In the guide, the letter F means fibers.
+
+9
+00:00:50.463 --> 00:00:58.249
+So 144F means one hundred forty-four fibers,
+and 2F means two fibers.
+
+10
+00:00:59.749 --> 00:01:03.376
+Fiber carries the huge amounts of AI data.
+
+11
+00:01:04.126 --> 00:01:08.435
+Copper cable carries the smaller management
+connections.
+
+12
+00:01:12.585 --> 00:01:19.668
+This is the 144-fiber trunk you will install
+from every TPU rack.
+
+13
+00:01:20.418 --> 00:01:21.997
+Look at its shape.
+
+14
+00:01:23.797 --> 00:01:29.173
+A trunk is a thick cable with many fibers
+inside one jacket.
+
+15
+00:01:31.473 --> 00:01:34.502
+At each end it breaks out at the split point.
+
+16
+00:01:35.252 --> 00:01:38.217
+Some people call it the furcation point.
+
+17
+00:01:39.567 --> 00:01:44.303
+Each branch is called a leg, and each leg ends
+in a connector.
+
+18
+00:01:45.053 --> 00:01:47.272
+This trunk has eighteen legs.
+
+19
+00:01:48.622 --> 00:01:50.969
+Each leg carries eight fibers.
+
+20
+00:01:51.719 --> 00:01:56.647
+Eighteen legs times eight fibers is one
+hundred forty-four.
+
+21
+00:01:57.397 --> 00:01:59.637
+That is where the name comes from.
+
+22
+00:02:00.987 --> 00:02:03.035
+Sixteen legs are used.
+
+23
+00:02:03.785 --> 00:02:06.686
+Legs seventeen and eighteen are spares.
+
+24
+00:02:10.836 --> 00:02:13.524
+You will handle four kinds of connector.
+
+25
+00:02:14.274 --> 00:02:16.237
+Let us look at each one.
+
+26
+00:02:17.637 --> 00:02:20.111
+This is an MPO-8 plug.
+
+27
+00:02:20.861 --> 00:02:25.597
+It is a rectangular push-on plug that holds
+eight fibers.
+
+28
+00:02:26.347 --> 00:02:33.729
+Every leg of the 144 and 192-fiber trunks is
+one of these.
+
+29
+00:02:36.029 --> 00:02:38.653
+This is an LC duplex plug.
+
+30
+00:02:39.403 --> 00:02:42.261
+It holds two fibers side by side.
+
+31
+00:02:43.011 --> 00:02:49.667
+The OCS cables use LC plugs with an angled
+polish, called APC.
+
+32
+00:02:50.417 --> 00:02:53.383
+APC plugs are usually green.
+
+33
+00:02:55.683 --> 00:03:02.723
+Never plug an APC connector into a flat UPC
+one, which is usually blue.
+
+34
+00:03:03.473 --> 00:03:08.209
+The glass does not line up and the end faces
+can be damaged.
+
+35
+00:03:08.959 --> 00:03:11.753
+If they do not match, stop and ask.
+
+36
+00:03:13.103 --> 00:03:19.610
+This is an RJ45 plug, the square plug on
+copper network cable.
+
+37
+00:03:20.960 --> 00:03:26.635
+And this is a jack, the socket on a copper
+panel where a copper run ends.
+
+38
+00:03:30.785 --> 00:03:34.347
+Legs and fibers are told apart by color.
+
+39
+00:03:35.097 --> 00:03:39.471
+The colors follow a standard called TIA-598.
+
+40
+00:03:40.221 --> 00:03:42.311
+You will use it every day.
+
+41
+00:03:44.611 --> 00:03:48.985
+The first group of four: blue, orange, green,
+brown.
+
+42
+00:03:50.585 --> 00:03:54.403
+The second group: slate, white, red, black.
+
+43
+00:03:56.003 --> 00:03:59.929
+The third group: yellow, violet, rose, aqua.
+
+44
+00:04:01.529 --> 00:04:03.513
+Once more, all twelve.
+
+45
+00:04:04.263 --> 00:04:06.695
+Blue, orange, green, brown.
+
+46
+00:04:07.445 --> 00:04:09.685
+Slate, white, red, black.
+
+47
+00:04:10.435 --> 00:04:13.080
+Yellow, violet, rose, aqua.
+
+48
+00:04:17.880 --> 00:04:20.760
+After twelve, the colors start again.
+
+49
+00:04:21.510 --> 00:04:29.879
+On the 144-fiber trunk, legs thirteen to
+sixteen are blue, orange, green and brown
+
+50
+00:04:29.879 --> 00:04:30.491
+again.
+
+51
+00:04:31.841 --> 00:04:35.191
+So a blue leg could be leg one or leg
+thirteen.
+
+52
+00:04:35.941 --> 00:04:38.522
+The color alone cannot tell you.
+
+53
+00:04:39.872 --> 00:04:45.099
+That is why the guide says: always check the
+leg number on the label.
+
+54
+00:04:45.849 --> 00:04:48.302
+Color helps you find a leg fast.
+
+55
+00:04:49.052 --> 00:04:51.079
+The number tells you for sure.
+
+56
+00:04:55.229 --> 00:04:56.487
+Now copper.
+
+57
+00:04:57.237 --> 00:05:02.016
+CAT6 is copper network cable, also called
+Ethernet.
+
+58
+00:05:02.766 --> 00:05:06.030
+It ends in an RJ45 plug.
+
+59
+00:05:07.380 --> 00:05:15.431
+In this job, copper carries the management and
+console connections from each TPU rack to its
+
+60
+00:05:15.431 --> 00:05:16.831
+end of row rack.
+
+61
+00:05:18.181 --> 00:05:20.954
+The guide lists copper jacket colors.
+
+62
+00:05:21.704 --> 00:05:24.520
+Orange is out-of-band management.
+
+63
+00:05:25.270 --> 00:05:29.259
+Blue is BMS, the building management system.
+
+64
+00:05:30.009 --> 00:05:35.193
+Green is FIS, and black is for cables inside
+one rack.
+
+65
+00:05:36.543 --> 00:05:43.157
+The guide says to check which colors your site
+stocks, and it does not explain FIS.
+
+66
+00:05:43.907 --> 00:05:46.829
+If you see green copper, ask your lead.
+
+67
+00:05:50.979 --> 00:05:53.305
+Last, how to handle fiber.
+
+68
+00:05:54.055 --> 00:05:58.535
+Rule one: scope and clean every leg before it
+goes in.
+
+69
+00:05:59.285 --> 00:06:03.850
+The scope is a small camera for looking at the
+glass end face.
+
+70
+00:06:06.150 --> 00:06:07.067
+Why?
+
+71
+00:06:07.817 --> 00:06:15.097
+Dirt is the number one reason optical networks
+need troubleshooting, and it can permanently
+
+72
+00:06:15.097 --> 00:06:16.457
+damage equipment.
+
+73
+00:06:17.207 --> 00:06:19.490
+You cannot see it without the scope.
+
+74
+00:06:20.840 --> 00:06:23.549
+Rule two: keep the bend wide.
+
+75
+00:06:24.299 --> 00:06:32.086
+DRS 01.00.01, the cable dressing sheet, sets
+the minimum.
+
+76
+00:06:32.836 --> 00:06:39.364
+While you are pulling, the cable must not bend
+tighter than twenty times its own diameter.
+
+77
+00:06:40.714 --> 00:06:44.277
+With no tension, the minimum is ten times.
+
+78
+00:06:45.027 --> 00:06:49.315
+If the manufacturer's spec gives a bigger
+number, use it.
+
+79
+00:06:50.065 --> 00:06:54.502
+The guide also recommends fifteen times for
+the long term.
+
+80
+00:06:55.252 --> 00:06:57.919
+Lesson five covers all of this.
+
+81
+00:06:59.269 --> 00:07:06.236
+For example, a cable a quarter inch thick
+needs a five inch bend radius while you pull
+
+82
+00:07:06.236 --> 00:07:06.479
+it.
+
+83
+00:07:07.829 --> 00:07:11.307
+And rule three: nothing touches the floor.
+
+84
+00:07:12.057 --> 00:07:15.385
+Not cables, not slack, not spare legs.
+
+85
+00:07:19.535 --> 00:07:22.372
+That is the basic vocabulary.
+
+86
+00:07:23.122 --> 00:07:29.386
+In lesson three of the course, practice
+putting the colors in order and making quick
+
+87
+00:07:29.386 --> 00:07:31.399
+decisions about connectors.
+

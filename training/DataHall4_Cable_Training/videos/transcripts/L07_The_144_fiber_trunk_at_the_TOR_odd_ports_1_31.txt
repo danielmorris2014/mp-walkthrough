@@ -1,0 +1,105 @@
+Lesson 7 video: The 144-fiber trunk at the TOR: odd ports 1-31
+Length 7:39 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] This video covers one of the most important connections on the job: the 144-fiber trunk at the top of rack switch.
+[0:12] We will cover what the number one forty-four counts, what odd means here, the rule for every leg, a complete example, both ends of the trunk, and common mistakes.
+
+[0:28] ODD PORTS, NOT ODD ROWS
+[0:29] You may have heard this described as one forty-four fiber to the odd rows, ports one to thirty-one.
+[0:38] Let us check that against the guide.
+[0:42] The guide says it is the odd-numbered ports on the top of rack switch: ports one, three, five, and so on, up to thirty-one.
+[0:53] Those odd ports happen to be the top row of the switch, which is probably where the word rows came from.
+[1:02] It is not odd rows of racks.
+[1:06] At the far end of the same trunk, each TPU rack gets one row on a panel, rows one to nine.
+[1:15] We will see that later in this video.
+
+[1:21] WHAT 144 COUNTS
+[1:22] One forty-four is the number of fibers in the trunk.
+[1:27] It breaks out into eighteen legs.
+[1:30] Each leg is an MPO-8 plug holding eight fibers.
+[1:36] Eighteen times eight is one hundred forty-four.
+[1:41] Legs one through sixteen are active.
+[1:45] Legs seventeen and eighteen are spares.
+
+[1:51] THE TOR SWITCH
+[1:52] This is the top of rack switch, an Arista 7060, on side A of the TPU rack.
+[2:02] It has thirty-two ports arranged in sixteen cages.
+[2:07] Each cage holds two ports, one above the other.
+[2:12] The top port in each cage has an odd number: one, three, five, seven.
+[2:19] The bottom port has an even number: two, four, six, eight.
+[2:25] Only the odd ports, on the top row, are yours.
+[2:30] The even ports go to the machines inside the rack, and they are pre-installed.
+[2:36] Do not touch them.
+[2:39] At the right end are two copper ports, ETH and console.
+[2:45] We will cover those in lesson twelve.
+
+[2:51] THE RULE
+[2:52] Now the rule.
+[2:54] Leg one goes in port one.
+[2:57] Leg two goes in port three.
+[3:01] Not port two.
+[3:03] Port two is the even port right below port one.
+[3:08] Leg three goes in port five.
+[3:11] Keep going in order: leg N goes in the Nth odd port.
+[3:18] There is a quick way to work it out.
+[3:21] Multiply the leg number by two, then subtract one.
+[3:27] Leg seven: two times seven is fourteen, minus one is thirteen.
+[3:33] Port thirteen.
+[3:36] Leg sixteen: two times sixteen is thirty-two, minus one is thirty-one.
+[3:43] Port thirty-one, the top port of the last cage.
+[3:48] The guide checked this rule against every TPU rack in this hall: all four hundred thirty-two of them.
+[4:00] Here are all sixteen legs with their colors and ports.
+[4:04] Pause the video if you want to study it.
+[4:10] Notice row five.
+[4:13] Leg thirteen is blue again, just like leg one.
+[4:17] Legs thirteen to sixteen repeat blue, orange, green and brown.
+[4:24] That is why you always read the leg number on the label, not just the color.
+[4:31] And at the bottom, legs seventeen and eighteen are spares.
+[4:36] Nothing plugs into them at the switch.
+
+[4:41] WORKED EXAMPLE
+[4:42] Let us land a trunk step by step.
+[4:46] First, read the wrap-around label near the boot, and check it against the cutsheet row for this TPU rack.
+[4:55] Pick up leg one.
+[4:58] It is blue.
+[5:00] Read its label to confirm it says one.
+[5:03] Scope it, clean it, and plug it into port one.
+[5:08] Leg two is orange.
+[5:11] It goes in the next odd port, port three.
+[5:15] Later you pick up another blue leg.
+[5:18] Read the label.
+[5:20] It says thirteen.
+[5:23] Two times thirteen, minus one, is twenty-five.
+[5:28] Legs seventeen and eighteen are spares.
+[5:32] Label them and dress them up so they do not touch the floor.
+[5:38] And store the trunk slack, above the split point, on top of the rack.
+[5:43] Never in the tray.
+
+[5:48] BOTH ENDS
+[5:49] This is the cable we just plugged in, now followed to its other end: the end of row rack.
+[5:57] It lands on the front of a large panel.
+[6:01] Each TPU rack gets one row on this panel.
+[6:06] Here, the trunk for the third TPU rack fills row three.
+[6:12] The legs go left to right: legs one and two in column A, and so on, up to legs fifteen and sixteen in column H.
+[6:23] And the spares, legs seventeen and eighteen, go in column I.
+[6:28] Lesson eight explains this panel in detail.
+
+[6:35] COMMON MISTAKES
+[6:36] Finally, the common mistakes.
+[6:40] A leg in an even port, the bottom row.
+[6:44] Even ports belong to the machines.
+[6:47] Do not disturb them yourself; tell your lead.
+[6:52] Off by one, like leg two in port two, or in port five.
+[6:57] Check it: the port must equal two times the leg, minus one.
+[7:03] Mistaking leg thirteen for leg one, because both are blue.
+[7:09] Always read the label.
+[7:12] A spare plugged in.
+[7:15] And a leg plugged in without being scoped and cleaned first.
+
+[7:22] WRAP-UP
+[7:23] Now open lesson seven in the course.
+[7:26] You will plug legs into the right ports yourself, then find the mistake on a switch that has one leg in the wrong place.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

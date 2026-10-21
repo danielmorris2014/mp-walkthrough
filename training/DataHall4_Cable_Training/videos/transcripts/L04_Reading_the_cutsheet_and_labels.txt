@@ -1,0 +1,59 @@
+Lesson 4 video: Reading the cutsheet and labels
+Length 4:26 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] Every cable you install is listed on the cutsheet and labeled at both ends.
+[0:08] This video shows you how to read both.
+[0:11] We will cover device names, panel port codes, one cutsheet row from A to Z, and labels.
+
+[0:22] NAMES AND LOCATIONS
+[0:23] Every device has a name and a location, and the cutsheet gives both.
+[0:30] A name says what a device is, from big to small: the site, the pod, the rack in that pod, and the device.
+[0:40] A location says where it is, like the codes you learned in lesson two.
+[0:46] Some device names you will meet: tor1 is the top of rack switch. rmu1 and rmu2 are the two TROSS units.
+[0:58] And pp1 is the OCS panel on the TPU rack.
+
+[1:07] PANEL PORT CODES
+[1:08] A panel port code tells you exactly which hole on a panel to use.
+[1:14] The guide shows two ways of writing the same spot.
+[1:19] On the cutsheet you will see codes like r1 dash a1.
+[1:24] That means row one, column a, port one.
+[1:29] On the end of row panel, ports are pre-printed differently: A1 dash 1.
+[1:36] The letter is the column, then the port, then after the dash, the row.
+[1:42] Both point to the same hole.
+[1:45] Read each piece by what it is, not by its position.
+[1:50] And remember, rows count up from the bottom of the panel.
+[1:55] Row one is always the lowest row.
+
+[2:01] ONE CUTSHEET ROW
+[2:02] Every cable you install has one row in the cutsheet.
+[2:07] Read it from left to right.
+[2:11] A and Z are the two ends of the cable.
+[2:14] A is where it starts, and Z is where it finishes.
+[2:20] The A side tells you where the cable starts: the location, the device name, and the port.
+[2:29] The A panel is the first panel and port it lands on.
+[2:34] Trunk and leg tell you which big cable is in the middle, and which leg of it.
+[2:41] The Z panel is the last panel and port, and the Z side is where the cable ends.
+[2:49] If a row says spare, that leg is landed and labeled, but not plugged into a device.
+
+[2:59] LABELS
+[3:00] Now labels.
+[3:02] Every cable gets the same label at both ends, and it must match the cutsheet.
+[3:09] Single connectors, breakout legs and copper runs get a flag label.
+[3:15] It sticks out like a flag, four inches from the boot.
+[3:20] The boot is the rubber cover behind the connector.
+[3:26] Trunks get a wrap-around label that circles the cable, one to two inches from the boot at each end.
+[3:34] All labels are machine printed.
+[3:38] No handwriting.
+[3:40] Line one is the A device and port.
+[3:44] Line two is the Z device and port.
+[3:48] Trunk labels list all the ports their legs land on.
+[3:53] One to four in square brackets with a colon means ports one through four.
+[3:59] Commas mean a list.
+[4:02] And if a label and the cutsheet disagree: stop and ask.
+
+[4:10] WRAP-UP
+[4:11] In lesson four of the course, you will choose the right label for different cables and spot label problems in realistic situations.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

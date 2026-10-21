@@ -1,0 +1,119 @@
+Lesson 0 video: Before you start: the DRS
+Length 10:06 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] Welcome.
+[0:03] Before you touch a single cable, you need to know about one kind of document: the DRS.
+[0:11] We will cover what a DRS is, what is in it, the standards it names, how it fits with the guide and the cutsheet, how to get the right one, how to read one, and the rule for having it on site.
+
+[0:29] WHAT A DRS IS
+[0:30] DRS stands for Deployment Requirement Sheet.
+[0:36] A DRS is one of Fluidstack's technical standards for how installation work must be done, in every data center Fluidstack deploys.
+[0:48] Here is the most important point.
+[0:52] DRS documents are not guidelines.
+[0:56] They are requirements.
+[0:58] A guideline is advice.
+[1:01] A requirement is the way it must be done, every time.
+[1:07] Every task you do on site has a matching DRS that says exactly how it must be done.
+[1:15] If something on site does not seem to fit the DRS, stop and ask.
+
+[1:24] WHAT IS IN IT
+[1:25] A DRS contains step-by-step installation requirements, technical specifications, the approved materials, and diagrams.
+[1:37] It also points to the industry standards the work must meet.
+[1:42] We will look at those next.
+[1:46] Why does it exist?
+[1:48] So every deployment meets the same quality standard, no matter which contractor or which site does the work.
+[1:58] That protects the equipment and lowers the risk of an outage, which means a network or system going down.
+[2:08] Every DRS is reviewed and approved by Fluidstack ICT leadership.
+[2:15] ICT means information and communications technology.
+[2:21] Standards change over time.
+[2:24] When one changes, a new revision of the DRS is issued, and you are notified through the portal.
+[2:33] Always use the current version.
+[2:36] Check the revision date on the cover page.
+
+[2:42] THE STANDARDS IT NAMES
+[2:43] These are the industry standards named in the DRS sheets so far.
+[2:49] You do not need to memorize them.
+[2:53] The DRS turns them into the rules you follow.
+[2:57] But you should recognize the names.
+[3:01] ANSI/TIA standards are written by the Telecommunications Industry Association, and approved as American National Standards.
+[3:16] TIA-568 covers telecom cabling in buildings, such as how cable is installed and supported.
+[3:27] TIA-606 covers administration: the identifiers, labels and records that let anyone trace a cable.
+[3:39] And TIA-942 covers the infrastructure of data centers and computer rooms.
+[3:48] The NEC, the National Electrical Code, is the U.S. electrical safety code.
+[3:56] It sets the fire ratings printed on cable jackets, such as plenum and riser.
+[4:05] BICSI is a professional association for this industry that writes design and installation standards.
+[4:14] NEMA, the National Electrical Manufacturers Association, sets standards for electrical products like enclosures and cable tray.
+[4:26] On site, you cite the DRS rule itself.
+[4:31] For example: DRS 01.00.01, rule 2.
+
+[4:40] HOW IT FITS
+[4:41] So how does the DRS fit with the other documents you will use?
+[4:48] The DRS says how each task must be done.
+[4:52] The cutsheet says where each cable goes.
+[4:56] It is the final word on any port.
+[5:00] The installation guide was built from the DRS, and from the patch panel data behind the cutsheet.
+[5:09] This course, and the Field Kit app, are training aids.
+[5:14] They explain the documents.
+[5:17] They never replace the DRS on site.
+[5:21] If this course or the guide ever differs from the current DRS, the DRS is the requirement.
+[5:30] Follow it, and tell your lead about the difference.
+
+[5:36] GETTING THE DRS
+[5:37] Before each task, find the DRS for that task.
+[5:43] The primary source is Fluidstack's Confluence portal.
+[5:48] Log in at fluidstack.atlassian.net, open the LVC Deployment space, then Deployment Requirements Sheets.
+[6:00] If you cannot reach the portal, contact your assigned Fluidstack project manager, your PM, or your site supervisor.
+[6:11] They can send you the document or restore your access.
+[6:16] Then check the version.
+[6:19] Look at the revision date on the cover page, and make sure it is the current revision.
+[6:26] Have it on hand where you work: printed, or on a device you can read there.
+[6:33] Then you can start.
+[6:35] One tip.
+[6:37] The portal needs a login and a connection, and data halls often have weak signal.
+[6:45] Get or print the DRS for the day's tasks before you go onto the floor.
+
+[6:53] READING A DRS SHEET
+[6:54] Here is how a DRS sheet is laid out.
+[6:58] This is a redrawn version of DRS 01.00.01, the general cable dressing sheet.
+[7:10] Every sheet has a number.
+[7:13] This one is 01.00.01.
+[7:18] Use the number to find it, to ask about it, and to cite it.
+[7:23] The title says which task it covers: General Fiber Cable Dressing.
+[7:30] Next is the revision date.
+[7:33] This sheet was revised on 6/9/2026.
+[7:39] Check it against the portal every time.
+[7:43] The approval block shows who approved the sheet for Fluidstack.
+[7:48] And every sheet is marked Internal Use Only.
+[7:53] It is confidential.
+[7:55] Use it for the work, and do not share or post it.
+[8:00] The body holds numbered rules.
+[8:04] A crossed-out picture means never.
+[8:07] Here, never use nylon zip ties.
+[8:11] A sheet can point to another sheet.
+[8:14] This one says to see DRS 01.00.07 for fiber bend radius.
+[8:24] When you do that part of the work, get that sheet too.
+
+[8:30] THE ON-SITE RULE
+[8:31] Now the on-site rule.
+[8:34] You must have the DRS for the work on hand at the work location.
+[8:40] A printed copy, or a digital copy on a device you can read there.
+[8:47] Working from memory alone is not acceptable, even if you have done the task a hundred times.
+[8:56] If you do not have the DRS, stop work, and get it before you go on.
+[9:03] This is a Fluidstack site requirement on all deployments.
+
+[9:10] COMMON MISTAKES
+[9:11] Three common mistakes.
+[9:14] Working from an old printout.
+[9:17] A newer revision may have changed a rule, so check the revision date.
+[9:23] Using this course, a photo from another site, or a coworker's word instead of the DRS.
+[9:31] Only the current DRS counts.
+[9:35] And sharing a DRS outside the job.
+[9:39] It is Internal Use Only.
+
+[9:45] WRAP-UP
+[9:46] In lesson zero of the course, put the before-you-start steps in order, explore a DRS sheet, and decide what to do in a few realistic situations.
+[9:59] Then take the lesson check.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

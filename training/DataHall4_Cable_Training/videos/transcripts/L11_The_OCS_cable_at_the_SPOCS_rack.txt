@@ -1,0 +1,85 @@
+Lesson 11 video: The OCS cable at the SPOCS rack
+Length 7:14 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] This is the OCS cable we plugged into the TPU rack.
+[0:07] Now we follow it to the other end: the SPOCS rack.
+[0:12] We will look inside a SPOCS rack, at the OCS shelf and its ports, which leg goes to which slot, the X and X plus one rule, a worked example, and how to pull and dress the bundles.
+
+[0:30] INSIDE A SPOCS RACK
+[0:31] A SPOCS rack holds four OCS shelves, one in each slot.
+[0:37] Only these four shelves are yours.
+[0:41] The slots count from the top down.
+[0:44] Slot one is the top shelf.
+[0:48] And slot four is the bottom shelf.
+[0:52] The power, TROSS, rectifier and battery shelves are pre-installed.
+[0:58] They are not yours.
+
+[1:03] THE OCS SHELF
+[1:04] Each shelf has three hundred twenty LC ports.
+[1:08] They are numbered with three digits, from zero zero one to three twenty.
+[1:15] Each box on this drawing is a pair of ports: the odd port on top, the even port below.
+[1:23] Like zero zero one and zero zero two.
+[1:29] The numbers count down a column of twenty, then move to the next column to the right.
+[1:36] Ports one forty-five to one sixty, shown in grey, are not used.
+[1:44] The left half, ports one to one sixty, is for TPU racks one to seventy-two.
+[1:51] The right half, one sixty-one to three twenty, is for TPU racks seventy-three to one forty-four.
+
+[2:03] LEG TO SLOT
+[2:04] Here is one OCS bundle arriving at a SPOCS rack from above.
+[2:10] The legs come in four different lengths.
+[2:14] Legs one and two, blue and orange, are the shortest: fourteen hundred eighty millimeters, about four feet ten inches.
+[2:24] They go to slot one, the top shelf.
+[2:28] Legs three and four, green and brown, are eighteen hundred forty millimeters.
+[2:35] Slot two.
+[2:37] Legs five and six, slate and white, are twenty-two hundred millimeters.
+[2:44] Slot three.
+[2:46] And legs seven and eight, red and black, are the longest: twenty-five sixty millimeters.
+[2:54] Slot four, the bottom shelf.
+[2:58] The lengths are built so each pair just reaches its shelf.
+[3:02] If a leg seems far too short or too long for its slot, it is probably the wrong leg.
+
+[3:12] PORT X AND X+1
+[3:13] Now, which port on each shelf?
+[3:16] The cutsheet gives your TPU rack a port number.
+[3:21] The guide calls it X.
+[3:24] Each slot gets two legs: one on port X, and one on port X plus one.
+[3:30] The odd-numbered leg goes on X.
+[3:34] So legs one, three, five and seven go on port X.
+[3:39] Legs two, four, six and eight go on port X plus one.
+[3:45] And here is the part people forget.
+[3:48] Your TPU rack uses the same X on every slot, and on all three SPOCS racks.
+[3:57] The guide checked this pattern on all eight thousand six hundred forty bundles in the reference cutsheet.
+
+[4:07] WORKED EXAMPLE
+[4:08] The guide's own drawing uses ports zero seventeen and zero eighteen as its example, so we will too.
+[4:18] Your real X comes from the cutsheet.
+[4:22] Leg one, blue, goes to slot one, port zero seventeen.
+[4:27] Leg two, orange, goes to slot one, port zero eighteen.
+[4:34] Leg three goes to slot two, port zero seventeen, and leg four to slot two, port zero eighteen.
+[4:43] The same two ports, one shelf lower.
+[4:47] Then legs five and six on slot three, and legs seven and eight on slot four.
+[4:54] Always zero seventeen and zero eighteen.
+[4:59] Then you do exactly the same with the orange cable at SPOCS rack two, and the yellow cable at SPOCS rack three.
+[5:09] Port zero seventeen is in the left half, so this TPU rack is in TPU one to seventy-two, and its bundles dress on the left.
+
+[5:24] PULLING AND DRESSING
+[5:25] Finally, pulling and dressing.
+[5:28] Pull the OCS bundles starting at the OCS rack, toward the TPU rack.
+[5:36] The split point, where the bundle breaks into legs, sits twelve to eighteen inches above the top of the OCS rack.
+[5:46] Bundles from TPU racks one to seventy-two leave the tray on the left side of the OCS rack and are dressed on the left.
+[5:58] Seventy-three to one forty-four go on the right.
+[6:03] OCS cables run in the tier one tray.
+[6:07] Secure them to the tray only at corners and exits, three times each, and use waterfalls centered over the rack's vertical cable manager.
+[6:19] Bundle with half-inch Velcro every twelve to eighteen inches.
+[6:25] That is DRS 01.00.03.
+[6:31] Zip ties are not allowed.
+[6:34] Store OCS slack on top of the TPU rack, never in the tray.
+[6:40] Label and coil the spare legs, or handle them as your site decided.
+[6:47] And label it all: a wrap-around label on the bundle near each end, and a flag label on every leg.
+
+[6:58] WRAP-UP
+[6:59] In lesson eleven of the course, practice matching legs to slots and ports, and deciding which side a bundle dresses on.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

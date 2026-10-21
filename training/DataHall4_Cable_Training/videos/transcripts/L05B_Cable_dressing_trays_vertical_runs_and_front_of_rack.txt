@@ -1,0 +1,134 @@
+Lesson 5B video: Cable dressing: trays, vertical runs and front of rack
+Length 12:09 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] This video follows a cable from the overhead tray to its device.
+[0:07] The rules come from DRS 01.00.03, Cable Dressing Basket Trays, DRS 01.00.03.01, Cable Dressing Vertical Pathways, DRS 01.00.02, Front of Rack Cable Dressing, and page seven of the guide.
+[0:34] The general rules from lesson five still apply the whole way: half-inch Velcro, never zip ties, bend radius, safe supports, and rated cable.
+
+[0:50] IN THE BASKET TRAY
+[0:51] Start in the tray.
+[0:53] Cables run overhead in a basket tray.
+[0:57] DRS 01.00.03, Cable Dressing Basket Trays, has five rules for it.
+[1:07] Rule one.
+[1:09] Bundle cables neatly in the tray with Velcro, twelve to eighteen inches apart.
+[1:17] Rule two.
+[1:19] Do not strap bundles to the tray on straight runs.
+[1:23] Secure them to the tray only going around corners, at exits, and on vertical runs.
+[1:32] At each corner, secure the bundle to the tray three times.
+[1:37] And at each exit, secure it three times.
+[1:42] Rule three.
+[1:44] Use half-inch Velcro for all cable bundling.
+[1:48] That matches DRS 01.00.01 and 01.00.02.
+[1:58] Rule four.
+[2:01] Waterfalls are centered over the rack's vertical cable managers.
+[2:06] A waterfall is a curved guide on the tray edge that keeps the bend wide where cable leaves the tray.
+[2:17] Rule five.
+[2:19] Cables keep the manufacturer's recommended bend radius at all times.
+[2:26] The drawing marks twenty times the cable diameter at a tray corner.
+[2:32] That matches the twenty times minimum for cable being pulled, from DRS 01.00.01.
+[2:43] Keep tray corners at least that wide, and confirm with your lead.
+[2:49] At the exit, the waterfall is what keeps the bend.
+[2:54] Never let cable drop over a tray edge unsupported.
+[2:59] The tray wire would kink it.
+
+[3:04] VERTICAL PATHWAYS
+[3:05] Some runs go up or down, in a vertical tray or ladder.
+[3:10] DRS 01.00.03.01, Cable Dressing Vertical Pathways, covers them.
+[3:21] Its number builds on 01.00.03.
+[3:28] This is a side view.
+[3:30] The right side is done right.
+[3:33] Rule one.
+[3:35] Bundle with Velcro every twelve to eighteen inches, in vertical tray as well.
+[3:42] On the horizontal runs the bundles float.
+[3:47] Rule two.
+[3:49] When the run goes vertical, secure the bundles to the tray.
+[3:54] Rule three.
+[3:56] Vertical cable must be secured so it is self-supporting.
+[4:02] Too much cable weight on the horizontal transitions damages the tray and the cable.
+[4:11] Rule four.
+[4:13] Waterfalls are required at all vertical transitions, to keep the bend radius.
+[4:21] Rule five.
+[4:23] Three-quarter inch Velcro may be used to secure cable to the vertical tray.
+[4:30] Bundling still uses half-inch.
+[4:34] The drawing also says all bends are greater than twenty times the cable diameter.
+[4:42] Now the mistakes on the left.
+[4:45] A missing waterfall at the transition can damage the cable.
+[4:51] And with too little Velcro, the cable slides to the bottom under its own weight, damaging the cable and the tray.
+
+[5:03] FRONT OF THE RACK
+[5:04] Next, the front of the rack.
+[5:06] DRS 01.00.02, Front of Rack Cable Dressing, covers how cable leaves the basket tray and comes down the front of the rack.
+[5:21] Rule one.
+[5:23] Cables shall not cross devices they do not patch into.
+[5:28] Every device must be replaceable without unplugging cables that end in another device.
+[5:37] Rule two.
+[5:39] Cable leaves the basket tray directly above the rack edge, or above the vertical cable manager.
+[5:48] Rule three.
+[5:50] Every cable entering or leaving the tray is supported by a waterfall, to keep the bend radius.
+[5:59] Here, too, the waterfall lines up with the rack's vertical cable manager.
+[6:06] Rule four.
+[6:08] Network racks must use over-the-top waterfalls, where the cable rides over the top edge of the tray.
+[6:17] In this hall, the guide puts that note on the DCN patch panel racks and the spine racks, in network rows one and two.
+[6:28] Ask your lead which other racks count as network racks.
+[6:34] Rule five.
+[6:36] Bundle cable neatly with half-inch Velcro.
+[6:40] That matches DRS 01.00.01 and 01.00.03.
+[6:50] Rule six.
+[6:53] Use the waterfall on the side of the rack the cables patch into.
+[6:58] These cables patch on the left, so they use the left waterfall.
+[7:04] And tray accessories, like waterfalls, must fit the tray: trays made by Basor, WBT, Legrand, or equivalent, with two by four inch openings and five millimeter wire.
+[7:20] If one does not fit, stop and ask.
+[7:25] One wording note.
+[7:27] Rule six says should, while the other rules say shall or must.
+[7:32] Every DRS is a requirement, so treat it as required, and confirm with your lead.
+
+[7:43] VCM, SLACK AND TIERS
+[7:44] The last rules come from page seven of the guide.
+[7:48] Their DRS sheet has not been added to this course yet.
+[7:54] In the vertical cable manager, cables come out between the fingers closest to the device.
+[8:01] Slack goes on the downstream side, toward the end device.
+[8:06] Nothing touches the floor.
+[8:10] Tray tiers count from the bottom up.
+[8:13] Tier one carries the OCS cables.
+[8:17] Tier two carries the 144-fiber trunks and, at this site, the CAT6 copper.
+[8:26] One conflict in the guide.
+[8:29] Page fourteen still says copper goes in tier one.
+[8:34] This course teaches tier two, but confirm with your lead.
+[8:40] And trunk slack is stored on top of the rack, never in the tray.
+
+[8:48] ASK YOUR LEAD
+[8:49] Four points to confirm with your lead.
+[8:52] Which racks count as network racks.
+[8:56] The DRS does not list them, so ask whether end of row and SPOCS racks need over-the-top waterfalls too.
+[9:06] Rule six of DRS 01.00.02 says should, not shall.
+[9:14] This course teaches it as required.
+[9:18] Bends in the tray pathway.
+[9:21] The basket tray and vertical pathway drawings show more than twenty times the diameter, while the general sheet allows ten times once cable is not under tension.
+[9:35] This course teaches more than twenty times in tray pathways.
+[9:40] And the copper tray tier from the guide.
+
+[9:46] WORKED EXAMPLE
+[9:47] Let us follow one bundle from the tray to a device, and name the rule at each step.
+[9:54] First, check that the rating on the jacket matches every space the run passes through.
+[10:02] That is DRS 01.00.01, rule six.
+[10:09] In the tray, bundle it with half-inch Velcro every twelve to eighteen inches, loose on straight runs.
+[10:18] DRS 01.00.03, rules one to three.
+[10:25] At the corner, keep the bend at least twenty times the diameter, and secure it to the tray three times.
+[10:34] Rules two and five.
+[10:37] At the exit, it goes over the waterfall centered over the vertical cable manager, on the side it patches into, and it is secured three times.
+[10:49] That is DRS 01.00.03 and DRS 01.00.02.
+[11:00] If the route climbs a vertical tray, the bundle is secured to the tray so it is self-supporting, with waterfalls at the transitions.
+[11:11] That is DRS 01.00.03.01.
+[11:18] Down the rack, it never crosses a device it does not patch into.
+[11:23] DRS 01.00.02, rule one.
+[11:30] In the vertical cable manager, it exits between the fingers closest to the device.
+[11:37] Slack goes on the downstream side.
+[11:41] And nothing touches the floor.
+
+[11:46] WRAP-UP
+[11:47] In lesson 5B of the course, explore the basket tray, a vertical pathway and the front of the rack, put the steps in order, match each rule to its source, and spot the dressing mistakes.
+[12:03] Then take the lesson check.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

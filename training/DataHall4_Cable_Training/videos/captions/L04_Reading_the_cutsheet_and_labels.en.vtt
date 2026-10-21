@@ -1,0 +1,215 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:07.280
+Every cable you install is listed on the
+cutsheet and labeled at both ends.
+
+2
+00:00:08.030 --> 00:00:10.590
+This video shows you how to read both.
+
+3
+00:00:11.940 --> 00:00:19.471
+We will cover device names, panel port codes,
+one cutsheet row from A to Z, and labels.
+
+4
+00:00:23.621 --> 00:00:29.189
+Every device has a name and a location, and
+the cutsheet gives both.
+
+5
+00:00:30.389 --> 00:00:37.298
+A name says what a device is, from big to
+small: the site, the pod, the rack in that
+
+6
+00:00:37.298 --> 00:00:38.943
+pod, and the device.
+
+7
+00:00:40.293 --> 00:00:45.499
+A location says where it is, like the codes
+you learned in lesson two.
+
+8
+00:00:46.849 --> 00:00:56.844
+Some device names you will meet: tor1 is the
+top of rack switch. rmu1 and rmu2 are the two
+
+9
+00:00:56.844 --> 00:00:58.177
+TROSS units.
+
+10
+00:00:58.927 --> 00:01:03.919
+And pp1 is the OCS panel on the TPU rack.
+
+11
+00:01:08.069 --> 00:01:13.594
+A panel port code tells you exactly which hole
+on a panel to use.
+
+12
+00:01:14.344 --> 00:01:17.843
+The guide shows two ways of writing the same
+spot.
+
+13
+00:01:19.243 --> 00:01:23.915
+On the cutsheet you will see codes like r1
+dash a1.
+
+14
+00:01:24.665 --> 00:01:27.822
+That means row one, column a, port one.
+
+15
+00:01:29.172 --> 00:01:35.316
+On the end of row panel, ports are pre-printed
+differently: A1 dash 1.
+
+16
+00:01:36.066 --> 00:01:41.122
+The letter is the column, then the port, then
+after the dash, the row.
+
+17
+00:01:42.472 --> 00:01:44.584
+Both point to the same hole.
+
+18
+00:01:45.334 --> 00:01:49.409
+Read each piece by what it is, not by its
+position.
+
+19
+00:01:50.759 --> 00:01:54.897
+And remember, rows count up from the bottom of
+the panel.
+
+20
+00:01:55.647 --> 00:01:58.485
+Row one is always the lowest row.
+
+21
+00:02:02.635 --> 00:02:06.880
+Every cable you install has one row in the
+cutsheet.
+
+22
+00:02:07.630 --> 00:02:09.635
+Read it from left to right.
+
+23
+00:02:11.035 --> 00:02:14.001
+A and Z are the two ends of the cable.
+
+24
+00:02:14.751 --> 00:02:18.484
+A is where it starts, and Z is where it
+finishes.
+
+25
+00:02:20.784 --> 00:02:27.803
+The A side tells you where the cable starts:
+the location, the device name, and the port.
+
+26
+00:02:29.153 --> 00:02:33.206
+The A panel is the first panel and port it
+lands on.
+
+27
+00:02:34.556 --> 00:02:40.017
+Trunk and leg tell you which big cable is in
+the middle, and which leg of it.
+
+28
+00:02:41.367 --> 00:02:47.703
+The Z panel is the last panel and port, and
+the Z side is where the cable ends.
+
+29
+00:02:49.053 --> 00:02:55.987
+If a row says spare, that leg is landed and
+labeled, but not plugged into a device.
+
+30
+00:03:00.137 --> 00:03:01.395
+Now labels.
+
+31
+00:03:02.145 --> 00:03:08.119
+Every cable gets the same label at both ends,
+and it must match the cutsheet.
+
+32
+00:03:09.319 --> 00:03:14.439
+Single connectors, breakout legs and copper
+runs get a flag label.
+
+33
+00:03:15.189 --> 00:03:19.285
+It sticks out like a flag, four inches from
+the boot.
+
+34
+00:03:20.035 --> 00:03:23.853
+The boot is the rubber cover behind the
+connector.
+
+35
+00:03:26.153 --> 00:03:32.818
+Trunks get a wrap-around label that circles
+the cable, one to two inches from the boot at
+
+36
+00:03:32.818 --> 00:03:33.492
+each end.
+
+37
+00:03:34.842 --> 00:03:37.274
+All labels are machine printed.
+
+38
+00:03:38.024 --> 00:03:39.539
+No handwriting.
+
+39
+00:03:40.889 --> 00:03:43.726
+Line one is the A device and port.
+
+40
+00:03:44.476 --> 00:03:47.612
+Line two is the Z device and port.
+
+41
+00:03:48.962 --> 00:03:52.759
+Trunk labels list all the ports their legs
+land on.
+
+42
+00:03:53.509 --> 00:03:59.184
+One to four in square brackets with a colon
+means ports one through four.
+
+43
+00:03:59.934 --> 00:04:01.491
+Commas mean a list.
+
+44
+00:04:02.841 --> 00:04:07.300
+And if a label and the cutsheet disagree: stop
+and ask.
+
+45
+00:04:11.450 --> 00:04:18.708
+In lesson four of the course, you will choose
+the right label for different cables and spot
+
+46
+00:04:18.708 --> 00:04:21.818
+label problems in realistic situations.
+

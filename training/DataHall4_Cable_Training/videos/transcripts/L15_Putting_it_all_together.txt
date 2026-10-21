@@ -1,0 +1,71 @@
+Lesson 15 video: Putting it all together
+Length 7:31 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] In this final video, we put everything together by following every cable of one TPU rack.
+[0:10] We will trace one rack's cables, follow one fiber from the switch all the way to a spine, review the done-when checklists, and list the open items to ask your lead about.
+
+[0:26] ONE RACK, EVERY CABLE
+[0:27] We will follow TPU rack 504.
+[0:32] Split the number: row five, spot four.
+[0:36] Spot four is north of the middle aisle, so it is served by end of row rack 511.
+[0:43] Row five is in pod ten.
+[0:47] 511 serves racks 502 to 510.
+[0:52] Using the guide's rule, the lowest-numbered rack goes on the bottom row, so 504 is the third rack: row three on the panel.
+[1:03] Confirm that on the cutsheet.
+[1:07] Its OCS cables go to pod ten's SPOCS racks: red to 512, orange to 612, yellow to 712.
+[1:21] Here is every cable on rack 504 in one table.
+[1:27] Pause the video to study it if you like.
+[1:33] The 144-fiber trunk runs from the switch's odd ports to row three on the front of 511's panel.
+[1:44] Behind row three, 511's eight 192-fiber trunks carry it to the eight patch panel racks, all in the RU thirty-five panel, slot three, columns C and D, lane one.
+[2:01] The three OCS cables go to 512, 612 and 712, with the same X and X plus one on every slot.
+[2:14] The six copper runs go to 511's panels at RU twenty-four, thirty and twenty-two.
+[2:22] And 511 itself is a standard end of row rack, so its management trunks are twelve fiber.
+
+[2:34] ONE FIBER, TOR TO SPINE
+[2:35] Now let us follow a single fiber leg, leg one of rack 504's trunk, all the way to the spines.
+[2:44] Leg one is blue.
+[2:46] Two times one, minus one: it plugs into port one of the top of rack switch.
+[2:54] At 511, it lands in column A, port one, row three.
+[3:00] Label A1 dash 3.
+[3:03] Behind that port is the column A 192-fiber trunk.
+[3:10] Row three holds legs five and six, and the odd leg, five, sits right behind A1.
+[3:18] Column A from a spot eleven rack goes to rack 107.
+[3:24] At 107, that trunk lands in the RU thirty-five panel, in columns C and D, lane one.
+[3:33] Leg five is odd, so it sits in column C, row three.
+[3:39] The C and D module in row three mixes this trunk with its neighbor in lane two, which is 611, and sends four cords to spines one, two, three and four.
+[3:54] Path complete.
+[3:56] One leg, followed from the TPU rack, through the end of row rack and the patch panel, to the spines.
+
+[4:07] DONE WHEN
+[4:08] Each guide ends with a done-when checklist.
+[4:12] Here are the highlights.
+[4:14] The full lists are in lesson fifteen and in the reference guide.
+[4:20] At the TPU rack: sixteen legs in the odd ports, spares dressed off the floor, the three OCS cables in their port groups, six copper runs, and everything scoped and labeled.
+[4:37] For OCS cables: the right color to the right SPOCS rack, the legs in their slots, the same X everywhere, the split point in the right place, and the right dressing side.
+[4:52] For copper and management: jack number equals port number, the right trunk size on the right positions, SPOCS cords at spots eleven and thirteen, and the spine end patched before turn-up.
+[5:09] For the large trunks: one TPU rack per front row, one 192-fiber trunk per rear column, two different end of row trunks in every module, and the correct module part number.
+
+[5:29] ASK YOUR LEAD
+[5:30] Finally, the open items.
+[5:33] These are places where the guide disagrees with itself, or simply does not say.
+[5:39] Bring them to your lead.
+[5:42] The cover says revision D, but every page footer says revision C.
+[5:48] Make sure you have the current revision.
+[5:52] Bend radius: the guide's fifteen times is not on any DRS so far, and the tray drawings show more than twenty times while the general sheet allows ten times without tension.
+[6:08] The DRS is the requirement; confirm the number with your lead.
+[6:14] The copper tray tier: tier two in most places, tier one on page fourteen.
+[6:22] The OCS spare legs, and the twelve versus twenty-four fiber trunks on the BMS racks.
+[6:31] The shuffle module part number, and the number of SPOCS uplinks per trunk.
+[6:38] And details the guide does not cover at all, like which rack is which TPU number, copper and fiber testing, and where the FB0 switch sits.
+
+[6:53] WRAP-UP
+[6:54] You have now followed every cable path in the hall.
+[6:58] When you are ready, take the final assessment in the course.
+[7:03] Your results are shown by topic, so you will know exactly what to review.
+[7:09] Have the current DRS on hand for every task, and keep the reference guide with you too.
+[7:17] Remember: the DRS says how, and the cutsheet is the final word on any port.
+[7:24] When in doubt, stop and ask.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

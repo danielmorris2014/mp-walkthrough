@@ -1,0 +1,271 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:07.625
+This video explains BMS, the building
+management system, and how its network
+
+2
+00:00:07.625 --> 00:00:10.245
+connections fit into your work.
+
+3
+00:00:11.595 --> 00:00:18.040
+We will cover what a building management
+system is, what the guide says about it, how
+
+4
+00:00:18.040 --> 00:00:22.134
+its information travels, what you do, and what
+to ask.
+
+5
+00:00:26.284 --> 00:00:30.060
+BMS stands for Building Management System.
+
+6
+00:00:30.810 --> 00:00:38.625
+It is a control system that monitors and
+manages a building's mechanical and electrical
+
+7
+00:00:38.625 --> 00:00:39.343
+systems.
+
+8
+00:00:40.843 --> 00:00:48.263
+In general, that means things like power and
+cooling equipment, water leak detection, fire
+
+9
+00:00:48.263 --> 00:00:50.571
+safety, lighting and access.
+
+10
+00:00:51.921 --> 00:00:59.411
+Sensors and controllers send their readings
+over a network to the BMS, which shows them on
+
+11
+00:00:59.411 --> 00:01:05.319
+screens and raises an alarm when something
+goes outside its safe range.
+
+12
+00:01:06.669 --> 00:01:10.658
+So a BMS can only see what its network can
+reach.
+
+13
+00:01:11.408 --> 00:01:13.904
+That is where your cabling comes in.
+
+14
+00:01:15.254 --> 00:01:17.387
+That was general background.
+
+15
+00:01:18.137 --> 00:01:25.732
+The guide itself only describes the BMS
+network connections in the end of row racks.
+
+16
+00:01:26.482 --> 00:01:31.154
+It does not list which building systems are
+monitored in this hall.
+
+17
+00:01:35.304 --> 00:01:41.640
+There are two types of end of row rack: the
+standard one, and the one with BMS.
+
+18
+00:01:42.990 --> 00:01:49.134
+There are six BMS racks: 611 and 613 in pod
+ten.
+
+19
+00:01:50.484 --> 00:02:00.447
+Then 1411 and 1413 in pod eleven, and 2211 and
+2213 in pod twelve.
+
+20
+00:02:01.197 --> 00:02:04.695
+Each pair is in the middle SPOCS row of its
+pod.
+
+21
+00:02:06.045 --> 00:02:13.896
+A BMS rack adds two things: an FB0 BMS switch,
+and a copper panel for it.
+
+22
+00:02:16.196 --> 00:02:24.285
+Its management trunks are twenty-four fiber,
+and duplex three on each one carries the FB0
+
+23
+00:02:24.285 --> 00:02:24.921
+uplink.
+
+24
+00:02:25.671 --> 00:02:31.111
+The guide also lists blue copper as BMS, if
+your site stocks it.
+
+25
+00:02:35.261 --> 00:02:38.824
+Let us trace BMS information through the hall.
+
+26
+00:02:39.824 --> 00:02:48.400
+It starts at BMS devices, which connect by
+copper to the FB0 switch and its copper panel.
+
+27
+00:02:49.150 --> 00:02:55.123
+The guide does not say which devices these
+are, or who runs those cables.
+
+28
+00:02:56.473 --> 00:03:04.969
+The FB0 switch uplinks with a two-fiber LC
+cord into the front of the RU thirty-nine LC
+
+29
+00:03:04.969 --> 00:03:08.484
+panel, at the duplex three position.
+
+30
+00:03:09.834 --> 00:03:17.001
+Behind that position, a twenty-four fiber
+trunk carries it to management spine one, and
+
+31
+00:03:17.001 --> 00:03:20.543
+another carries it to management spine two.
+
+32
+00:03:21.893 --> 00:03:23.067
+Why two?
+
+33
+00:03:23.817 --> 00:03:31.065
+Every end of row rack connects to both
+management spines, so the management network,
+
+34
+00:03:31.065 --> 00:03:33.481
+BMS included, has two paths.
+
+35
+00:03:34.831 --> 00:03:41.017
+Past the spines, the information reaches the
+systems that collect and display it.
+
+36
+00:03:41.767 --> 00:03:43.922
+That part is not yours.
+
+37
+00:03:48.072 --> 00:03:51.272
+So what do you actually do at a BMS rack?
+
+38
+00:03:52.272 --> 00:03:53.744
+Identify it.
+
+39
+00:03:54.494 --> 00:04:02.736
+It is marked EOR BMS on the map, and you
+should find the FB0 switch and an extra copper
+
+40
+00:04:02.736 --> 00:04:03.305
+panel.
+
+41
+00:04:04.655 --> 00:04:05.785
+Connect it.
+
+42
+00:04:06.535 --> 00:04:14.112
+Land the twenty-four fiber trunks on the rear
+of the RU thirty-nine panel, and plug the
+
+43
+00:04:14.112 --> 00:04:20.295
+switch cords into the front, including duplex
+three for the FB0 switch.
+
+44
+00:04:21.645 --> 00:04:27.469
+Label it: wrap-around labels on the trunks,
+and flag labels on the cords.
+
+45
+00:04:28.819 --> 00:04:30.270
+And verify it.
+
+46
+00:04:31.020 --> 00:04:33.601
+Both trunks are twenty-four fiber.
+
+47
+00:04:34.351 --> 00:04:40.474
+The FB0 cord is in duplex three for both
+spines, per the cutsheet.
+
+48
+00:04:41.224 --> 00:04:43.293
+The SPOCS cords are in.
+
+49
+00:04:44.043 --> 00:04:46.881
+And the far ends are patched before turn-up.
+
+50
+00:04:51.031 --> 00:04:55.319
+Some BMS details are simply not in the guide.
+
+51
+00:04:56.069 --> 00:04:58.565
+Bring these questions to your lead.
+
+52
+00:04:59.565 --> 00:05:04.727
+Which rack unit the FB0 switch and its copper
+panel use.
+
+53
+00:05:06.077 --> 00:05:13.106
+Which BMS devices connect to it, where their
+cables come from, and whether your crew runs
+
+54
+00:05:13.106 --> 00:05:13.501
+them.
+
+55
+00:05:14.851 --> 00:05:21.678
+What FB0 stands for, and whether any testing
+is required on BMS links.
+
+56
+00:05:23.028 --> 00:05:24.308
+Do not guess.
+
+57
+00:05:25.058 --> 00:05:31.714
+A missing BMS connection may not show up until
+the day someone needs an alarm.
+
+58
+00:05:35.864 --> 00:05:43.850
+In lesson fourteen of the course, trace the
+BMS uplink step by step and answer a question
+
+59
+00:05:43.850 --> 00:05:45.016
+at each stop.
+

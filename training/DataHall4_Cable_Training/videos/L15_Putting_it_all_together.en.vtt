@@ -1,0 +1,325 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:08.504
+In this final video, we put everything
+together by following every cable of one TPU
+
+2
+00:00:08.504 --> 00:00:08.944
+rack.
+
+3
+00:00:10.294 --> 00:00:17.304
+We will trace one rack's cables, follow one
+fiber from the switch all the way to a spine,
+
+4
+00:00:17.304 --> 00:00:23.606
+review the done-when checklists, and list the
+open items to ask your lead about.
+
+5
+00:00:27.756 --> 00:00:30.956
+We will follow TPU rack 504.
+
+6
+00:00:32.156 --> 00:00:35.377
+Split the number: row five, spot four.
+
+7
+00:00:36.127 --> 00:00:43.125
+Spot four is north of the middle aisle, so it
+is served by end of row rack 511.
+
+8
+00:00:43.875 --> 00:00:46.243
+Row five is in pod ten.
+
+9
+00:00:47.593 --> 00:00:51.774
+511 serves racks 502 to 510.
+
+10
+00:00:52.524 --> 00:01:00.060
+Using the guide's rule, the lowest-numbered
+rack goes on the bottom row, so 504 is the
+
+11
+00:01:00.060 --> 00:01:03.127
+third rack: row three on the panel.
+
+12
+00:01:03.877 --> 00:01:06.031
+Confirm that on the cutsheet.
+
+13
+00:01:07.381 --> 00:01:17.792
+Its OCS cables go to pod ten's SPOCS racks:
+red to 512, orange to 612, yellow to 712.
+
+14
+00:01:21.942 --> 00:01:26.443
+Here is every cable on rack 504 in one table.
+
+15
+00:01:27.193 --> 00:01:30.052
+Pause the video to study it if you like.
+
+16
+00:01:33.052 --> 00:01:42.352
+The 144-fiber trunk runs from the switch's odd
+ports to row three on the front of 511's
+
+17
+00:01:42.352 --> 00:01:42.993
+panel.
+
+18
+00:01:44.343 --> 00:01:53.681
+Behind row three, 511's eight 192-fiber trunks
+carry it to the eight patch panel racks, all
+
+19
+00:01:53.681 --> 00:02:00.557
+in the RU thirty-five panel, slot three,
+columns C and D, lane one.
+
+20
+00:02:01.907 --> 00:02:12.659
+The three OCS cables go to 512, 612 and 712,
+with the same X and X plus one on every slot.
+
+21
+00:02:14.009 --> 00:02:21.539
+The six copper runs go to 511's panels at RU
+twenty-four, thirty and twenty-two.
+
+22
+00:02:22.889 --> 00:02:30.953
+And 511 itself is a standard end of row rack,
+so its management trunks are twelve fiber.
+
+23
+00:02:35.103 --> 00:02:42.731
+Now let us follow a single fiber leg, leg one
+of rack 504's trunk, all the way to the
+
+24
+00:02:42.731 --> 00:02:43.359
+spines.
+
+25
+00:02:44.559 --> 00:02:46.138
+Leg one is blue.
+
+26
+00:02:46.888 --> 00:02:53.117
+Two times one, minus one: it plugs into port
+one of the top of rack switch.
+
+27
+00:02:54.467 --> 00:02:59.459
+At 511, it lands in column A, port one, row
+three.
+
+28
+00:03:00.209 --> 00:03:02.385
+Label A1 dash 3.
+
+29
+00:03:03.735 --> 00:03:09.581
+Behind that port is the column A 192-fiber
+trunk.
+
+30
+00:03:10.331 --> 00:03:17.563
+Row three holds legs five and six, and the odd
+leg, five, sits right behind A1.
+
+31
+00:03:18.313 --> 00:03:23.305
+Column A from a spot eleven rack goes to rack
+107.
+
+32
+00:03:24.655 --> 00:03:33.017
+At 107, that trunk lands in the RU thirty-five
+panel, in columns C and D, lane one.
+
+33
+00:03:33.767 --> 00:03:38.311
+Leg five is odd, so it sits in column C, row
+three.
+
+34
+00:03:39.661 --> 00:03:47.473
+The C and D module in row three mixes this
+trunk with its neighbor in lane two, which is
+
+35
+00:03:47.473 --> 00:03:52.888
+611, and sends four cords to spines one, two,
+three and four.
+
+36
+00:03:54.238 --> 00:03:55.667
+Path complete.
+
+37
+00:03:56.417 --> 00:04:03.396
+One leg, followed from the TPU rack, through
+the end of row rack and the patch panel, to
+
+38
+00:04:03.396 --> 00:04:04.268
+the spines.
+
+39
+00:04:08.418 --> 00:04:11.575
+Each guide ends with a done-when checklist.
+
+40
+00:04:12.325 --> 00:04:13.968
+Here are the highlights.
+
+41
+00:04:14.718 --> 00:04:19.326
+The full lists are in lesson fifteen and in
+the reference guide.
+
+42
+00:04:20.526 --> 00:04:28.319
+At the TPU rack: sixteen legs in the odd
+ports, spares dressed off the floor, the three
+
+43
+00:04:28.319 --> 00:04:35.843
+OCS cables in their port groups, six copper
+runs, and everything scoped and labeled.
+
+44
+00:04:37.193 --> 00:04:44.645
+For OCS cables: the right color to the right
+SPOCS rack, the legs in their slots, the same
+
+45
+00:04:44.645 --> 00:04:51.103
+X everywhere, the split point in the right
+place, and the right dressing side.
+
+46
+00:04:52.453 --> 00:05:00.367
+For copper and management: jack number equals
+port number, the right trunk size on the right
+
+47
+00:05:00.367 --> 00:05:07.679
+positions, SPOCS cords at spots eleven and
+thirteen, and the spine end patched before
+
+48
+00:05:07.679 --> 00:05:08.367
+turn-up.
+
+49
+00:05:09.717 --> 00:05:18.312
+For the large trunks: one TPU rack per front
+row, one 192-fiber trunk per rear column, two
+
+50
+00:05:18.312 --> 00:05:25.952
+different end of row trunks in every module,
+and the correct module part number.
+
+51
+00:05:30.102 --> 00:05:32.449
+Finally, the open items.
+
+52
+00:05:33.199 --> 00:05:39.172
+These are places where the guide disagrees
+with itself, or simply does not say.
+
+53
+00:05:39.922 --> 00:05:41.671
+Bring them to your lead.
+
+54
+00:05:42.671 --> 00:05:48.175
+The cover says revision D, but every page
+footer says revision C.
+
+55
+00:05:48.925 --> 00:05:51.315
+Make sure you have the current revision.
+
+56
+00:05:52.665 --> 00:06:00.634
+Bend radius: the guide's fifteen times is not
+on any DRS so far, and the tray drawings show
+
+57
+00:06:00.634 --> 00:06:07.641
+more than twenty times while the general sheet
+allows ten times without tension.
+
+58
+00:06:08.391 --> 00:06:13.553
+The DRS is the requirement; confirm the number
+with your lead.
+
+59
+00:06:14.903 --> 00:06:21.111
+The copper tray tier: tier two in most places,
+tier one on page fourteen.
+
+60
+00:06:22.461 --> 00:06:30.056
+The OCS spare legs, and the twelve versus
+twenty-four fiber trunks on the BMS racks.
+
+61
+00:06:31.406 --> 00:06:36.803
+The shuffle module part number, and the number
+of SPOCS uplinks per trunk.
+
+62
+00:06:38.153 --> 00:06:45.950
+And details the guide does not cover at all,
+like which rack is which TPU number, copper
+
+63
+00:06:45.950 --> 00:06:50.292
+and fiber testing, and where the FB0 switch
+sits.
+
+64
+00:06:54.442 --> 00:06:58.026
+You have now followed every cable path in the
+hall.
+
+65
+00:06:58.776 --> 00:07:02.723
+When you are ready, take the final assessment
+in the course.
+
+66
+00:07:03.473 --> 00:07:08.998
+Your results are shown by topic, so you will
+know exactly what to review.
+
+67
+00:07:09.748 --> 00:07:16.617
+Have the current DRS on hand for every task,
+and keep the reference guide with you too.
+
+68
+00:07:17.367 --> 00:07:23.767
+Remember: the DRS says how, and the cutsheet
+is the final word on any port.
+
+69
+00:07:24.517 --> 00:07:26.779
+When in doubt, stop and ask.
+

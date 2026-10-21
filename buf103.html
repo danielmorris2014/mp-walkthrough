@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>BUF103 Cutsheet</title>
+<style>
+:root {
+  --bg: #0b0c0e; --card: #111113; --card2: #18191b; --line: #363a3f;
+  --text: #edeef0; --muted: #b0b4ba; --dim: #777b84;
+  --amber-t: #ffca16; --green: #30a46c; --red: #e5484d;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { overflow-x: clip; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 400 14px/1.45 -apple-system, "SF Pro Text", system-ui, sans-serif;
+  padding: calc(54px + env(safe-area-inset-top)) 12px calc(24px + env(safe-area-inset-bottom));
+  touch-action: manipulation; }
+.topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  background: rgba(11,12,14,.96); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line); padding: calc(6px + env(safe-area-inset-top)) 10px 6px; }
+.topbar .row1 { display: flex; align-items: center; gap: 8px; }
+.back { min-height: 40px; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,.055);
+  border: 1px solid var(--line); color: var(--muted); font: 800 12.5px -apple-system, sans-serif; cursor: pointer; }
+.back:active { transform: scale(.96); }
+.h1 { font: 800 17px/1.1 -apple-system, sans-serif; letter-spacing: -.2px; }
+.h1 small { display: block; font: 600 10.5px -apple-system, sans-serif; color: var(--dim); letter-spacing: .4px; margin-top: 2px; }
+.searchwrap { display: flex; gap: 8px; margin-top: 8px; }
+input[type=text] { flex: 1; min-width: 0; min-height: 44px; font-size: 16px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--card2); color: var(--text); padding: 0 12px; }
+.gobtn { min-height: 44px; padding: 0 16px; border-radius: 12px; border: 0; background: #fff; color: #111;
+  font: 800 14px -apple-system, sans-serif; cursor: pointer; }
+.gobtn:active { transform: scale(.97); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: rgba(118,118,128,.14);
+  border-radius: 10px; padding: 2px; margin-top: 8px; }
+.seg button { min-height: 40px; border: 0; border-radius: 8px; background: transparent; color: var(--muted);
+  font: 800 12.5px -apple-system, sans-serif; cursor: pointer; }
+.seg button.on { background: #fff; color: #111; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-top: 10px; }
+.ct { font: 800 11px -apple-system, sans-serif; letter-spacing: .8px; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+.fam { color: var(--amber-t); }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.rowline { display: block; padding: 9px 0; border-top: 1px solid rgba(255,255,255,.06); font-size: 12.5px; }
+.rowline:first-of-type { border-top: 0; }
+.ends { display: flex; gap: 8px; align-items: flex-start; }
+.end { flex: 1; min-width: 0; }
+.end .loc { font: 800 13px/1.2 ui-monospace, monospace; word-break: break-all; }
+.end .dev { font: 600 11px/1.35 ui-monospace, monospace; color: var(--muted); word-break: break-all; margin-top: 2px; }
+.arrow { color: var(--dim); font-size: 15px; flex: none; padding-top: 2px; }
+.spec { font: 600 10.5px/1.4 ui-monospace, monospace; color: var(--dim); margin-top: 4px; word-break: break-all; }
+.panel { display: inline-block; font: 700 10px ui-monospace, monospace; color: var(--green);
+  border: 1px solid rgba(48,164,108,.4); border-radius: 6px; padding: 1px 6px; margin-top: 5px; }
+.mrow { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-top: 1px solid rgba(255,255,255,.06); font-size: 12px; }
+.mrow:first-of-type { border-top: 0; }
+.mrow .n { font-weight: 800; white-space: nowrap; color: var(--text); }
+.mrow .s { color: var(--muted); font: 600 10.5px/1.4 ui-monospace, monospace; min-width: 0; word-break: break-all; text-align: right; }
+.count { font: 800 11px -apple-system, sans-serif; color: var(--dim); margin: 6px 0 2px; }
+.hint { color: var(--dim); font-size: 12px; margin-top: 10px; }
+.err { border-color: var(--red); }
+.err .ct { color: var(--red); }
+button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border-radius: 10px; background: #fff; color: #111; font: 700 14px -apple-system, sans-serif; }
+.loadstate { color: var(--dim); font-size: 12.5px; margin-top: 12px; }
+@media (min-width: 640px) { body { max-width: 640px; margin: 0 auto; } }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="row1">
+    <button class="back" onclick="location.href='./index.html#/home'">&#8249; MP Kit</button>
+    <div class="h1">BUF103 Cutsheet<small id="meta">DH1&#8211;DH4 &#183; pre-build data</small></div>
+  </div>
+  <div class="searchwrap">
+    <input type="text" id="q" placeholder="Rack (dh1-r0411), device, port or spec" enterkeyhint="search" autocapitalize="off" autocomplete="off" spellcheck="false">
+    <button class="gobtn" id="go">Search</button>
+  </div>
+  <div class="seg" id="seg">
+    <button data-v="search" class="on">Search</button>
+    <button data-v="rack">Rack view</button>
+    <button data-v="mats">Materials</button>
+  </div>
+</div>
+<div id="view">
+  <div class="loadstate" id="loadstate">Loading the BUF103 cutsheet&#8230;</div>
+  <div id="results"></div>
+</div>
+<script>
+'use strict';
+/* BUF103 Cutsheet viewer — loads data/buf103.json.gz (ADR-0003: bundled via
+   the build pipeline from the ICT production cutsheet). Search scans the
+   interned dictionary then matches rows; the rack view shows every
+   connection touching a rack; materials are per-family spec counts
+   computed at build time. Fails LOUD with retry (the v48 lesson). */
+var D = null, ST = 'idle', ERR = '', FAMS = [];
+function load() {
+  if (ST !== 'idle') return;
+  ST = 'loading'; ERR = '';
+  if (typeof DecompressionStream === 'undefined') {
+    ST = 'error'; ERR = 'This phone\u2019s iOS is too old for the offline cutsheet (needs iOS 16.4+).';
+    renderErr(); return;
+  }
+  fetch('./data/buf103.json.gz').then(function (r) {
+    if (!r.ok) throw new Error('http');
+    return new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).json();
+  }).then(function (d) {
+    D = d; ST = 'ready';
+    FAMS = d.fams;
+    document.getElementById('meta').textContent = d.src.replace(/_/g, ' ') + ' \u00b7 ' +
+      d.halls.join('\u2013') + ' \u00b7 ' + totalRows().toLocaleString() + ' cables';
+    document.getElementById('loadstate').style.display = 'none';
+    showMats(); // default landing
+  }).catch(function () {
+    ST = 'error';
+    ERR = 'Could not load the cutsheet database' + (navigator.onLine ? ' (server problem \u2014 try Retry).' : ' (no signal \u2014 open once with signal, then it works offline).');
+    renderErr();
+  });
+}
+window.addEventListener('online', function () { if (ST === 'error') { ST = 'idle'; load(); } });
+function totalRows() {
+  var n = 0; FAMS.forEach(function (f) { n += D.rows[f].length; }); return n;
+}
+function renderErr() {
+  var el = document.getElementById('loadstate');
+  el.style.display = 'block';
+  el.innerHTML = '';
+  var c = document.createElement('div');
+  c.className = 'card err';
+  c.innerHTML = '<div class="ct">Cutsheet unavailable</div><div style="font-size:12.5px;color:var(--muted)">' + esc(ERR) + '</div>';
+  var b = document.createElement('button');
+  b.className = 'retry'; b.textContent = 'Retry loading cutsheet';
+  b.onclick = function () { ST = 'idle'; load(); };
+  c.appendChild(b);
+  el.innerHTML = ''; el.appendChild(c);
+}
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]; }); }
+var MODE = 'mats';
+document.getElementById('seg').addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  MODE = b.getAttribute('data-v');
+  document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x === b); });
+  if (MODE === 'mats' && D) showMats();
+  else if (MODE !== 'mats') run();
+});
+document.getElementById('go').addEventListener('click', run);
+document.getElementById('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.target.blur(); run(); } });
+
+function rackNorm(q) {
+  // dh1-r0411 / DH1 R0411 / BUF103-DH1-R0411 -> canonical BUF103-DH1-R0411
+  var m = /(buf103[-/])?(dh\d)\s*[-/ ]\s*r(\d{2,4})\b/i.exec(q.trim());
+  if (!m) return null;
+  return 'BUF103-' + m[2].toUpperCase() + '-R' + m[3];
+}
+function run() {
+  if (!D) { load(); return; }
+  var out = document.getElementById('results');
+  out.innerHTML = '';
+  var q = document.getElementById('q').value.trim();
+  if (!q) {
+    out.innerHTML = '<div class="hint">Type a rack (like dh1-r0411), a device name, a port, or part of a cable spec.</div>';
+    return;
+  }
+  var t0 = performance.now();
+  var rack = rackNorm(q);
+  if (rack && MODE !== 'search') { rackView(rack, out); return; }
+  if (rack && MODE === 'search') { rackView(rack, out); return; }
+  // dictionary scan: find matching string ids, then rows referencing them
+  var qu = q.toUpperCase();
+  var hit = new Set();
+  for (var i = 0; i < D.d.length; i++) {
+    if (D.d[i].toUpperCase().indexOf(qu) >= 0) hit.add(i);
+  }
+  var matches = [], LIMIT = 400;
+  for (var f = 0; f < FAMS.length && matches.length < LIMIT; f++) {
+    var fam = FAMS[f], rows = D.rows[fam];
+    for (var r = 0; r < rows.length && matches.length < LIMIT; r++) {
+      var row = rows[r];
+      if (hit.has(row[0]) || hit.has(row[1]) || hit.has(row[2]) || hit.has(row[3]) || hit.has(row[4])) {
+        matches.push([fam, row]);
+      }
+    }
+  }
+  var ms = Math.round(performance.now() - t0);
+  var head = document.createElement('div');
+  head.className = 'count';
+  head.textContent = matches.length + (matches.length >= LIMIT ? '+' : '') + ' matches \u00b7 ' + ms + 'ms';
+  out.appendChild(head);
+  if (!matches.length) {
+    out.innerHTML += '<div class="hint">Nothing in the cutsheet matches \u201c' + esc(q) + '\u201d.</div>';
+    return;
+  }
+  var byFam = {};
+  matches.forEach(function (m) { (byFam[m[0]] = byFam[m[0]] || []).push(m[1]); });
+  Object.keys(byFam).forEach(function (fam) {
+    var c = document.createElement('div');
+    c.className = 'card';
+    var rowsHtml = byFam[fam].slice(0, 60).map(function (row) { return rowHtml(row); }).join('');
+    c.innerHTML = '<div class="ct"><span class="fam">' + esc(fam) + '</span> \u00b7 ' + byFam[fam].length + '</div>' + rowsHtml +
+      (byFam[fam].length > 60 ? '<div class="hint">Showing first 60 of ' + byFam[fam].length + '.</div>' : '');
+    out.appendChild(c);
+  });
+}
+function rowHtml(row) {
+  var a = D.d[row[0]] || '?', aDev = D.d[row[1]] || '', z = D.d[row[2]] || '?', zDev = D.d[row[3]] || '';
+  var spec = D.d[row[4]] || '', panel = D.d[row[5]] || '';
+  return '<div class="rowline"><div class="ends">' +
+    '<div class="end"><div class="loc">' + esc(a) + '</div><div class="dev">' + esc(aDev) + '</div></div>' +
+    '<div class="arrow">\u2192</div>' +
+    '<div class="end"><div class="loc">' + esc(z) + '</div><div class="dev">' + esc(zDev) + '</div></div>' +
+    '</div>' + (spec ? '<div class="spec">' + esc(spec) + '</div>' : '') +
+    (panel ? '<div class="panel">' + esc(panel) + '</div>' : '') + '</div>';
+}
+function rackView(rack, out) {
+  // every connection touching this rack on either end, grouped by family
+  var groups = [];
+  FAMS.forEach(function (fam) {
+    var hits = D.rows[fam].filter(function (row) { return D.d[row[0]] === rack || D.d[row[2]] === rack; });
+    if (hits.length) groups.push([fam, hits]);
+  });
+  if (!groups.length) {
+    out.innerHTML = '<div class="hint">No connections touch <b>' + esc(rack) + '</b> in this cutsheet revision.</div>';
+    return;
+  }
+  var total = 0; groups.forEach(function (g) { total += g[1].length; });
+  var h = document.createElement('div');
+  h.className = 'count';
+  h.textContent = rack + ' \u00b7 ' + total + ' connections \u00b7 ' + groups.length + ' families';
+  out.appendChild(h);
+  groups.forEach(function (g) {
+    var c = document.createElement('div');
+    c.className = 'card';
+    c.innerHTML = '<div class="ct"><span class="fam">' + esc(g[0]) + '</span> \u00b7 ' + g[1].length + '</div>' +
+      g[1].slice(0, 200).map(rowHtml).join('') +
+      (g[1].length > 200 ? '<div class="hint">Showing first 200 of ' + g[1].length + '.</div>' : '');
+    out.appendChild(c);
+  });
+}
+function showMats() {
+  var out = document.getElementById('results');
+  out.innerHTML = '';
+  var h = document.createElement('div');
+  h.className = 'count';
+  h.textContent = 'Planned cables by family \u2014 counts and specs from this cutsheet revision';
+  out.appendChild(h);
+  FAMS.forEach(function (fam) {
+    var specs = D.mats[fam] || [];
+    var total = 0; specs.forEach(function (s) { total += s[1]; });
+    var c = document.createElement('div');
+    c.className = 'card';
+    var rows = specs.slice(0, 8).map(function (s) {
+      return '<div class="mrow"><span class="s">' + esc(D.d[s[0]]) + '</span><span class="n">' + s[1].toLocaleString() + '</span></div>';
+    }).join('');
+    c.innerHTML = '<div class="ct"><span class="fam">' + esc(fam) + '</span> \u00b7 ' + total.toLocaleString() + ' cables</div>' + rows +
+      (specs.length > 8 ? '<div class="hint">+' + (specs.length - 8) + ' more specs</div>' : '');
+    out.appendChild(c);
+  });
+}
+load();
+</script>
+</body>
+</html>

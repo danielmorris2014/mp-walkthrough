@@ -1,0 +1,414 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:09.424
+This video covers one of the most important
+connections on the job: the 144-fiber trunk at
+
+2
+00:00:09.424 --> 00:00:11.525
+the top of rack switch.
+
+3
+00:00:12.875 --> 00:00:19.724
+We will cover what the number one forty-four
+counts, what odd means here, the rule for
+
+4
+00:00:19.724 --> 00:00:25.697
+every leg, a complete example, both ends of
+the trunk, and common mistakes.
+
+5
+00:00:29.847 --> 00:00:36.684
+You may have heard this described as one
+forty-four fiber to the odd rows, ports one to
+
+6
+00:00:36.684 --> 00:00:37.548
+thirty-one.
+
+7
+00:00:38.298 --> 00:00:40.623
+Let us check that against the guide.
+
+8
+00:00:42.123 --> 00:00:49.556
+The guide says it is the odd-numbered ports on
+the top of rack switch: ports one, three,
+
+9
+00:00:49.556 --> 00:00:52.427
+five, and so on, up to thirty-one.
+
+10
+00:00:53.777 --> 00:01:00.394
+Those odd ports happen to be the top row of
+the switch, which is probably where the word
+
+11
+00:01:00.394 --> 00:01:01.521
+rows came from.
+
+12
+00:01:02.871 --> 00:01:05.346
+It is not odd rows of racks.
+
+13
+00:01:06.696 --> 00:01:14.388
+At the far end of the same trunk, each TPU
+rack gets one row on a panel, rows one to
+
+14
+00:01:14.388 --> 00:01:14.845
+nine.
+
+15
+00:01:15.595 --> 00:01:18.049
+We will see that later in this video.
+
+16
+00:01:22.199 --> 00:01:26.316
+One forty-four is the number of fibers in the
+trunk.
+
+17
+00:01:27.666 --> 00:01:30.119
+It breaks out into eighteen legs.
+
+18
+00:01:30.869 --> 00:01:35.627
+Each leg is an MPO-8 plug holding eight
+fibers.
+
+19
+00:01:36.377 --> 00:01:40.302
+Eighteen times eight is one hundred
+forty-four.
+
+20
+00:01:41.652 --> 00:01:44.532
+Legs one through sixteen are active.
+
+21
+00:01:45.882 --> 00:01:48.783
+Legs seventeen and eighteen are spares.
+
+22
+00:01:52.933 --> 00:02:00.720
+This is the top of rack switch, an Arista
+7060, on side A of the TPU rack.
+
+23
+00:02:02.320 --> 00:02:06.523
+It has thirty-two ports arranged in sixteen
+cages.
+
+24
+00:02:07.273 --> 00:02:11.198
+Each cage holds two ports, one above the
+other.
+
+25
+00:02:12.548 --> 00:02:18.329
+The top port in each cage has an odd number:
+one, three, five, seven.
+
+26
+00:02:19.679 --> 00:02:24.501
+The bottom port has an even number: two, four,
+six, eight.
+
+27
+00:02:25.851 --> 00:02:29.669
+Only the odd ports, on the top row, are yours.
+
+28
+00:02:30.419 --> 00:02:36.201
+The even ports go to the machines inside the
+rack, and they are pre-installed.
+
+29
+00:02:36.951 --> 00:02:38.551
+Do not touch them.
+
+30
+00:02:39.901 --> 00:02:44.679
+At the right end are two copper ports, ETH and
+console.
+
+31
+00:02:45.429 --> 00:02:48.096
+We will cover those in lesson twelve.
+
+32
+00:02:52.246 --> 00:02:53.547
+Now the rule.
+
+33
+00:02:54.297 --> 00:02:56.580
+Leg one goes in port one.
+
+34
+00:02:57.930 --> 00:03:00.298
+Leg two goes in port three.
+
+35
+00:03:01.048 --> 00:03:02.541
+Not port two.
+
+36
+00:03:03.291 --> 00:03:07.195
+Port two is the even port right below port
+one.
+
+37
+00:03:08.545 --> 00:03:11.041
+Leg three goes in port five.
+
+38
+00:03:11.791 --> 00:03:16.933
+Keep going in order: leg N goes in the Nth odd
+port.
+
+39
+00:03:18.283 --> 00:03:20.480
+There is a quick way to work it out.
+
+40
+00:03:21.230 --> 00:03:25.646
+Multiply the leg number by two, then subtract
+one.
+
+41
+00:03:27.446 --> 00:03:32.929
+Leg seven: two times seven is fourteen, minus
+one is thirteen.
+
+42
+00:03:33.679 --> 00:03:35.108
+Port thirteen.
+
+43
+00:03:36.458 --> 00:03:42.602
+Leg sixteen: two times sixteen is thirty-two,
+minus one is thirty-one.
+
+44
+00:03:43.352 --> 00:03:47.021
+Port thirty-one, the top port of the last
+cage.
+
+45
+00:03:48.371 --> 00:03:55.633
+The guide checked this rule against every TPU
+rack in this hall: all four hundred thirty-two
+
+46
+00:03:55.633 --> 00:03:56.265
+of them.
+
+47
+00:04:00.415 --> 00:04:04.148
+Here are all sixteen legs with their colors
+and ports.
+
+48
+00:04:04.898 --> 00:04:07.629
+Pause the video if you want to study it.
+
+49
+00:04:10.629 --> 00:04:12.293
+Notice row five.
+
+50
+00:04:13.043 --> 00:04:16.840
+Leg thirteen is blue again, just like leg one.
+
+51
+00:04:17.590 --> 00:04:22.859
+Legs thirteen to sixteen repeat blue, orange,
+green and brown.
+
+52
+00:04:24.209 --> 00:04:29.777
+That is why you always read the leg number on
+the label, not just the color.
+
+53
+00:04:31.127 --> 00:04:35.330
+And at the bottom, legs seventeen and eighteen
+are spares.
+
+54
+00:04:36.080 --> 00:04:38.597
+Nothing plugs into them at the switch.
+
+55
+00:04:42.747 --> 00:04:45.243
+Let us land a trunk step by step.
+
+56
+00:04:46.243 --> 00:04:53.035
+First, read the wrap-around label near the
+boot, and check it against the cutsheet row
+
+57
+00:04:53.035 --> 00:04:54.457
+for this TPU rack.
+
+58
+00:04:55.807 --> 00:04:57.343
+Pick up leg one.
+
+59
+00:04:58.093 --> 00:04:59.309
+It is blue.
+
+60
+00:05:00.059 --> 00:05:03.131
+Read its label to confirm it says one.
+
+61
+00:05:03.881 --> 00:05:07.230
+Scope it, clean it, and plug it into port one.
+
+62
+00:05:08.580 --> 00:05:10.329
+Leg two is orange.
+
+63
+00:05:11.079 --> 00:05:14.130
+It goes in the next odd port, port three.
+
+64
+00:05:15.480 --> 00:05:17.976
+Later you pick up another blue leg.
+
+65
+00:05:18.726 --> 00:05:20.177
+Read the label.
+
+66
+00:05:20.927 --> 00:05:22.527
+It says thirteen.
+
+67
+00:05:23.277 --> 00:05:27.159
+Two times thirteen, minus one, is twenty-five.
+
+68
+00:05:28.509 --> 00:05:31.411
+Legs seventeen and eighteen are spares.
+
+69
+00:05:32.161 --> 00:05:36.705
+Label them and dress them up so they do not
+touch the floor.
+
+70
+00:05:38.055 --> 00:05:43.089
+And store the trunk slack, above the split
+point, on top of the rack.
+
+71
+00:05:43.839 --> 00:05:45.333
+Never in the tray.
+
+72
+00:05:49.483 --> 00:05:56.022
+This is the cable we just plugged in, now
+followed to its other end: the end of row
+
+73
+00:05:56.022 --> 00:05:56.416
+rack.
+
+74
+00:05:57.816 --> 00:06:00.717
+It lands on the front of a large panel.
+
+75
+00:06:01.467 --> 00:06:05.457
+Each TPU rack gets one row on this panel.
+
+76
+00:06:06.207 --> 00:06:10.687
+Here, the trunk for the third TPU rack fills
+row three.
+
+77
+00:06:12.037 --> 00:06:20.188
+The legs go left to right: legs one and two in
+column A, and so on, up to legs fifteen and
+
+78
+00:06:20.188 --> 00:06:21.999
+sixteen in column H.
+
+79
+00:06:23.349 --> 00:06:28.149
+And the spares, legs seventeen and eighteen,
+go in column I.
+
+80
+00:06:28.899 --> 00:06:32.590
+Lesson eight explains this panel in detail.
+
+81
+00:06:36.740 --> 00:06:39.193
+Finally, the common mistakes.
+
+82
+00:06:40.193 --> 00:06:43.415
+A leg in an even port, the bottom row.
+
+83
+00:06:44.165 --> 00:06:46.874
+Even ports belong to the machines.
+
+84
+00:06:47.624 --> 00:06:50.931
+Do not disturb them yourself; tell your lead.
+
+85
+00:06:52.281 --> 00:06:57.017
+Off by one, like leg two in port two, or in
+port five.
+
+86
+00:06:57.767 --> 00:07:02.567
+Check it: the port must equal two times the
+leg, minus one.
+
+87
+00:07:03.917 --> 00:07:08.610
+Mistaking leg thirteen for leg one, because
+both are blue.
+
+88
+00:07:09.360 --> 00:07:11.216
+Always read the label.
+
+89
+00:07:12.566 --> 00:07:14.251
+A spare plugged in.
+
+90
+00:07:15.001 --> 00:07:19.076
+And a leg plugged in without being scoped and
+cleaned first.
+
+91
+00:07:23.226 --> 00:07:26.021
+Now open lesson seven in the course.
+
+92
+00:07:26.771 --> 00:07:32.871
+You will plug legs into the right ports
+yourself, then find the mistake on a switch
+
+93
+00:07:32.871 --> 00:07:35.517
+that has one leg in the wrong place.
+

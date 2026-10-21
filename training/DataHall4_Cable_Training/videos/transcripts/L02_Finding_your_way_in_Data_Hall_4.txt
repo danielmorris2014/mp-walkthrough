@@ -1,0 +1,86 @@
+Lesson 2 video: Finding your way in Data Hall 4
+Length 6:45 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] In this video you will learn to find your way around Data Hall 4, using the hall map from the guide.
+[0:09] We will look at the map, learn to read a rack location, see the pattern inside every row, find the pods and special racks, and finish in the network rows.
+
+[0:24] THE HALL MAP
+[0:25] This is Data Hall 4 seen from above.
+[0:29] Take a moment to look at the whole map first.
+[0:35] On the left, at the west end of the hall, are network rows one and two.
+[0:40] This is where many of your trunks end.
+[0:44] Everything else is compute rows, numbered three to twenty-six, running left to right across the map.
+[0:54] The compute rows are split into three pods: pod ten, pod eleven and pod twelve.
+[1:02] Each small striped box is one TPU rack.
+[1:06] The six colored stripes stand for the six cable groups you install on it.
+[1:13] The white boxes are the end of row racks.
+[1:17] The orange boxes in the middle aisle are the SPOCS racks.
+[1:23] Now let us learn how each of these racks gets its name.
+
+[1:30] READING A LOCATION
+[1:31] Every rack has a location code.
+[1:35] You read it left to right: site, hall, row, spot.
+[1:40] The first part is the site.
+[1:44] DH four means data hall four.
+[1:48] R zero five means row five.
+[1:52] And twelve is the spot.
+[1:55] A spot is a rack's place in its row.
+[2:00] So this code means hall four, row five, spot twelve.
+[2:05] That is the first SPOCS rack of pod ten.
+[2:09] On the map, a rack shows only its row and spot.
+[2:14] So this rack is labeled 512.
+[2:18] The last two digits are always the spot, and everything before them is the row.
+
+[2:27] THE ROW PATTERN
+[2:28] Every compute row follows the same pattern.
+[2:32] Once you know it, you can find anything.
+[2:36] Spots two to ten hold nine TPU racks on the north side of the middle aisle.
+[2:44] Spot eleven is the end of row rack that serves those nine north racks.
+[2:51] Spot twelve is the middle aisle.
+[2:54] In a few rows, a SPOCS rack sits here.
+[2:59] Spot thirteen is the end of row rack for the south side, and spots fourteen to twenty-two hold the nine south TPU racks.
+[3:11] The blocks marked CDU at the row ends are not explained in the guide.
+[3:17] In liquid cooled halls a CDU usually supplies coolant to the racks.
+[3:24] You do not cable it.
+[3:27] So every row has eighteen TPU racks and two end of row racks.
+
+[3:36] WHICH EOR?
+[3:37] Let us use the pattern.
+[3:40] Which end of row rack serves TPU rack 1517?
+[3:46] First, split the number.
+[3:49] 1517 is row fifteen, spot seventeen.
+[3:55] Spot seventeen is between fourteen and twenty-two, so it is on the south side of the middle aisle.
+[4:03] South racks use the end of row rack at spot thirteen.
+[4:08] So the answer is rack 1513.
+[4:13] One more.
+[4:15] Rack 905 is row nine, spot five.
+[4:19] Spot five is north, so its end of row rack is 911.
+
+[4:27] PODS AND SPECIAL RACKS
+[4:28] A pod is a group of one hundred forty-four TPU racks that share three SPOCS racks.
+[4:36] Each pod covers eight rows.
+[4:41] Pod ten's three SPOCS racks are 512, 612 and 712.
+[4:48] Red is number one, orange is two, and yellow is three.
+[4:54] Pod eleven uses 1312, 1412 and 1512.
+[5:00] Pod twelve uses 2112, 2212 and 2312.
+[5:07] Six of the end of row racks are a special type, marked EOR BMS on the map.
+[5:15] They are 611, 613, 1411, 1413, 2211 and 2213.
+[5:25] You will meet them again in lessons thirteen and fourteen.
+
+[5:32] NETWORK ROWS
+[5:33] Finally, the network rows at the west end.
+[5:37] These are rows one and two.
+[5:41] The pink racks are the DCN patch panel racks.
+[5:45] They come in pairs, an N rack and an S rack, labeled A through H.
+[5:52] For example, rack 107 is patch panel A north, and 108 is patch panel A south.
+[6:01] The purple racks are the DCN spines.
+[6:05] And the two white racks, 131 and 204, are the management spines.
+[6:13] The racks marked oxide, SASL and FU are not explained in the guide, and you do not install anything in them.
+
+[6:25] WRAP-UP
+[6:26] You can now read any rack location and find it on the map.
+[6:32] In lesson two of the course, practice by clicking racks on the interactive map and decoding location codes.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

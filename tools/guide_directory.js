@@ -74,7 +74,7 @@
     ov.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(3,6,12,.88);display:flex;align-items:center;justify-content:center;padding:18px;';
     ov.innerHTML = '<div style="background:var(--surface,#18191b);border:1px solid var(--line,#363a3f);border-radius:16px;padding:20px;max-width:420px;width:100%;max-height:80vh;overflow:auto;">' +
       '<div style="font:800 20px/1 ui-monospace,monospace;color:var(--text,#edeef0);margin-bottom:6px;">' + esc(rec[0]) + '</div>' +
-      '<div style="font:700 10px/1.4 -apple-system,sans-serif;letter-spacing:.5px;text-transform:uppercase;color:var(--text-2,#b0b4ba);margin-bottom:12px;">' + esc(rec[3] || '') + '</div>' +
+      '<div style="font:700 10px/1.4 -apple-system,sans-serif;letter-spacing:.5px;text-transform:uppercase;color:var(--text-2,#b0b4ba);margin-bottom:12px;">' + esc(rec[3] || '') + '</div>' + mislabelHtml(rec[0]) +
       '<div style="border:1px solid var(--line,#363a3f);border-radius:10px;padding:10px;margin-bottom:8px;"><div style="font:700 10px -apple-system,sans-serif;color:var(--text-3,#777b84);margin-bottom:4px;">A END</div><div style="font:12px/1.5 ui-monospace,monospace;color:var(--text,#edeef0);word-break:break-all;">' + esc(parts(rec[1])) + '</div></div>' +
       '<div style="border:1px solid var(--line,#363a3f);border-radius:10px;padding:10px;margin-bottom:12px;"><div style="font:700 10px -apple-system,sans-serif;color:var(--text-3,#777b84);margin-bottom:4px;">Z END</div><div style="font:12px/1.5 ui-monospace,monospace;color:var(--text,#edeef0);word-break:break-all;">' + esc(parts(rec[2])) + '</div></div>' +
       '<div style="display:flex;gap:8px;"><button data-c="' + esc(rec[0]) + '" style="flex:1;min-height:44px;border:0;border-radius:10px;background:#fff;color:#111;font:700 14px -apple-system,sans-serif;">Copy barcode</button>' +
@@ -92,6 +92,30 @@
       }
     });
     document.body.appendChild(ov);
+  }
+  // wrong-label warning (feature #3): if this barcode was previously flagged
+  // in the Field Guide (spfg.mislabels, open items), say so BEFORE the walk
+  function mislabelFor(bc) {
+    try {
+      var list = JSON.parse(localStorage.getItem('spfg.mislabels') || '[]');
+      if (!Array.isArray(list)) return null;
+      for (var i = 0; i < list.length; i++) {
+        var r = list[i];
+        if (r && !r.done && (r.id === bc || String(r.id || '').toUpperCase() === String(bc).toUpperCase())) return r;
+      }
+    } catch (e) {}
+    return null;
+  }
+  function mislabelHtml(bc) {
+    var r = mislabelFor(bc);
+    if (!r) return '';
+    var bits = [];
+    if (r.sa) bits.push('A end reads ' + r.sa + ' (database: ' + r.da + ')');
+    if (r.sz) bits.push('Z end reads ' + r.sz + ' (database: ' + r.dz + ')');
+    return '<div style="margin-top:8px;border:1px solid rgba(229,72,77,.5);border-radius:10px;padding:10px;background:rgba(229,72,77,.08);">' +
+      '<div style="font:800 11px -apple-system,sans-serif;letter-spacing:.5px;color:#ff6369;">\u26A0 PREVIOUSLY FLAGGED WRONG LABEL</div>' +
+      '<div style="font:600 11px/1.5 -apple-system,sans-serif;color:var(--text-2,#b0b4ba);margin-top:4px;">' +
+      (bits.join('. ') || 'printed label does not match the database') + (r.note ? '. Note: ' + r.note : '') + '</div></div>';
   }
   function mountError(view) {
     if (document.getElementById('mpDirCard')) return;
@@ -162,7 +186,7 @@
         var big = document.createElement('div');
         big.id = 'mpDirCard'; big.className = 'card hl'; big.style.marginTop = '10px';
         big.innerHTML = '<div class="eyebrow">\u{1F4CB} From the database \u00b7 ' + esc(top[0]) + ' \u00b7 ' + esc(top[3] || '') + '</div>' + endHtml('A', top[1]) + endHtml('Z', top[2]) +
-          '<div class="muted" style="font-size:12px;margin-top:8px;">Check these against the flag. If the flag is different, tap Wrong labels.</div>';
+          '<div class="muted" style="font-size:12px;margin-top:8px;">Check these against the flag. If the flag is different, tap Wrong labels.</div>' + mislabelHtml(top[0]);
         var h2 = view.querySelector('.h2');
         if (h2) h2.insertAdjacentElement('afterend', big); else view.insertBefore(big, view.firstChild);
         if (res.length > 1) { card.id = 'mpDirCard2'; view.appendChild(card); }

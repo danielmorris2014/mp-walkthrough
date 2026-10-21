@@ -1,0 +1,323 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:07.874
+In this video you will learn to find your way
+around Data Hall 4, using the hall map from
+
+2
+00:00:07.874 --> 00:00:08.624
+the guide.
+
+3
+00:00:09.974 --> 00:00:16.849
+We will look at the map, learn to read a rack
+location, see the pattern inside every row,
+
+4
+00:00:16.849 --> 00:00:21.793
+find the pods and special racks, and finish in
+the network rows.
+
+5
+00:00:25.943 --> 00:00:29.036
+This is Data Hall 4 seen from above.
+
+6
+00:00:29.786 --> 00:00:32.858
+Take a moment to look at the whole map first.
+
+7
+00:00:35.058 --> 00:00:40.199
+On the left, at the west end of the hall, are
+network rows one and two.
+
+8
+00:00:40.949 --> 00:00:43.467
+This is where many of your trunks end.
+
+9
+00:00:44.817 --> 00:00:51.586
+Everything else is compute rows, numbered
+three to twenty-six, running left to right
+
+10
+00:00:51.586 --> 00:00:52.795
+across the map.
+
+11
+00:00:54.145 --> 00:01:01.271
+The compute rows are split into three pods:
+pod ten, pod eleven and pod twelve.
+
+12
+00:01:02.621 --> 00:01:06.205
+Each small striped box is one TPU rack.
+
+13
+00:01:06.955 --> 00:01:12.416
+The six colored stripes stand for the six
+cable groups you install on it.
+
+14
+00:01:13.766 --> 00:01:17.030
+The white boxes are the end of row racks.
+
+15
+00:01:17.780 --> 00:01:22.068
+The orange boxes in the middle aisle are the
+SPOCS racks.
+
+16
+00:01:23.418 --> 00:01:27.621
+Now let us learn how each of these racks gets
+its name.
+
+17
+00:01:31.771 --> 00:01:34.373
+Every rack has a location code.
+
+18
+00:01:35.123 --> 00:01:39.283
+You read it left to right: site, hall, row,
+spot.
+
+19
+00:01:40.783 --> 00:01:42.959
+The first part is the site.
+
+20
+00:01:44.309 --> 00:01:47.211
+DH four means data hall four.
+
+21
+00:01:48.561 --> 00:01:51.334
+R zero five means row five.
+
+22
+00:01:52.684 --> 00:01:54.561
+And twelve is the spot.
+
+23
+00:01:55.311 --> 00:01:58.127
+A spot is a rack's place in its row.
+
+24
+00:02:00.427 --> 00:02:04.779
+So this code means hall four, row five, spot
+twelve.
+
+25
+00:02:05.529 --> 00:02:08.623
+That is the first SPOCS rack of pod ten.
+
+26
+00:02:09.973 --> 00:02:13.663
+On the map, a rack shows only its row and
+spot.
+
+27
+00:02:14.413 --> 00:02:17.272
+So this rack is labeled 512.
+
+28
+00:02:18.022 --> 00:02:23.910
+The last two digits are always the spot, and
+everything before them is the row.
+
+29
+00:02:28.060 --> 00:02:31.623
+Every compute row follows the same pattern.
+
+30
+00:02:32.373 --> 00:02:35.125
+Once you know it, you can find anything.
+
+31
+00:02:36.625 --> 00:02:43.110
+Spots two to ten hold nine TPU racks on the
+north side of the middle aisle.
+
+32
+00:02:44.460 --> 00:02:50.348
+Spot eleven is the end of row rack that serves
+those nine north racks.
+
+33
+00:02:51.698 --> 00:02:54.173
+Spot twelve is the middle aisle.
+
+34
+00:02:54.923 --> 00:02:58.208
+In a few rows, a SPOCS rack sits here.
+
+35
+00:02:59.558 --> 00:03:07.504
+Spot thirteen is the end of row rack for the
+south side, and spots fourteen to twenty-two
+
+36
+00:03:07.504 --> 00:03:10.182
+hold the nine south TPU racks.
+
+37
+00:03:11.532 --> 00:03:17.079
+The blocks marked CDU at the row ends are not
+explained in the guide.
+
+38
+00:03:17.829 --> 00:03:24.015
+In liquid cooled halls a CDU usually supplies
+coolant to the racks.
+
+39
+00:03:24.765 --> 00:03:26.515
+You do not cable it.
+
+40
+00:03:27.865 --> 00:03:33.433
+So every row has eighteen TPU racks and two
+end of row racks.
+
+41
+00:03:37.583 --> 00:03:39.417
+Let us use the pattern.
+
+42
+00:03:40.167 --> 00:03:45.053
+Which end of row rack serves TPU rack 1517?
+
+43
+00:03:46.853 --> 00:03:48.751
+First, split the number.
+
+44
+00:03:49.501 --> 00:03:53.917
+1517 is row fifteen, spot seventeen.
+
+45
+00:03:55.267 --> 00:04:01.567
+Spot seventeen is between fourteen and
+twenty-two, so it is on the south side of the
+
+46
+00:04:01.567 --> 00:04:02.542
+middle aisle.
+
+47
+00:04:03.892 --> 00:04:08.137
+South racks use the end of row rack at spot
+thirteen.
+
+48
+00:04:08.887 --> 00:04:11.831
+So the answer is rack 1513.
+
+49
+00:04:13.181 --> 00:04:14.269
+One more.
+
+50
+00:04:15.019 --> 00:04:18.817
+Rack 905 is row nine, spot five.
+
+51
+00:04:19.567 --> 00:04:24.559
+Spot five is north, so its end of row rack is
+911.
+
+52
+00:04:28.709 --> 00:04:36.090
+A pod is a group of one hundred forty-four TPU
+racks that share three SPOCS racks.
+
+53
+00:04:36.840 --> 00:04:39.144
+Each pod covers eight rows.
+
+54
+00:04:41.444 --> 00:04:47.759
+Pod ten's three SPOCS racks are 512, 612 and
+712.
+
+55
+00:04:48.509 --> 00:04:52.797
+Red is number one, orange is two, and yellow
+is three.
+
+56
+00:04:54.147 --> 00:04:59.736
+Pod eleven uses 1312, 1412 and 1512.
+
+57
+00:05:00.486 --> 00:05:06.587
+Pod twelve uses 2112, 2212 and 2312.
+
+58
+00:05:07.937 --> 00:05:14.721
+Six of the end of row racks are a special
+type, marked EOR BMS on the map.
+
+59
+00:05:15.471 --> 00:05:24.431
+They are 611, 613, 1411, 1413, 2211 and 2213.
+
+60
+00:05:25.181 --> 00:05:29.277
+You will meet them again in lessons thirteen
+and fourteen.
+
+61
+00:05:33.427 --> 00:05:36.777
+Finally, the network rows at the west end.
+
+62
+00:05:37.527 --> 00:05:39.511
+These are rows one and two.
+
+63
+00:05:41.111 --> 00:05:45.121
+The pink racks are the DCN patch panel racks.
+
+64
+00:05:45.871 --> 00:05:50.799
+They come in pairs, an N rack and an S rack,
+labeled A through H.
+
+65
+00:05:52.149 --> 00:05:59.936
+For example, rack 107 is patch panel A north,
+and 108 is patch panel A south.
+
+66
+00:06:01.286 --> 00:06:04.465
+The purple racks are the DCN spines.
+
+67
+00:06:05.815 --> 00:06:12.001
+And the two white racks, 131 and 204, are the
+management spines.
+
+68
+00:06:13.351 --> 00:06:21.265
+The racks marked oxide, SASL and FU are not
+explained in the guide, and you do not install
+
+69
+00:06:21.265 --> 00:06:22.759
+anything in them.
+
+70
+00:06:26.909 --> 00:06:31.411
+You can now read any rack location and find it
+on the map.
+
+71
+00:06:32.161 --> 00:06:39.042
+In lesson two of the course, practice by
+clicking racks on the interactive map and
+
+72
+00:06:39.042 --> 00:06:41.057
+decoding location codes.
+

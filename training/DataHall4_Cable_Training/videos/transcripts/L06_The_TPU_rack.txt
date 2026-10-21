@@ -1,0 +1,61 @@
+Lesson 6 video: The TPU rack
+Length 4:49 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] This video is about the rack where every one of your cable paths begins: the TPU rack.
+[0:09] We will cover what a TPU is, the two faces of the rack, each unit from top to bottom, which parts are yours, and the six cable groups that leave it.
+
+[0:24] WHAT A TPU IS
+[0:25] TPU stands for Tensor Processing Unit.
+[0:30] It is a computer chip designed for the kind of math that artificial intelligence uses.
+[0:38] The guide calls the rack that holds these computers a TPU rack.
+[0:44] Sometimes it just says TPU, as in TPU one to seventy-two.
+[0:51] The drawings call it an Ironwood TPU rack.
+[0:56] From public sources, not the guide: Ironwood is Google's seventh-generation TPU.
+[1:04] A rack holds sixty-four chips, it is liquid cooled, and racks connect to each other through optical circuit switches.
+[1:14] That is why you install OCS cables.
+
+[1:20] THE TWO FACES
+[1:21] A TPU rack has two faces, side A and side B.
+[1:27] Parts outlined in black are yours.
+[1:30] Grey parts are pre-installed, and you leave them alone.
+[1:36] At the top of each side are three rectifiers.
+[1:41] They turn incoming power into the DC power the rack uses.
+[1:46] Not yours.
+[1:49] Below them on side A is the top of rack switch.
+[1:54] On side B, the same space is a blank panel.
+[1:59] The top of rack switch is the rack's door to the data network.
+[2:04] Your 144-fiber trunk plugs into it.
+[2:11] Next is the TROSS unit, one on each side.
+[2:15] The drawings say TROSS.
+[2:17] The cutsheet calls them rmu1 on side A and rmu2 on side B.
+[2:24] Same box, two names.
+[2:29] Below the TROSS is the OCS panel.
+[2:33] The cutsheet calls it pp1.
+[2:36] Ports one to twelve are on side A, and thirteen to twenty-four are on side B.
+[2:44] The rest of the rack is machine trays, the AI computers themselves, with batteries at the bottom.
+[2:52] All pre-installed.
+[2:55] Do not touch them.
+
+[3:00] WHAT IS YOURS
+[3:01] So on a TPU rack, you connect exactly four things.
+[3:06] The top of rack switch.
+[3:10] The two TROSS units, rmu1 and rmu2.
+[3:15] And the OCS panel, pp1, on both sides.
+[3:21] Everything else, including the even ports on the top of rack switch and the short internal cables, is not yours.
+[3:31] Remember: if a cable never leaves the rack, it is not yours.
+
+[3:39] SIX CABLE GROUPS
+[3:40] On the hall map, each TPU rack had six colored stripes.
+[3:46] Here is what they stand for.
+[3:49] One 144-fiber trunk, from the top of rack switch to the end of row rack.
+[3:58] Three OCS cables: red, orange and yellow, from the OCS panel to the three SPOCS racks of the pod.
+[4:09] Two gig E copper runs, one from each TROSS unit.
+[4:14] And four more copper runs: the switch's management and console ports, and the console port on each TROSS unit.
+[4:24] The next lessons follow each of these groups, starting with the 144-fiber trunk.
+
+[4:35] WRAP-UP
+[4:36] In lesson six of the course, explore every unit of the rack and practice finding the parts that are yours.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

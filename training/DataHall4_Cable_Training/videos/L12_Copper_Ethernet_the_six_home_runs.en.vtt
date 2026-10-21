@@ -1,0 +1,285 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:03.845
+Now we move from fiber to copper.
+
+2
+00:00:04.595 --> 00:00:10.483
+Every TPU rack sends six copper cables to its
+end of row rack.
+
+3
+00:00:11.833 --> 00:00:18.790
+We will cover what copper does here, the six
+runs, both ends of each run, and how to tell
+
+4
+00:00:18.790 --> 00:00:21.839
+runs apart when they all look the same.
+
+5
+00:00:25.989 --> 00:00:32.730
+The fiber you have learned so far carries the
+AI data: huge amounts, very fast.
+
+6
+00:00:33.480 --> 00:00:35.805
+The copper does a different job.
+
+7
+00:00:37.205 --> 00:00:40.427
+It connects the rack to the management
+network.
+
+8
+00:00:41.177 --> 00:00:48.701
+That is a separate network people use to set
+up, watch and control the equipment, even when
+
+9
+00:00:48.701 --> 00:00:51.182
+the main data network is down.
+
+10
+00:00:53.482 --> 00:00:56.405
+Some of the runs are console connections.
+
+11
+00:00:57.155 --> 00:01:04.692
+A console port gives a direct, text-only
+connection to a device, used for first setup
+
+12
+00:01:04.692 --> 00:01:06.200
+and for recovery.
+
+13
+00:01:08.500 --> 00:01:15.384
+The copper runs land on panels in the end of
+row rack, and patch cords connect them to
+
+14
+00:01:15.384 --> 00:01:17.225
+pre-installed switches.
+
+15
+00:01:18.575 --> 00:01:24.549
+From there, fiber uplinks carry the management
+traffic to the management spines.
+
+16
+00:01:25.299 --> 00:01:27.261
+That is lesson thirteen.
+
+17
+00:01:31.411 --> 00:01:33.353
+Here are all six runs.
+
+18
+00:01:34.103 --> 00:01:36.492
+Take a moment to read the table.
+
+19
+00:01:38.992 --> 00:01:46.298
+From the top of rack switch: its ETH
+management port goes to the copper panel at RU
+
+20
+00:01:46.298 --> 00:01:50.875
+twenty-four, which feeds the management leaf
+switch.
+
+21
+00:01:52.225 --> 00:01:58.305
+Its console port goes to the panel at RU
+thirty, for the console switch.
+
+22
+00:01:59.655 --> 00:02:07.888
+From each TROSS unit: the GIG E 1 port goes to
+the panel at RU twenty-two, for the TROSS leaf
+
+23
+00:02:07.888 --> 00:02:08.508
+switch.
+
+24
+00:02:09.858 --> 00:02:15.191
+And each TROSS unit's console port goes to RU
+thirty as well.
+
+25
+00:02:16.541 --> 00:02:20.211
+So all four console runs go to RU thirty.
+
+26
+00:02:20.961 --> 00:02:27.130
+The guide checked these on all two thousand
+five hundred ninety-two copper runs in the
+
+27
+00:02:27.130 --> 00:02:27.489
+hall.
+
+28
+00:02:31.639 --> 00:02:34.519
+Each copper cable is a home run.
+
+29
+00:02:35.269 --> 00:02:43.963
+It has an RJ45 plug at the TPU rack, and runs
+straight to a jack on the end of row copper
+
+30
+00:02:43.963 --> 00:02:44.549
+panel.
+
+31
+00:02:45.299 --> 00:02:48.307
+There is no panel at the TPU end.
+
+32
+00:02:50.607 --> 00:02:54.937
+On each TROSS unit, look for the port labeled
+console.
+
+33
+00:02:56.287 --> 00:02:59.338
+Then find the port labeled GIG E 1.
+
+34
+00:03:00.088 --> 00:03:06.851
+The guide notes that port positions in its
+drawing are simplified, so go by the label.
+
+35
+00:03:08.201 --> 00:03:13.875
+TROSS unit one is on side A, and TROSS unit
+two is on side B.
+
+36
+00:03:14.625 --> 00:03:16.993
+Both are at RU thirty-eight.
+
+37
+00:03:21.143 --> 00:03:28.141
+At the end of row rack, each home run ends on
+a jack in the copper panel next to its switch.
+
+38
+00:03:29.491 --> 00:03:34.184
+You terminate each home run on the jack the
+cutsheet gives you.
+
+39
+00:03:34.934 --> 00:03:39.414
+To terminate means to attach the cable's wires
+to the jack.
+
+40
+00:03:41.714 --> 00:03:46.514
+Then a short CAT6 patch cord connects the jack
+to the switch.
+
+41
+00:03:47.264 --> 00:03:50.421
+The jack number is the switch port number.
+
+42
+00:03:51.171 --> 00:03:53.497
+Jack ten goes to port ten.
+
+43
+00:03:54.847 --> 00:04:01.481
+In the vertical cable manager, cables exit
+between the fingers closest to the switch.
+
+44
+00:04:02.231 --> 00:04:13.303
+Bundle with half-inch Velcro every twelve to
+eighteen inches in the tray, per DRS 01.00.03.
+
+45
+00:04:14.053 --> 00:04:16.208
+Nothing touches the floor.
+
+46
+00:04:17.558 --> 00:04:24.472
+Label every copper cable with a flag label,
+four inches from the plug, at each end,
+
+47
+00:04:24.472 --> 00:04:26.305
+printed on both sides.
+
+48
+00:04:27.655 --> 00:04:33.970
+The guide does not say which termination
+standard to use, or whether copper must be
+
+49
+00:04:33.970 --> 00:04:34.503
+tested.
+
+50
+00:04:35.253 --> 00:04:37.983
+Ask your lead what your site requires.
+
+51
+00:04:42.133 --> 00:04:47.211
+All six runs are the same kind of cable, often
+the same color.
+
+52
+00:04:47.961 --> 00:04:52.569
+What makes each one different is where it
+starts and where it ends.
+
+53
+00:04:53.969 --> 00:05:01.306
+The switch's ETH and console ports are side by
+side, but they go to different panels:
+
+54
+00:05:01.306 --> 00:05:03.291
+twenty-four and thirty.
+
+55
+00:05:04.641 --> 00:05:11.319
+On a TROSS unit, GIG E 1 goes to twenty-two,
+and console goes to thirty.
+
+56
+00:05:12.669 --> 00:05:19.346
+TROSS one and TROSS two are on opposite sides
+of the rack, and their labels say which.
+
+57
+00:05:20.696 --> 00:05:24.173
+And do not confuse a home run with a patch
+cord.
+
+58
+00:05:24.923 --> 00:05:28.187
+The home run comes from the TPU rack.
+
+59
+00:05:28.937 --> 00:05:33.247
+The patch cord is the short cable from jack to
+switch.
+
+60
+00:05:34.597 --> 00:05:42.511
+The label is how you confirm each one: line
+one, the A device and port, and line two, the
+
+61
+00:05:42.511 --> 00:05:44.111
+Z device and port.
+
+62
+00:05:48.261 --> 00:05:54.939
+In lesson twelve of the course, match each run
+to its panel and spot copper mistakes.
+

@@ -1,0 +1,102 @@
+Lesson 3 video: Fiber and copper basics
+Length 7:35 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] Before we connect anything, we need some basic vocabulary for fiber and copper cable.
+[0:09] This video covers what a fiber is, how trunks break out into legs, the connectors you will handle, the fiber color code, copper cable, and how to handle fiber safely.
+
+[0:26] WHAT A FIBER IS
+[0:27] An optical fiber is a strand of glass about as thin as a hair.
+[0:33] Equipment sends data through it as pulses of light.
+[0:38] Fibers usually work in pairs.
+[0:41] One fiber sends, and the other one receives.
+[0:46] In the guide, the letter F means fibers.
+[0:50] So 144F means one hundred forty-four fibers, and 2F means two fibers.
+[0:59] Fiber carries the huge amounts of AI data.
+[1:04] Copper cable carries the smaller management connections.
+
+[1:11] TRUNKS AND LEGS
+[1:12] This is the 144-fiber trunk you will install from every TPU rack.
+[1:20] Look at its shape.
+[1:23] A trunk is a thick cable with many fibers inside one jacket.
+[1:31] At each end it breaks out at the split point.
+[1:35] Some people call it the furcation point.
+[1:39] Each branch is called a leg, and each leg ends in a connector.
+[1:45] This trunk has eighteen legs.
+[1:48] Each leg carries eight fibers.
+[1:51] Eighteen legs times eight fibers is one hundred forty-four.
+[1:57] That is where the name comes from.
+[2:00] Sixteen legs are used.
+[2:03] Legs seventeen and eighteen are spares.
+
+[2:09] CONNECTORS
+[2:10] You will handle four kinds of connector.
+[2:14] Let us look at each one.
+[2:17] This is an MPO-8 plug.
+[2:20] It is a rectangular push-on plug that holds eight fibers.
+[2:26] Every leg of the 144 and 192-fiber trunks is one of these.
+[2:36] This is an LC duplex plug.
+[2:39] It holds two fibers side by side.
+[2:43] The OCS cables use LC plugs with an angled polish, called APC.
+[2:50] APC plugs are usually green.
+[2:55] Never plug an APC connector into a flat UPC one, which is usually blue.
+[3:03] The glass does not line up and the end faces can be damaged.
+[3:08] If they do not match, stop and ask.
+[3:13] This is an RJ45 plug, the square plug on copper network cable.
+[3:20] And this is a jack, the socket on a copper panel where a copper run ends.
+
+[3:29] COLOR CODE
+[3:30] Legs and fibers are told apart by color.
+[3:35] The colors follow a standard called TIA-598.
+[3:40] You will use it every day.
+[3:44] The first group of four: blue, orange, green, brown.
+[3:50] The second group: slate, white, red, black.
+[3:56] The third group: yellow, violet, rose, aqua.
+[4:01] Once more, all twelve.
+[4:04] Blue, orange, green, brown.
+[4:07] Slate, white, red, black.
+[4:10] Yellow, violet, rose, aqua.
+[4:17] After twelve, the colors start again.
+[4:21] On the 144-fiber trunk, legs thirteen to sixteen are blue, orange, green and brown again.
+[4:31] So a blue leg could be leg one or leg thirteen.
+[4:35] The color alone cannot tell you.
+[4:39] That is why the guide says: always check the leg number on the label.
+[4:45] Color helps you find a leg fast.
+[4:49] The number tells you for sure.
+
+[4:54] COPPER
+[4:55] Now copper.
+[4:57] CAT6 is copper network cable, also called Ethernet.
+[5:02] It ends in an RJ45 plug.
+[5:07] In this job, copper carries the management and console connections from each TPU rack to its end of row rack.
+[5:18] The guide lists copper jacket colors.
+[5:21] Orange is out-of-band management.
+[5:25] Blue is BMS, the building management system.
+[5:30] Green is FIS, and black is for cables inside one rack.
+[5:36] The guide says to check which colors your site stocks, and it does not explain FIS.
+[5:43] If you see green copper, ask your lead.
+
+[5:49] HANDLING FIBER
+[5:50] Last, how to handle fiber.
+[5:54] Rule one: scope and clean every leg before it goes in.
+[5:59] The scope is a small camera for looking at the glass end face.
+[6:06] Why?
+[6:07] Dirt is the number one reason optical networks need troubleshooting, and it can permanently damage equipment.
+[6:17] You cannot see it without the scope.
+[6:20] Rule two: keep the bend wide.
+[6:24] DRS 01.00.01, the cable dressing sheet, sets the minimum.
+[6:32] While you are pulling, the cable must not bend tighter than twenty times its own diameter.
+[6:40] With no tension, the minimum is ten times.
+[6:45] If the manufacturer's spec gives a bigger number, use it.
+[6:50] The guide also recommends fifteen times for the long term.
+[6:55] Lesson five covers all of this.
+[6:59] For example, a cable a quarter inch thick needs a five inch bend radius while you pull it.
+[7:07] And rule three: nothing touches the floor.
+[7:12] Not cables, not slack, not spare legs.
+
+[7:18] WRAP-UP
+[7:19] That is the basic vocabulary.
+[7:23] In lesson three of the course, practice putting the colors in order and making quick decisions about connectors.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

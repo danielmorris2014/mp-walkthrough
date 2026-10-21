@@ -1,0 +1,76 @@
+Lesson 1 video: The big picture: what we are building
+Length 5:48 · transcript
+
+
+[0:00] INTRODUCTION
+[0:01] Welcome.
+[0:03] This first video gives you the big picture of the job, before we look at any single cable.
+[0:11] We will cover what this hall is for, the three jobs your cables do, the five cable paths you install, what you never touch, and one rule that beats every other rule.
+
+[0:27] WHAT WE ARE BUILDING
+[0:28] A data hall is one large room full of racks.
+[0:32] A rack is a tall metal cabinet that holds computer equipment.
+[0:38] Most of the racks in Data Hall 4 are called TPU racks.
+[0:44] TPU stands for Tensor Processing Unit.
+[0:48] It is a computer chip built for artificial intelligence work, and one TPU rack holds many of them.
+[0:59] One rack on its own is powerful.
+[1:02] But the real work happens when hundreds of racks act as one big machine.
+[1:09] Your cables are how they work together.
+[1:13] Every cable you install connects one piece of equipment to another, on an exact port.
+
+[1:23] THREE JOBS
+[1:24] Here is the whole job on one page.
+[1:27] It comes from page four of the installation guide.
+[1:32] Take a moment to look at it.
+[1:36] Your cables build three separate systems.
+[1:40] The first is the data network.
+[1:43] The guide calls it the DCN, for Data Center Network.
+[1:50] Data leaves each TPU rack on one thick fiber cable, goes to the rack at the end of the row, then on to patch panels and big switches called spines.
+[2:04] The second system is the optical switch fabric.
+[2:09] Each TPU rack sends three cables to three special racks called SPOCS racks, which hold optical circuit switches.
+[2:20] The third system is the management network.
+[2:24] It is a smaller, separate network that people use to set up and watch the equipment.
+[2:33] Why keep them separate?
+[2:35] Each one has a different job.
+[2:39] And if the main data network has a problem, the management network is still there to reach the equipment.
+
+[2:49] THE FIVE PATHS
+[2:50] Now let us name the five cable paths your crew installs.
+[2:55] We will go one at a time.
+[2:59] Path one.
+[3:01] One 144-fiber trunk from each TPU rack to its end of row rack.
+[3:09] Path two.
+[3:11] Eight 192-fiber trunks from each end of row rack to the DCN patch panels, and short cords from there to the spines.
+[3:23] Path three.
+[3:25] Three OCS cables from each TPU rack, one to each of its three SPOCS racks.
+[3:34] Path four.
+[3:36] Six copper cables from each TPU rack to its end of row rack.
+[3:43] Path five.
+[3:45] Management trunks from each end of row rack to the management spines, plus management cords from the SPOCS racks.
+[3:55] Five paths.
+[3:57] Every lesson after this one follows one of these paths from its start to its finish.
+
+[4:07] WHAT YOU DO NOT TOUCH
+[4:08] Just as important is what you do not touch.
+[4:12] Anything inside the TPU rack is already cabled when it arrives.
+[4:18] That includes the machines, the trays, the short internal cables, and the batteries.
+[4:25] Leave them alone.
+[4:28] And your work ends at the spines.
+[4:31] Anything past the spines belongs to someone else.
+[4:36] Here is a simple test from the guide.
+[4:39] If a cable never leaves the rack, it is not yours.
+
+[4:47] THE ONE RULE
+[4:48] Finally, the rule that beats every other rule.
+[4:52] Your site's cutsheet is the final word on any port.
+[4:58] The cutsheet is the spreadsheet that lists every cable and every stop it makes.
+[5:05] If a label, the guide, or this course ever disagrees with the cutsheet, do not guess.
+[5:13] Stop and ask your lead.
+[5:16] This course teaches you the patterns, so you understand why each cable goes where it goes.
+[5:23] The cutsheet tells you exactly where.
+
+[5:29] WRAP-UP
+[5:30] That is the big picture.
+[5:33] Next, open lesson one in the course to explore the diagram yourself, match each cable to where it goes, and take the short check.
+
+Sources: Large Site Cable Installation Guide (Data Hall 4) and Fluidstack DRS sheets as cited. The current DRS says how the work is done; your site cutsheet is the final word on any port.

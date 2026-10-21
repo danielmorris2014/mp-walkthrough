@@ -1,0 +1,231 @@
+WEBVTT
+
+1
+00:00:01.200 --> 00:00:08.155
+This video is about the rack where every one
+of your cable paths begins: the TPU rack.
+
+2
+00:00:09.505 --> 00:00:17.085
+We will cover what a TPU is, the two faces of
+the rack, each unit from top to bottom, which
+
+3
+00:00:17.085 --> 00:00:21.750
+parts are yours, and the six cable groups that
+leave it.
+
+4
+00:00:25.900 --> 00:00:29.420
+TPU stands for Tensor Processing Unit.
+
+5
+00:00:30.170 --> 00:00:37.189
+It is a computer chip designed for the kind of
+math that artificial intelligence uses.
+
+6
+00:00:38.689 --> 00:00:44.086
+The guide calls the rack that holds these
+computers a TPU rack.
+
+7
+00:00:44.836 --> 00:00:50.489
+Sometimes it just says TPU, as in TPU one to
+seventy-two.
+
+8
+00:00:51.839 --> 00:00:55.295
+The drawings call it an Ironwood TPU rack.
+
+9
+00:00:56.645 --> 00:01:03.792
+From public sources, not the guide: Ironwood
+is Google's seventh-generation TPU.
+
+10
+00:01:04.542 --> 00:01:11.136
+A rack holds sixty-four chips, it is liquid
+cooled, and racks connect to each other
+
+11
+00:01:11.136 --> 00:01:13.758
+through optical circuit switches.
+
+12
+00:01:14.508 --> 00:01:17.751
+That is why you install OCS cables.
+
+13
+00:01:21.901 --> 00:01:26.701
+A TPU rack has two faces, side A and side B.
+
+14
+00:01:27.451 --> 00:01:30.181
+Parts outlined in black are yours.
+
+15
+00:01:30.931 --> 00:01:34.878
+Grey parts are pre-installed, and you leave
+them alone.
+
+16
+00:01:36.878 --> 00:01:40.334
+At the top of each side are three rectifiers.
+
+17
+00:01:41.084 --> 00:01:46.161
+They turn incoming power into the DC power the
+rack uses.
+
+18
+00:01:46.911 --> 00:01:48.127
+Not yours.
+
+19
+00:01:49.477 --> 00:01:53.317
+Below them on side A is the top of rack
+switch.
+
+20
+00:01:54.067 --> 00:01:57.971
+On side B, the same space is a blank panel.
+
+21
+00:01:59.321 --> 00:02:04.036
+The top of rack switch is the rack's door to
+the data network.
+
+22
+00:02:04.786 --> 00:02:08.733
+Your 144-fiber trunk plugs into it.
+
+23
+00:02:11.033 --> 00:02:14.361
+Next is the TROSS unit, one on each side.
+
+24
+00:02:15.111 --> 00:02:16.988
+The drawings say TROSS.
+
+25
+00:02:17.738 --> 00:02:24.223
+The cutsheet calls them rmu1 on side A and
+rmu2 on side B.
+
+26
+00:02:24.973 --> 00:02:26.979
+Same box, two names.
+
+27
+00:02:29.279 --> 00:02:32.500
+Below the TROSS is the OCS panel.
+
+28
+00:02:33.250 --> 00:02:35.853
+The cutsheet calls it pp1.
+
+29
+00:02:36.603 --> 00:02:43.024
+Ports one to twelve are on side A, and
+thirteen to twenty-four are on side B.
+
+30
+00:02:44.374 --> 00:02:51.573
+The rest of the rack is machine trays, the AI
+computers themselves, with batteries at the
+
+31
+00:02:51.573 --> 00:02:52.139
+bottom.
+
+32
+00:02:52.889 --> 00:02:54.617
+All pre-installed.
+
+33
+00:02:55.367 --> 00:02:56.967
+Do not touch them.
+
+34
+00:03:01.117 --> 00:03:05.725
+So on a TPU rack, you connect exactly four
+things.
+
+35
+00:03:06.725 --> 00:03:08.645
+The top of rack switch.
+
+36
+00:03:09.995 --> 00:03:14.582
+The two TROSS units, rmu1 and rmu2.
+
+37
+00:03:15.932 --> 00:03:20.284
+And the OCS panel, pp1, on both sides.
+
+38
+00:03:21.634 --> 00:03:29.072
+Everything else, including the even ports on
+the top of rack switch and the short internal
+
+39
+00:03:29.072 --> 00:03:30.807
+cables, is not yours.
+
+40
+00:03:31.557 --> 00:03:36.421
+Remember: if a cable never leaves the rack, it
+is not yours.
+
+41
+00:03:40.571 --> 00:03:45.499
+On the hall map, each TPU rack had six colored
+stripes.
+
+42
+00:03:46.249 --> 00:03:48.511
+Here is what they stand for.
+
+43
+00:03:49.911 --> 00:03:56.908
+One 144-fiber trunk, from the top of rack
+switch to the end of row rack.
+
+44
+00:03:58.258 --> 00:04:07.417
+Three OCS cables: red, orange and yellow, from
+the OCS panel to the three SPOCS racks of the
+
+45
+00:04:07.417 --> 00:04:07.815
+pod.
+
+46
+00:04:09.165 --> 00:04:13.325
+Two gig E copper runs, one from each TROSS
+unit.
+
+47
+00:04:14.675 --> 00:04:21.563
+And four more copper runs: the switch's
+management and console ports, and the console
+
+48
+00:04:21.563 --> 00:04:23.507
+port on each TROSS unit.
+
+49
+00:04:24.857 --> 00:04:32.495
+The next lessons follow each of these groups,
+starting with the 144-fiber trunk.
+
+50
+00:04:36.645 --> 00:04:43.591
+In lesson six of the course, explore every
+unit of the rack and practice finding the
+
+51
+00:04:43.591 --> 00:04:45.327
+parts that are yours.
+
