@@ -527,6 +527,15 @@ input, select, textarea { font-size: 16px !important; }
   font:800 12.5px var(--font-ui); cursor:pointer;
 }
 .mp-back:active { transform:scale(.96); }
+/* MP Kit embed mode: guide destinations are kit sections - their app
+   chrome (tab bar, brand, help FAB) stands down; the MP Kit pill is the
+   only way out. Toggled by sessionStorage.mp_embed from openGuide(). */
+body.mp-embed .tabs { display: none; }
+body.mp-embed .brand { visibility: hidden; }
+body.mp-embed .helpbtn { display: none; }
+body.mp-embed #view { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+body.mp-embed .mp-back { background: #fff; color: #111; border-color: #fff; }
+
 
 /* identity: white primary actions + neutral active states, like our app.
    Fiber/copper media colors stay (they're status, not chrome). */
@@ -537,6 +546,15 @@ input, select, textarea { font-size: 16px !important; }
 @media (max-width:480px) { .brand span { display:none; } }
 </style>
 <script>
+(function () {
+  try {
+    if (sessionStorage.getItem('mp_embed') === '1') {
+      var ap = function () { document.body.classList.add('mp-embed'); };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ap, { once: true });
+      else ap();
+    }
+  } catch (e) {}
+})();
 (function () {
   function addBack() {
     var h = document.querySelector('header.top');

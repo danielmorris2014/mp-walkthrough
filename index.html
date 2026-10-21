@@ -897,7 +897,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v61';
+var APP_VERSION = 'v62';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2164,7 +2164,10 @@ window.addEventListener('hashchange', routeFromHash);
 
 /* ---------------- home / launcher ---------------- */
 function openGuide(r) {
-  try { sessionStorage.setItem('mp_return_hash', location.hash || '#/walk'); } catch (e) {}
+  try {
+    sessionStorage.setItem('mp_return_hash', location.hash || '#/walk');
+    sessionStorage.setItem('mp_embed', '1'); // guide chrome off: kit sections, not a second app
+  } catch (e) {}
   window.location.href = './guide.html' + (r ? '#/' + r : '');
 }
 function hallPctHung(hall) {

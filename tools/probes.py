@@ -301,6 +301,22 @@ with sync_playwright() as p:
     check("chrome[buf103].topMeasured", r12["pad"] >= r12["topbar"], f"pad={r12['pad']} topbar={r12['topbar']}")
     sp2.close()
 
+    # guide EMBED MODE: arriving from a kit tile must NOT show the guide's
+    # own app chrome (tab bar / brand / help FAB) - kit sections, not a
+    # second app. Direct guide loads keep their chrome.
+    sp3 = b.new_context(viewport={"width": 390, "height": 844}, color_scheme="dark").new_page()
+    sp3.goto(BASE + "/guide.html", wait_until="domcontentloaded")
+    sp3.wait_for_timeout(2500)
+    sp3.evaluate("() => { sessionStorage.setItem('mp_embed','1'); location.reload(); }")
+    sp3.wait_for_timeout(3000)
+    r14 = sp3.evaluate("""() => ({
+      embed: document.body.classList.contains('mp-embed'),
+      tabsHidden: getComputedStyle(document.querySelector('.tabs')).display === 'none',
+      backPill: !!document.querySelector('.mp-back')
+    })""")
+    check("guide.embedMode.hidesChrome", r14["embed"] and r14["tabsHidden"] and r14["backPill"], str(r14))
+    sp3.close()
+
     # guide launcher routes: content, not the cloud dead-end
     for route in ["train", "mislabel", "clean", "find"]:
         sp = b.new_context(viewport={"width": 390, "height": 844}, color_scheme="dark").new_page()
