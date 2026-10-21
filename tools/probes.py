@@ -205,6 +205,23 @@ with sync_playwright() as p:
     for k, ok in res8.items():
         check(f"overlay.{k}", ok)
 
+    # --- 9. SCREEN-OWNED RENDERING: each tab's onShow populates its own
+    #    panel (v45 architecture — renderCrewPanel grab-bag is gone). ---
+    res9 = pg.evaluate("""() => {
+      const out = {};
+      switchTab('crew');
+      out.crewChips = document.getElementById('crewChips').children.length > 0;
+      out.crewInputs = !!(document.getElementById('supers') && document.getElementById('shiftTime'));
+      switchTab('blockers');
+      out.blockersList = !!document.getElementById('blockerList');
+      out.hallNotesHome = !!document.getElementById('notesWrap');   // lives on this panel
+      switchTab('report');
+      out.reportOutput = !!(document.getElementById('reportOutput') || document.getElementById('reportStyle'));
+      return out;
+    }""")
+    for k, ok in res9.items():
+        check(f"screen.{k}", ok)
+
     b.close()
 
 print("\n" + ("PROBES: ALL PASS" if not fails else "PROBES FAILED: " + ", ".join(fails)))

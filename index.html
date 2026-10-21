@@ -927,7 +927,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v44';
+var APP_VERSION = 'v45';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1355,18 +1355,23 @@ function scrollToRow(r) {
     setTimeout(function () { el.classList.remove('flash'); }, 1800);
   }
 }
+function renderHallNotes() {
+  var hall = state.halls[state.activeHall];
+  var nw = document.getElementById('notesWrap');
+  if (!nw || !hall) return;
+  // hall notes live in the Blockers panel (v35) — rendered here, called by renderBlockersTab
+  nw.innerHTML = (hall.notes || []).map(function (n, i) {
+    return '<div class="note-item"><span>\uD83D\uDCCC ' + escapeHtml(n) + '</span>' +
+      '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:28px;" onclick="removeNote(' + i + ')">\u2715</button></div>';
+  }).join('');
+}
 function renderWalk() {
   renderHallStrip();
   var hall = state.halls[state.activeHall];
   if (!hall) { state.activeHall = Object.keys(state.halls)[0]; hall = state.halls[state.activeHall]; }
   renderLegend();
 
-  // notes (may live in the hall menu, not the walk panel)
-  var nw = document.getElementById('notesWrap');
-  if (nw) nw.innerHTML = (hall.notes || []).map(function (n, i) {
-    return '<div class="note-item"><span>\uD83D\uDCCC ' + escapeHtml(n) + '</span>' +
-      '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:28px;" onclick="removeNote(' + i + ')">\u2715</button></div>';
-  }).join('');
+  renderHallNotes();
 
   // stats (shared with WalkView.update so patch and full render agree)
   renderWalkStats(hall);
@@ -1478,7 +1483,7 @@ function addNote() {
   pushUndo();
   state.halls[state.activeHall].notes.push(v);
   inp.value = '';
-  saveState(); renderWalk();
+  saveState(); renderHallNotes();
 }
 function removeNote(i) {
   pushUndo();
@@ -1588,14 +1593,7 @@ function addHallPrompt() {
 }
 
 /* ---------------- crew / meta / blockers ---------------- */
-function renderCrewPanel() {
-  var sn = document.getElementById('syncName');
-  if (sn) { try { sn.value = localStorage.getItem('mp_sync_name') || ''; } catch (e) {} }
-  var si = document.getElementById('syncSettingsInfo');
-  if (si) {
-    var st = Sync.getStatus();
-    si.textContent = st.connected ? ('Connected. Last sync ' + (Sync.timeAgo(st.lastSyncAt) || 'never')) : 'Not connected';
-  }
+function renderCrewTab() {
   var m = state.meta;
   document.getElementById('supers').value = m.supers || '';
   document.getElementById('shiftTime').value = m.shiftTime || '';
@@ -1604,9 +1602,6 @@ function renderCrewPanel() {
   document.getElementById('spWorkNotes').value = m.spWorkNotes || '';
   document.getElementById('areasOfConcern').value = m.areasOfConcern || '';
   document.getElementById('tasksTomorrow').value = m.tasksTomorrow || '';
-  if (!document.getElementById('blockerDate').value) {
-    document.getElementById('blockerDate').value = new Date().toLocaleDateString('en-US');
-  }
   var cw = document.getElementById('crewChips');
   cw.innerHTML = '';
   state.crewPool.forEach(function (member, i) {
@@ -1624,17 +1619,36 @@ function renderCrewPanel() {
       pushUndo();
       member.active = !member.active;
       state.meta.spCount = state.crewPool.filter(function (x2) { return x2.active; }).length;
-      saveState(); renderCrewPanel();
+      saveState(); renderCrewTab(); renderHome();
     };
     cw.appendChild(d);
   });
+  renderSettingsSheet();
+}
+
+// the blockers panel's own content: blocker list + hall notes
+function renderBlockersTab() {
+  var dEl = document.getElementById('blockerDate');
+  if (dEl && !dEl.value) dEl.value = new Date().toLocaleDateString('en-US');
+  renderBlockers();
+  renderHallNotes();
+}
+
+// the settings sheet's own fields
+function renderSettingsSheet() {
+  var sn = document.getElementById('syncName');
+  if (sn) { try { sn.value = localStorage.getItem('mp_sync_name') || ''; } catch (e) {} }
+  var si = document.getElementById('syncSettingsInfo');
+  if (si) {
+    var st = Sync.getStatus();
+    si.textContent = st.connected ? ('Connected. Last sync ' + (Sync.timeAgo(st.lastSyncAt) || 'never')) : 'Not connected';
+  }
   var sig = document.getElementById('signature');
   if (sig && document.activeElement !== sig) sig.value = state.settings.signature || '';
   var tsb = document.getElementById('textSizeBtn');
   if (tsb) tsb.textContent = state.settings.textSize === 'large' ? 'Large' : 'Normal';
   var wb = document.getElementById('wakeBtn');
   if (wb) wb.textContent = state.settings.wakeLock ? 'On' : 'Off';
-  renderBlockers(); renderHistory(); renderBackupStatus();
 }
 function saveMeta() {
   state.meta.supers = document.getElementById('supers').value;
@@ -1652,7 +1666,7 @@ function addCrewMember() {
   pushUndo();
   state.crewPool.push({ name: n.trim(), active: true });
   state.meta.spCount = state.crewPool.filter(function (x) { return x.active; }).length;
-  saveState(); renderCrewPanel();
+  saveState(); renderCrewTab();
 }
 function addBlocker() {
   var dEl = document.getElementById('blockerDate');
@@ -1721,7 +1735,7 @@ function endOfNight() {
   state.history.unshift({ ts: Date.now(), label: style.options[style.selectedIndex].text + ' (end of night)', text: txt });
   if (state.history.length > 100) state.history.pop();
   saveBaseline(true);
-  saveState(); renderCrewPanel(); renderReport();
+  saveState(); renderCrewTab(); renderBlockersTab(); renderReport();
   document.getElementById('nightChecklist').innerHTML =
     '<li>Report archived to history \u2713</li>' +
     '<li>Baseline saved \u2014 tomorrow can show changes-only \u2713</li>' +
@@ -1786,13 +1800,13 @@ function toggleCrewEdit() {
   crewEditing = !crewEditing;
   var b = document.getElementById('crewEditBtn');
   if (b) b.textContent = crewEditing ? 'Done' : 'Edit';
-  renderCrewPanel();
+  renderCrewTab();
 }
 function removeCrewMember(i) {
   pushUndo();
   state.crewPool.splice(i, 1);
   state.meta.spCount = state.crewPool.filter(function (x) { return x.active; }).length;
-  saveState(); renderCrewPanel();
+  saveState(); renderCrewTab();
   showToast('Removed');
 }
 
@@ -2037,8 +2051,8 @@ var WALK_CHROME = { bar: true, back: true };
 var SCREENS = {
   home:     { title: 'MP Kit', panel: 'panel-home', chrome: {}, onShow: function () { renderHome(); } },
   walk:     { title: WALK_TITLE, panel: 'panel-walk', chrome: { bar: true, dock: true, hallTabs: true, back: true }, onShow: null },
-  crew:     { title: WALK_TITLE, panel: 'panel-crew', chrome: WALK_CHROME, onShow: function () { renderCrewPanel(); } },
-  blockers: { title: WALK_TITLE, panel: 'panel-blockers', chrome: WALK_CHROME, onShow: function () { renderCrewPanel(); } },
+  crew:     { title: WALK_TITLE, panel: 'panel-crew', chrome: WALK_CHROME, onShow: function () { renderCrewTab(); } },
+  blockers: { title: WALK_TITLE, panel: 'panel-blockers', chrome: WALK_CHROME, onShow: function () { renderBlockersTab(); } },
   report:   { title: WALK_TITLE, panel: 'panel-report', chrome: WALK_CHROME, onShow: function () { renderReport(); renderHistory(); } }
 };
 var currentTab = null;
@@ -2119,7 +2133,7 @@ function updateSyncStatus() {
   } catch (e) { el.textContent = ''; }
 }
 function openSettings() {
-  Overlay.open('settingsSheet'); renderCrewPanel();
+  Overlay.open('settingsSheet'); renderSettingsSheet();
 }
 function closeSettings() {
   Overlay.close('settingsSheet');
@@ -2243,7 +2257,7 @@ function syncNow() {
 function disconnectSite() {
   Sync.disconnect();
   updateSyncStatus();
-  renderCrewPanel();
+  renderSettingsSheet();
   showToast('Disconnected. App is standalone.');
 }
 function dismissOnboarding() {
@@ -2255,7 +2269,7 @@ function dismissOnboarding() {
   } catch (e) {}
 }
 function renderAll() {
-  renderHallTabs(); renderWalk(); renderCrewPanel(); renderHome();
+  renderHallTabs(); renderWalk(); renderCrewTab(); renderBlockersTab(); renderHome();
   if (document.getElementById('panel-report').classList.contains('active')) { renderReport(); renderHistory(); }
 }
 
