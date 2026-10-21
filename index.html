@@ -642,14 +642,6 @@
         </span>
         <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
       </button>
-      <button class="home-card" onclick="openGuide()">
-        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M13 14h-2l-1.5 7h5z"/><path d="M8.5 8 5 11l1 4"/><path d="M15.5 8 19 11l-1 4"/><path d="M9 21h6"/></svg></span>
-        <span style="min-width:0;">
-          <span class="home-name">Cable Field Guide</span>
-          <span class="home-sub">Find a cable · scan · wrong labels · clean fiber · 29K-barcode directory</span>
-        </span>
-        <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
-      </button>
     <div id="toolGrid"></div>
     </div>
   </div>
@@ -905,7 +897,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v60';
+var APP_VERSION = 'v61';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2073,16 +2065,24 @@ var SCREENS = {
 var KIT_PAGES = [
   { name: 'BUF103 Cutsheet', sub: 'Planned cables: search, rack view, materials', icon: 'grid',
     url: './buf103.html', precache: true, group: 'Field data' },
+  { name: 'Find a cable', sub: 'Barcode, rack, port or dry-run line', icon: 'search',
+    guide: 'find', group: 'Field data' },
+  { name: 'Scan barcode', sub: 'Camera scanner into the 29K directory', icon: 'scan',
+    guide: 'scan', group: 'Field data' },
   { name: 'Read a Label', sub: 'Offline OCR when the barcode won\u2019t scan', icon: 'search',
     url: './ocr.html', precache: true, group: 'Field data' },
   { name: 'Flag labels', sub: 'A/Z flag labels with barcode + serial', icon: 'lines',
     url: './labels.html', precache: true, group: 'Field data' },
+  { name: 'Wrong labels', sub: 'Log cables whose label is wrong', icon: 'flag',
+    guide: 'mislabel', group: 'Field data' },
   { name: 'Training', sub: '17-lesson course + reference guide', icon: 'bars',
     url: './training/DataHall4_Cable_Training/START_HERE.html', precache: false, group: 'Learn' },
   { name: 'Knowledge Cards', sub: 'Flashcards from the Data Hall 4 glossary', icon: 'book',
     url: './flashcards.html', precache: true, group: 'Learn' },
   { name: 'Field Reference', sub: 'Standards, cable paths, trunk landings', icon: 'spark',
-    url: './reference.html', precache: true, group: 'Learn' }
+    url: './reference.html', precache: true, group: 'Learn' },
+  { name: 'Clean fiber steps', sub: 'Step-by-step cleaning and inspection', icon: 'drop',
+    guide: 'clean', group: 'Learn' }
 ];
 var KIT_ICONS = {
   grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
@@ -2091,6 +2091,8 @@ var KIT_ICONS = {
   lines: '<path d="M3 5v14"/><path d="M7 5v14"/><path d="M11 5v14"/><path d="M15 5v14"/><path d="M19 5v14"/><path d="M21 5v14"/>',
   search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
   flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/>',
+  scan: '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" x2="17" y1="12" y2="12"/>',
+  drop: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
   spark: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>'
 };
 function renderKitTiles() {
