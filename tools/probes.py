@@ -128,6 +128,45 @@ with sync_playwright() as p:
     for k, ok in res6.items():
         check(f"stamp.{k}", ok)
 
+    # --- 7. SYNC MERGE: one policy, exercised offline via a stubbed fetch.
+    #    Remote-newer keys are taken, personal keys ride along, a no-change
+    #    sync returns the SAME reference (no spurious re-render), baselines
+    #    are part of the merge (v42 architecture). ---
+    res7 = pg.evaluate("""async () => {
+      const out = {};
+      const remote = JSON.parse(JSON.stringify(state));
+      remote._meta = { halls_at: Date.now() + 5000 };  // remote halls newer
+      remote.halls = { REPLACED: true };
+      remote.baseline = { fromRemote: true };
+      const gh = { sha: 'x', content: btoa(unescape(encodeURIComponent(JSON.stringify(remote)))) };
+      const realFetch = window.fetch;
+      let puts = 0;
+      window.fetch = (url, opts) => {
+        if (opts && opts.method === 'PUT') { puts++; return Promise.resolve({ ok: true, json: () => Promise.resolve({}) }); }
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(gh) });
+      };
+      const code = Sync.encodeCode('stub-probe-token');
+      Sync.connect(code);
+      const out1 = await Sync.sync(state);
+      const out2 = await Sync.sync(out1);
+      // pure merge directly: local-newer blockers must win over remote
+      const local2 = JSON.parse(JSON.stringify(state));
+      local2._meta = { blockers_at: Date.now() + 9000 };
+      const merged = Sync.merge(remote, local2);
+      window.fetch = realFetch;
+      Sync.disconnect();
+      out.remoteNewerWins = out1.halls && out1.halls.REPLACED === true;
+      out.sameRefWhenNoChange = out2 === out1;
+      out.personalKeysRide = out1.settings === state.settings;
+      out.baselinesMerge = merged.baseline && merged.baseline.fromRemote === true;
+      out.localNewerWins = Sync.merge({ blockers: ['remote'], _meta: { blockers_at: 1 } },
+                                      { blockers: ['local'], _meta: { blockers_at: 2 } }).blockers[0] === 'local';
+      out.winnerStampCarried = merged._meta && merged._meta.blockers_at === local2._meta.blockers_at;
+      return out;
+    }""")
+    for k, ok in res7.items():
+        check(f"merge.{k}", ok)
+
     b.close()
 
 print("\n" + ("PROBES: ALL PASS" if not fails else "PROBES FAILED: " + ", ".join(fails)))

@@ -65,6 +65,11 @@ var Sync = (function () {
   }
 
   // ---- merge: latest-per-key across top-level state keys (ADR-0002) ----
+  function isEmptyVal(v) {
+    return v === undefined || v === null ||
+      (Array.isArray(v) && !v.length) ||
+      (typeof v === 'object' && !Object.keys(v || {}).length);
+  }
   function mergeStates(remote, local) {
     if (!remote) return local;
     if (!local) return remote;
@@ -73,6 +78,10 @@ var Sync = (function () {
       var rAt = (remote._meta && remote._meta[k + '_at']) || 0;
       var lAt = (local._meta && local._meta[k + '_at']) || 0;
       var localWins = lAt >= rAt;
+      // tie-break: an unstamped EMPTY local value never beats remote data —
+      // otherwise a fresh joiner would never receive keys it hasn't touched
+      // (e.g. the site's baselines and history).
+      if (lAt === rAt && isEmptyVal(local[k]) && !isEmptyVal(remote[k])) localWins = false;
       merged[k] = localWins ? local[k] : remote[k];
       meta[k + '_at'] = localWins ? lAt : rAt; // carry the winner's stamp forward
     });
@@ -214,6 +223,7 @@ var Sync = (function () {
     sync: sync,
     touch: touch,
     markChanged: markChanged,
+    merge: mergeStates,   // pure latest-per-key merge (ADR-0002) — the one policy
     getStatus: getStatus,
     timeAgo: timeAgo,
     encodeCode: encodeCode

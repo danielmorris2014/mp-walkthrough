@@ -923,7 +923,7 @@ hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v41';
+var APP_VERSION = 'v42';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2204,18 +2204,14 @@ function joinSite() {
   if (!code.trim()) { if (msg) msg.textContent = 'Paste a site code first.'; return; }
   if (msg) msg.textContent = 'Connecting...';
   Sync.connect(code).then(function (ok) {
-    if (ok) {
-      Sync.pull().then(function (remote) {
-        if (remote && remote.halls) {
-          ['halls','blockers','crewPool','meta','history'].forEach(function (k) {
-            if (remote[k]) state[k] = remote[k];
-          });
-          saveState(); renderAll();
-        }
-        if (msg) msg.textContent = 'Connected!';
-        setTimeout(dismissOnboarding, 800);
-      });
-    } else { if (msg) msg.textContent = 'Could not connect. Check the code.'; }
+    if (!ok) { if (msg) msg.textContent = 'Could not connect. Check the code.'; return; }
+    // joining IS syncing — one merge policy (ADR-0002 latest-wins), no
+    // private remote-wins copy here anymore. Baselines ride along too.
+    Sync.sync(state).then(function (m) {
+      if (m !== state) { state = m; renderAll(); }
+      if (msg) msg.textContent = 'Connected!';
+      setTimeout(dismissOnboarding, 800);
+    });
   });
 }
 function saveSyncName() {
