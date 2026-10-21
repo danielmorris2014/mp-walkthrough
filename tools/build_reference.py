@@ -57,6 +57,32 @@ m2 = re.search(r"</body>", html)
 html = html[:m2.start()] + TABLES[TABLES.find("<script"):] + html[m2.start():]
 
 
+
+# v56: the vendor's dark DRS cards/sections ship without light-text overrides
+# (dark text on dark cards on real phones) and captions/td run 1.8-2.1:1.
+# One normalizer layer, injected AFTER their styles, forces a consistent
+# light theme - measured fix for the 10 failing pairs the audit found.
+FIXES = """
+<style id="mp-contrast-fix">
+section.lsec, div.card { background: #f0ebe1 !important; color: #1f2429 !important;
+  border: 1px solid #d8d2c6 !important; }
+section.lsec p, section.lsec b, section.lsec h2, section.lsec h3, section.lsec dt,
+div.card p, div.card b, div.card h3, div.card dt, div.card li { color: #1f2429 !important; }
+section.lsec em, div.card em { color: #4a5158 !important; }
+section.lsec a, div.card a { color: #0b5d63 !important; text-decoration: underline; }
+figcaption, p.muted, .card span.muted, .lsec span.muted, dt span { color: #5a6169 !important; }
+.card span, .lsec span { color: inherit; }
+td { color: #2a2f36 !important; }
+td[data-label]:not([data-label=""])::before { opacity: .6; }
+/* stacked table cards need to read on the LIGHT page */
+@media (max-width: 720px) {
+  table tr { background: rgba(0, 0, 0, 0.035) !important;
+    border: 1px solid rgba(0, 0, 0, 0.14) !important; }
+}
+</style>
+"""
+html = html.replace("</head>", FIXES + "</head>", 1)
+
 out = os.path.join(APP, "reference.html")
 io.open(out, "w", encoding="utf-8", newline="").write(html)
 print("reference.html rebuilt:", len(html), "chars (pill + responsive tables)")
