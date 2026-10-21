@@ -222,6 +222,27 @@ with sync_playwright() as p:
     for k, ok in res9.items():
         check(f"screen.{k}", ok)
 
+    # --- 10. HALL MODULE: one interface for hall ops; the arity-overloaded
+    #    deleteHall is gone; add/remove round-trip (v46 architecture). ---
+    pg.on("dialog", lambda d: d.accept())
+    res10 = pg.evaluate("""() => {
+      const out = {};
+      out.listWorks = Hall.list().length >= 1;
+      out.activeWorks = Hall.active() === state.halls[state.activeHall];
+      out.overloadGone = typeof deleteHall === 'undefined' && typeof switchHall === 'undefined';
+      const before = Hall.list().length;
+      const id = Hall.add('PROBE HALL');
+      out.addSwitches = Hall.active() && Hall.active().name === 'PROBE HALL';
+      Hall.remove(id);
+      out.removeRestores = !state.halls[id] && Hall.list().length === before;
+      const keep = Hall.list()[0].id;
+      Hall.switchTo(keep);
+      out.switchWorks = state.activeHall === keep;
+      return out;
+    }""")
+    for k, ok in res10.items():
+        check(f"hall.{k}", ok)
+
     b.close()
 
 print("\n" + ("PROBES: ALL PASS" if not fails else "PROBES FAILED: " + ", ".join(fails)))

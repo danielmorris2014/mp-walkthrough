@@ -927,7 +927,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v45';
+var APP_VERSION = 'v46';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1016,6 +1016,53 @@ var Overlay = (function () {
   function anyOpen() { return !!document.querySelector('.ov-open'); }
   return { open: open, close: close, isOpen: isOpen, toggle: toggle, closeAll: closeAll, anyOpen: anyOpen };
 })();
+/* ---------------- Hall: the one hall-operations module ---------------- */
+// list / active / switchTo / add / remove — and ONE post-mutation render
+// sequence. The old deleteHall(id)/deleteHall() arity overload (two
+// contracts, one name, string-handler bait) is gone; remove() takes an
+// optional id and defaults to the active hall.
+var Hall = (function () {
+  function afterChange() {
+    saveState();
+    renderHallTabs(); renderWalk(); renderHome(); renderBlockers();
+  }
+  function list() { return Object.values(state.halls); }
+  function active() { return state.halls[state.activeHall]; }
+  function switchTo(id) {
+    if (!state.halls[id]) return;
+    state.activeHall = id;
+    afterChange();
+    flashHall(state.halls[id]);
+  }
+  function add(name) {
+    var id = name.trim().replace(/\s+/g, '_').toUpperCase() + '_' + Date.now().toString(36);
+    pushUndo();
+    state.halls[id] = makeHall(id, name.trim(), 26, [
+      grp('Network Rows 1\u20132', 1, 2),
+      grp('POD A (Rows 3\u201310)', 3, 10),
+      grp('POD B (Rows 11\u201318)', 11, 18),
+      grp('POD C (Rows 19\u201326)', 19, 26)
+    ]);
+    state.activeHall = id;
+    afterChange();
+    return id;
+  }
+  function remove(id) {
+    id = id || state.activeHall;
+    var h = state.halls[id];
+    if (!h) return;
+    if (Object.keys(state.halls).length <= 1) { showToast('Keep at least one hall'); return; }
+    if (!confirm('Delete ' + h.name + ' and all its row data?')) return;
+    pushUndo();
+    delete state.halls[id];
+    if (state.activeHall === id) state.activeHall = Object.keys(state.halls)[0];
+    Overlay.close('hallEditor');
+    afterChange();
+    showToast('Hall deleted');
+  }
+  return { list: list, active: active, switchTo: switchTo, add: add, remove: remove };
+})();
+
 
 function emptyRow() { return { '11': Side.empty(), '13': Side.empty() }; }
 
@@ -1219,38 +1266,20 @@ function toggleHallMenu() {
   var b = document.getElementById('hallMenuBody');
   if (!mEl || !b) return;
   if (Overlay.isOpen('hallMenu')) { Overlay.close('hallMenu'); return; }
-  var halls = Object.values(state.halls);
+  var halls = Hall.list();
   b.innerHTML =
     '<div class="card-title" style="margin-bottom:12px;">Manage halls</div>' +
     halls.map(function (h) {
       return '<div class="batch-row" style="margin-bottom:8px; align-items:center;">' +
         '<span style="flex:1; font-weight:700; font-size:14px;">' + escapeHtml(h.name) + '</span>' +
         '<span class="muted" style="font-size:11px;">' + h.maxRow + ' rows</span>' +
-        '<button class="btn btn-secondary" style="min-height:36px; padding:0 10px; font-size:11px;" onclick="switchHall(\'' + h.id + '\'); toggleHallMenu();">Switch</button>' +
-        '<button class="btn btn-danger" style="min-height:36px; padding:0 10px; font-size:11px;" onclick="deleteHall(\'' + h.id + '\'); toggleHallMenu();">Delete</button>' +
+        '<button class="btn btn-secondary" style="min-height:36px; padding:0 10px; font-size:11px;" onclick="Hall.switchTo(\'' + h.id + '\'); toggleHallMenu();">Switch</button>' +
+        '<button class="btn btn-danger" style="min-height:36px; padding:0 10px; font-size:11px;" onclick="Hall.remove(\'' + h.id + '\'); toggleHallMenu();">Delete</button>' +
         '</div>';
     }).join('') +
     '<button class="btn" style="width:100%; margin-top:12px; min-height:48px;" onclick="addHallPrompt()">+ Add ' + (halls.length === 3 ? 'CB/DH' : 'hall') + '</button>' +
     '<button class="btn btn-ghost" style="width:100%; margin-top:8px;" onclick="toggleHallMenu()">Close</button>';
   Overlay.open('hallMenu');
-}
-function switchHall(id) {
-  state.activeHall = id; saveState();
-  renderHallTabs(); renderWalk(); renderHallStrip();
-  flashHall(state.halls[id]);
-}
-function deleteHall(id) {
-  var h = state.halls[id];
-  if (!h) return;
-  if (!confirm('Delete ' + h.name + ' and all its row data?')) return;
-  pushUndo();
-  delete state.halls[id];
-  if (state.activeHall === id) {
-    var ks = Object.keys(state.halls);
-    state.activeHall = ks.length ? ks[0] : null;
-  }
-  saveState(); renderHallTabs(); renderWalk(); renderHallStrip();
-  showToast('Hall deleted');
 }
 function renderHallTabs() {
   var wrap = document.getElementById('hallTabs');
@@ -1264,9 +1293,7 @@ function renderHallTabs() {
     b.innerHTML = escapeHtml(h.name) + '<div class="seg-bar" style="width:' + Math.max(20, pct) + '%"></div>';
     b.onclick = function () {
       if (state.activeHall === h.id) return;
-      state.activeHall = h.id; saveState();
-      renderHallTabs(); renderWalk(); renderHallStrip();
-      flashHall(h);
+      Hall.switchTo(h.id);
     };
     wrap.appendChild(b);
   });
@@ -1520,7 +1547,7 @@ function renderEditor() {
     '<button class="btn btn-secondary" onclick="addGroup()">+ Group</button>' +
     '<button class="btn" onclick="applyGroups()">Save groups</button>' +
     '<button class="btn btn-danger" onclick="clearHallStatuses()">Clear statuses</button>' +
-    '<button class="btn btn-danger" onclick="deleteHall()">Delete hall</button></div>' +
+    '<button class="btn btn-danger" onclick="Hall.remove()">Delete hall</button></div>' +
     '</div>';
 }
 function applyHallBasics() {
@@ -1566,29 +1593,10 @@ function clearHallStatuses() {
   saveState(); renderWalk();
   showToast('Cleared');
 }
-function deleteHall() {
-  var ids = Object.keys(state.halls);
-  if (ids.length <= 1) { showToast('Keep at least one hall'); return; }
-  if (!confirm('Delete hall ' + state.halls[state.activeHall].name + ' and its statuses?')) return;
-  pushUndo();
-  delete state.halls[state.activeHall];
-  state.activeHall = Object.keys(state.halls)[0];
-  Overlay.close('hallEditor');
-  saveState(); renderAll();
-}
 function addHallPrompt() {
   var name = prompt('Data hall name (e.g. CB5 DH2):');
   if (!name || !name.trim()) return;
-  var id = name.trim().replace(/\s+/g, '_').toUpperCase() + '_' + Date.now().toString(36);
-  pushUndo();
-  state.halls[id] = makeHall(id, name.trim(), 26, [
-    grp('Network Rows 1–2', 1, 2),
-    grp('POD A (Rows 3–10)', 3, 10),
-    grp('POD B (Rows 11–18)', 11, 18),
-    grp('POD C (Rows 19–26)', 19, 26)
-  ]);
-  state.activeHall = id;
-  saveState(); renderHallTabs(); renderWalk();
+  Hall.add(name.trim());
   showToast('Hall added — use Edit hall to set rows/groups');
 }
 
