@@ -274,6 +274,31 @@ with sync_playwright() as p:
             check("page[buf103].dataLoaded", "cables" in r["bodyText"], r["bodyText"][:60])
         sp.close()
 
+    # --- 12. PAGES REGISTRY: home destinations are one declarative list;
+    #    every precache-flagged page must be in sw.js PRECACHE (was four
+    #    hand-maintained lists - the sw.js-forgetting bug family). ---
+    res12 = pg.evaluate("() => KIT_PAGES")
+    import re as _re
+    sw = open("sw.js", encoding="utf-8").read()
+    precache = set(_re.findall(r"'([^']+)'", sw.split("PRECACHE")[1].split("]")[0]))
+    for entry in res12:
+        if entry.get("precache") and entry.get("url"):
+            path = entry["url"].lstrip("./")
+            check(f"registry[{entry['name']}].precached", path in precache or entry["url"] in precache,
+                  f"{entry['url']} missing from sw PRECACHE")
+
+    # measured top chrome on pages with fixed topbars (no hand constants)
+    sp2 = b.new_context(viewport={"width": 390, "height": 844}, color_scheme="dark").new_page()
+    sp2.goto(BASE + "/buf103.html", wait_until="domcontentloaded")
+    sp2.wait_for_timeout(4500)
+    r12 = sp2.evaluate("""() => {
+      const tb = document.querySelector('.topbar');
+      const pad = parseFloat(getComputedStyle(document.body).paddingTop);
+      return { topbar: tb ? tb.offsetHeight : 0, pad: pad };
+    }""")
+    check("chrome[buf103].topMeasured", r12["pad"] >= r12["topbar"], f"pad={r12['pad']} topbar={r12['topbar']}")
+    sp2.close()
+
     # guide launcher routes: content, not the cloud dead-end
     for route in ["train", "mislabel", "clean", "find"]:
         sp = b.new_context(viewport={"width": 390, "height": 844}, color_scheme="dark").new_page()

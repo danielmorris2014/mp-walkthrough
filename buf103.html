@@ -6,17 +6,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>BUF103 Cutsheet</title>
+<link rel="stylesheet" href="./chrome.css">
 <style>
-:root {
-  --bg: #0b0c0e; --card: #111113; --card2: #18191b; --line: #363a3f;
-  --text: #edeef0; --muted: #b0b4ba; --dim: #777b84;
-  --amber-t: #ffca16; --green: #30a46c; --red: #e5484d;
-}
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html { overflow-x: clip; }
 body { margin: 0; background: var(--bg); color: var(--text);
   font: 400 14px/1.45 -apple-system, "SF Pro Text", system-ui, sans-serif;
-  padding: calc(154px + env(safe-area-inset-top)) 12px calc(24px + env(safe-area-inset-bottom));
+  padding: calc(var(--top-chrome, 154px) + 10px) 12px calc(24px + env(safe-area-inset-bottom));
   touch-action: manipulation; }
 .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50;
   background: rgba(11,12,14,.96); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
@@ -117,51 +113,27 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 </div>
 <div class="sheetbg" id="sheetbg"></div>
 <div class="sheet" id="sheet"></div>
+<script src="./kit-data.js"></script>
 <script>
 'use strict';
 /* BUF103 Cutsheet viewer v2 - interactive drill-down: hall -> racks ->
    connections; search; materials; every connection opens a detail sheet
    with copy buttons. Data bundled via the pipeline (ADR-0003). */
-var D = null, ST = 'idle', ERR = '', FAMS = [], RACKS = {};   // RACKS = {DH1: [{rack, n}...]}
+var D = null, FAMS = [], RACKS = {};   // RACKS = {DH1: [{rack, n}...]}
 var MODE = 'browse', HALL = null, RACK = null, FAMFILTER = null, SHOWN = [];
+function esc(t) { return KitData.esc(t); }
+function loadDone(d) {
+  D = d; FAMS = d.fams;
+  buildRacks();
+  document.getElementById('meta').textContent = d.src.replace(/_/g, ' ') + ' \u00b7 ' +
+    d.halls.join('\u2013') + ' \u00b7 ' + totalRows().toLocaleString() + ' cables';
+  document.getElementById('loadstate').style.display = 'none';
+  showBrowse();
+}
 function load() {
-  if (ST !== 'idle') return;
-  ST = 'loading'; ERR = '';
-  if (typeof DecompressionStream === 'undefined') {
-    ST = 'error'; ERR = 'This phone\u2019s iOS is too old for the offline cutsheet (needs iOS 16.4+).';
-    renderErr(); return;
-  }
-  fetch('./data/buf103.json.gz').then(function (r) {
-    if (!r.ok) throw new Error('http');
-    return new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).json();
-  }).then(function (d) {
-    D = d; ST = 'ready'; FAMS = d.fams;
-    buildRacks();
-    document.getElementById('meta').textContent = d.src.replace(/_/g, ' ') + ' \u00b7 ' +
-      d.halls.join('\u2013') + ' \u00b7 ' + totalRows().toLocaleString() + ' cables';
-    document.getElementById('loadstate').style.display = 'none';
-    showBrowse();
-  }).catch(function () {
-    ST = 'error';
-    ERR = 'Could not load the cutsheet database' + (navigator.onLine ? ' (server problem \u2014 try Retry).' : ' (no signal \u2014 open once with signal, then it works offline).');
-    renderErr();
-  });
+  KitData.load('./data/buf103.json.gz', 'cutsheet', 'loadstate').then(loadDone);
 }
-window.addEventListener('online', function () { if (ST === 'error') { ST = 'idle'; load(); } });
 function totalRows() { var n = 0; FAMS.forEach(function (f) { n += D.rows[f].length; }); return n; }
-function renderErr() {
-  var el = document.getElementById('loadstate');
-  el.style.display = 'block';
-  var c = document.createElement('div');
-  c.className = 'card err';
-  c.innerHTML = '<div class="ct">Cutsheet unavailable</div><div style="font-size:12.5px;color:var(--muted)">' + esc(ERR) + '</div>';
-  var b = document.createElement('button');
-  b.className = 'retry'; b.textContent = 'Retry loading cutsheet';
-  b.onclick = function () { ST = 'idle'; load(); };
-  c.appendChild(b);
-  el.innerHTML = ''; el.appendChild(c);
-}
-function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]; }); }
 function buildRacks() {
   // one pass over rows: per-rack connection counts, bucketed by hall
   var counts = {};
@@ -396,20 +368,13 @@ document.getElementById('sheet').addEventListener('click', function (e) {
   if (e.target.classList.contains('closex')) return closeSheet();
   var b = e.target.closest('button[data-copy]');
   if (b) {
-    var t = b.getAttribute('data-copy');
-    var done = function () { b.textContent = 'Copied \u2713'; setTimeout(closeSheet, 600); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, done);
-    else done();
+    KitData.copy(b.getAttribute('data-copy'), function (ok) {
+      b.textContent = ok ? 'Copied \u2713' : 'Copy failed';
+      if (ok) setTimeout(closeSheet, 600);
+    });
   }
 });
-function fitChrome() {
-  var tb = document.querySelector('.topbar');
-  if (!tb) return;
-  document.body.style.paddingTop = (tb.offsetHeight + 10) + 'px';
-}
-window.addEventListener('resize', fitChrome);
-document.addEventListener('DOMContentLoaded', fitChrome);
-fitChrome();
+KitData.watchFixedTop('.topbar');
 load();
 </script>
 </body>

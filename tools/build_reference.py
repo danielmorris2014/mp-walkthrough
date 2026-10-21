@@ -8,15 +8,8 @@ APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 z = zipfile.ZipFile(r"C:\Users\DanielMorris\Downloads\DataHall4_Cable_Training_Course_Only.zip")
 html = z.read("DataHall4_Cable_Training/reference/Reference_Guide.html").decode("utf-8", "replace")
 
-PILL = """<style id="mp-ref-back">
-.mp-ref-back { position: fixed; top: calc(10px + env(safe-area-inset-top)); left: 10px; z-index: 9999;
-  min-height: 44px; padding: 0 14px; border-radius: 999px; background: rgba(17,17,19,0.85);
-  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-  border: 1px solid #363a3f; color: #b0b4ba; font: 800 13px -apple-system, sans-serif;
-  display: inline-flex; align-items: center; text-decoration: none; }
-.mp-ref-back:active { transform: scale(.96); }
-</style>
-<a class="mp-ref-back" href="./index.html#/home">&#8249; MP Kit</a>"""
+PILL = """<link rel="stylesheet" href="./chrome.css">
+<a class="mp-back-pill" href="./index.html#/home">&#8249; MP Kit</a>"""
 
 TABLES = """<style id="mp-responsive-tables">
 /* v51: wide tables become stacked, labeled cards on phones - a row you can
@@ -54,11 +47,15 @@ TABLES = """<style id="mp-responsive-tables">
 
 m = re.search(r"<body[^>]*>", html)
 assert m, "no body tag"
-html = html[:m.end()] + PILL + html[m.end():]
+m_tag = m.group(0)
+if 'class=' in m_tag:
+    html = html[:m.start()] + m_tag.replace('class="', 'class="mp-pill-page ') + PILL + html[m.end():]
+else:
+    html = html[:m.start()] + m_tag[:-1] + ' class="mp-pill-page">' + PILL + html[m.end():]
 html = html.replace("</head>", TABLES.split("<script")[0] + "</head>", 1)  # style -> head
 m2 = re.search(r"</body>", html)
 html = html[:m2.start()] + TABLES[TABLES.find("<script"):] + html[m2.start():]
-html = html.replace("</head>", "<style>body{padding-top:8px}@media(max-width:600px){body{padding-top:52px}}</style></head>", 1)
+
 
 out = os.path.join(APP, "reference.html")
 io.open(out, "w", encoding="utf-8", newline="").write(html)

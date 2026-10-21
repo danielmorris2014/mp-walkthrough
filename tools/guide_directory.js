@@ -11,38 +11,22 @@
    cache miss silenced the directory for the whole session with no
    indication why scans found nothing. */
 (function () {
-  var DIR = null, DIR_STATE = 'idle', DIR_ERR = '';
+  function esc(t) { return KitData.esc(t); }
+  var DIR = null;
   function dirLoad() {
-    if (DIR_STATE !== 'idle') return;
-    DIR_STATE = 'loading'; DIR_ERR = '';
-    if (typeof DecompressionStream === 'undefined') {
-      DIR_STATE = 'error';
-      DIR_ERR = 'This phone’s iOS is too old for the offline barcode database (needs iOS 16.4+).';
-      return;
-    }
-    fetch('./data/directory.json.gz').then(function (r) {
-      if (!r.ok) throw new Error('http');
-      return new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).json();
-    }).then(function (d) {
+    KitData.load('./data/directory.json.gz', 'barcode database', null).then(function (d) {
       var bc = d.barcodes || [];
       var byNum = {}, hay = [];
       for (var i = 0; i < bc.length; i++) {
-        var m = /^([A-Z0-9]+)#0*(\d+)$/.exec(bc[i][0]);
-        if (m) byNum[+m[2]] = bc[i];
+        var mm = /^([A-Z0-9]+)#0*(\d+)$/.exec(bc[i][0]);
+        if (mm) byNum[+mm[2]] = bc[i];
         hay.push([ (bc[i][0] + '  ' + bc[i][1] + '  ' + bc[i][2] + '  ' + (bc[i][3] || '')).toUpperCase(), bc[i] ]);
       }
       DIR = { byNum: byNum, hay: hay, n: bc.length };
-      DIR_STATE = 'ready';
-    }).catch(function () {
-      DIR_STATE = 'error';
-      DIR_ERR = 'Could not load the offline barcode database' + (navigator.onLine ? ' (server problem — try Retry).' : ' (no signal — open the app once with signal, then it works offline again).');
+      var c = document.getElementById('mpDirErr');
+      if (c) c.remove();
     });
   }
-  // signal returned -> recover automatically instead of staying poisoned
-  window.addEventListener('online', function () {
-    if (DIR_STATE === 'error') { DIR_STATE = 'idle'; dirLoad(); }
-  });
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function parts(lbl) {
     var m = /^([A-Z0-9]{3,6})-([A-Z]{0,3}\d{1,2})-(R\d{4})-(.+)$/i.exec(lbl || '') ||
             /^([A-Z0-9]{3,6}) \/ ([A-Z]{0,3}\d{1,2}) \/ (R\d{4}) \/ (.+)$/i.exec(lbl || '');
@@ -85,10 +69,10 @@
       if (e.target === ov || e.target.id === 'mpDirX') ov.remove();
       var b = e.target.closest('button[data-c]');
       if (b) {
-        var t = b.getAttribute('data-c');
-        (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(t) : Promise.reject()).catch(function () {});
-        b.textContent = 'Copied \u2713';
-        setTimeout(function () { ov.remove(); }, 650);
+        KitData.copy(b.getAttribute('data-c'), function (ok) {
+          b.textContent = ok ? 'Copied \u2713' : 'Copy failed';
+          if (ok) setTimeout(function () { ov.remove(); }, 650);
+        });
       }
     });
     document.body.appendChild(ov);
@@ -118,26 +102,11 @@
       (bits.join('. ') || 'printed label does not match the database') + (r.note ? '. Note: ' + r.note : '') + '</div></div>';
   }
   function mountError(view) {
-    if (document.getElementById('mpDirCard')) return;
-    var ec = document.createElement('div');
-    ec.id = 'mpDirCard'; ec.className = 'card hl'; ec.style.marginTop = '10px';
-    ec.innerHTML = '<div class="eyebrow">\u{1F4CB} Barcode directory · unavailable</div>' +
-      '<div class="muted" style="font-size:12px;line-height:1.5;">' + esc(DIR_ERR || 'Could not load the barcode database.') + '</div>';
-    var rb = document.createElement('button');
-    rb.textContent = 'Retry loading database';
-    rb.style.cssText = 'margin-top:8px;min-height:44px;width:100%;border:0;border-radius:10px;background:#fff;color:#111;font:700 14px -apple-system,sans-serif;';
-    rb.onclick = function () {
-      DIR_STATE = 'idle'; DIR_ERR = '';
-      var c = document.getElementById('mpDirCard'); if (c) c.remove();
-      dirLoad();
-      var iv = setInterval(function () {
-        if (DIR_STATE === 'ready') { clearInterval(iv); var cc = document.getElementById('mpDirCard'); if (cc) cc.remove(); augment(); }
-        if (DIR_STATE === 'error') { clearInterval(iv); var cc2 = document.getElementById('mpDirCard'); if (cc2) cc2.remove(); augment(); }
-      }, 400);
-      setTimeout(function () { clearInterval(iv); }, 30000);
-    };
-    ec.appendChild(rb);
-    view.appendChild(ec);
+    if (document.getElementById('mpDirErr')) return;
+    var holder = document.createElement('div');
+    holder.id = 'mpDirErr';
+    view.appendChild(holder);
+    KitData.showError('./data/directory.json.gz', 'barcode database', 'mpDirErr');
   }
   function augment() {
     var view = document.getElementById('view');
@@ -151,7 +120,7 @@
       if (rs && /^(Results|Resultados)/.test(rs.parentNode.textContent)) q = rs.textContent;
     }
     if (!q || !q.trim()) return;
-    if (DIR_STATE === 'idle') dirLoad();
+    if (KitData.state('./data/directory.json.gz') !== 'ready' && KitData.state('./data/directory.json.gz') !== 'loading') dirLoad();
     var mount = function () {
       if (document.getElementById('mpDirCard')) return;
       var res = DIR ? search(q) : [];
@@ -194,13 +163,15 @@
       }
       view.appendChild(card);
     };
-    if (DIR_STATE === 'ready') mount();
-    else if (DIR_STATE === 'error') mountError(view);
+    var st = KitData.state('./data/directory.json.gz');
+    if (st === 'ready') mount();
+    else if (st === 'error') mountError(view);
     else {
       dirLoad();
       var iv = setInterval(function () {
-        if (DIR_STATE === 'ready') { clearInterval(iv); mount(); }
-        if (DIR_STATE === 'error') { clearInterval(iv); mountError(view); }
+        var st2 = KitData.state('./data/directory.json.gz');
+        if (st2 === 'ready') { clearInterval(iv); mount(); }
+        if (st2 === 'error') { clearInterval(iv); mountError(view); }
       }, 400);
       setTimeout(function () { clearInterval(iv); }, 20000);
     }
@@ -213,6 +184,6 @@
       clearTimeout(t); t = setTimeout(augment, 300);
     }
   }, true);
-  window.__MPDIR = { augment: augment, state: function () { return DIR_STATE; }, n: function () { return DIR ? DIR.n : 0; }, q: function () { var i = document.getElementById('q'); return i ? i.value : null; } };
+  window.__MPDIR = { augment: augment, state: function () { return KitData.state('./data/directory.json.gz'); }, n: function () { return DIR ? DIR.n : 0; }, q: function () { var i = document.getElementById('q'); return i ? i.value : null; } };
 })();
 </script>
