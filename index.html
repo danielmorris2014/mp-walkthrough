@@ -900,7 +900,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v54';
+var APP_VERSION = 'v55';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1033,7 +1033,31 @@ var Hall = (function () {
     afterChange();
     showToast('Hall deleted');
   }
-  return { list: list, active: active, switchTo: switchTo, add: add, remove: remove };
+  function addBuf103Halls() {
+    fetch('./data/halls-buf103.json').then(function (r) { return r.json(); }).then(function (cfg) {
+      var added = 0;
+      Object.keys(cfg).forEach(function (h) {
+        var id = 'BUF103_' + h;
+        if (state.halls[id]) return;
+        var groups = (cfg[h].groups || []).map(function (g) {
+          return grp(g.name, g.rows[0], g.rows[g.rows.length - 1]);
+        });
+        var rows = {};
+        (cfg[h].groups || []).forEach(function (g) {
+          g.rows.forEach(function (r2) { rows[r2] = emptyRow(); });
+        });
+        pushUndo();
+        state.halls[id] = makeHall(id, 'BUF103 ' + h, cfg[h].maxRow, groups);
+        // makeHall builds its own rows; splice in the real row set
+        state.halls[id].rows = rows;
+        added++;
+      });
+      if (!added) { showToast('BUF103 halls already added'); return; }
+      afterChange();
+      showToast(added + ' BUF103 hall' + (added > 1 ? 's' : '') + ' added');
+    }).catch(function () { showToast('Could not load BUF103 hall data'); });
+  }
+  return { list: list, active: active, switchTo: switchTo, add: add, remove: remove, addBuf103Halls: addBuf103Halls };
 })();
 
 
@@ -1250,6 +1274,7 @@ function toggleHallMenu() {
         '<button class="btn btn-danger" style="min-height:36px; padding:0 10px; font-size:11px;" onclick="Hall.remove(\'' + h.id + '\'); toggleHallMenu();">Delete</button>' +
         '</div>';
     }).join('') +
+    '<button class="btn" style="width:100%; margin-top:12px; min-height:48px;" onclick="Hall.addBuf103Halls(); toggleHallMenu();">+ Add BUF103 halls (DH1–DH4)</button>' +
     '<button class="btn" style="width:100%; margin-top:12px; min-height:48px;" onclick="addHallPrompt()">+ Add ' + (halls.length === 3 ? 'CB/DH' : 'hall') + '</button>' +
     '<button class="btn btn-ghost" style="width:100%; margin-top:8px;" onclick="toggleHallMenu()">Close</button>';
   Overlay.open('hallMenu');

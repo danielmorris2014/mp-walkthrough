@@ -21,6 +21,7 @@ def intern(s):
     return dct[s]
 
 fams, rows_out, total = [], {}, 0
+
 hall_re = re.compile(r"BUF103-(DH\d+?)[-/]", re.I)
 halls = {}
 
@@ -95,6 +96,10 @@ for name in wb.sheetnames:
     print(f"{name!r}: {len(buf)} rows (header at r{hdr_idx})")
 
 wb.close()
+rev = {v: k for k, v in dct.items()}
+def dct_rev(i):
+    return rev.get(i)
+
 
 # materials: per family -> per spec-string counts (spec dict text only)
 mats = {}
@@ -120,6 +125,31 @@ with open(os.path.join(APP, "data", "buf103.json"), "w", encoding="utf-8") as f:
     f.write(raw)
 with open(os.path.join(APP, "data", "buf103.json.gz"), "wb") as f:
     f.write(gzip.compress(raw.encode("utf-8"), compresslevel=9, mtime=0))
+
+# hall configs for the walkthrough: rows derived from rack ids (R{row}{pos})
+halls_cfg = {}
+for hall in out["halls"]:
+    rows = set()
+    for fam in fams:
+        for r in rows_out[fam]:
+            for loci in (r[0], r[2]):
+                loc = dct_rev(loci)
+                m2 = re.match(r"BUF103-(DH\d+)-R(\d{2})\d{2}$", loc or "")
+                if m2 and m2.group(1) == hall:
+                    rows.add(int(m2.group(2)))
+    rows = sorted(rows)
+    groups = []
+    groups_net = [r for r in rows if r <= 2]
+    body = [r for r in rows if r > 2]
+    if groups_net:
+        groups.append({"name": "Network Rows %d-%d" % (groups_net[0], groups_net[-1]), "rows": groups_net})
+    for i in range(0, len(body), 8):
+        chunk = body[i:i+8]
+        groups.append({"name": "POD %d (%d-%d)" % (i//8, chunk[0], chunk[-1]), "rows": chunk})
+    halls_cfg[hall] = {"maxRow": max(rows) if rows else 0, "groups": groups}
+with open(os.path.join(APP, "data", "halls-buf103.json"), "w", encoding="utf-8") as f:
+    json.dump(halls_cfg, f, separators=(",", ":"))
+print("halls-buf103.json:", {h: v["maxRow"] for h, v in halls_cfg.items()})
 print(f"TOTAL rows={total} dict={len(dct)} halls={sorted(halls)}")
 print(f"json={len(raw)//1024}KB gz={os.path.getsize(os.path.join(APP,'data','buf103.json.gz'))//1024}KB in {time.time()-t0:.0f}s")
 if total < 250000:

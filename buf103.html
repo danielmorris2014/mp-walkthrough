@@ -131,7 +131,13 @@ function loadDone(d) {
   showBrowse();
 }
 function load() {
-  KitData.load('./data/buf103.json.gz', 'cutsheet', 'loadstate').then(loadDone);
+  KitData.load('./data/buf103.json.gz', 'cutsheet', 'loadstate').then(function (d) {
+    loadDone(d);
+    try {
+      var q = sessionStorage.getItem('mp.ocrq');
+      if (q) { sessionStorage.removeItem('mp.ocrq'); document.getElementById('q').value = q; run(); }
+    } catch (e) {}
+  });
 }
 function totalRows() { var n = 0; FAMS.forEach(function (f) { n += D.rows[f].length; }); return n; }
 function buildRacks() {
@@ -322,6 +328,38 @@ function showMats() {
   out.innerHTML = '';
   var h = document.createElement('div');
   h.className = 'count'; h.textContent = 'Planned cables by family \u2014 counts and specs from this cutsheet revision';
+  // walkthrough progress for BUF103 halls (same-origin localStorage)
+  try {
+    var st = JSON.parse(localStorage.getItem('mp_walkthrough_v1') || 'null');
+    if (st && st.halls) {
+      var rows = [];
+      Object.keys(st.halls).forEach(function (hid) {
+        if (hid.indexOf('BUF103_') !== 0) return;
+        var hall = st.halls[hid];
+        var total = 0, hung = 0;
+        Object.keys(hall.rows || {}).forEach(function (rn) {
+          ['11', '13'].forEach(function (sd) {
+            var seg = hall.rows[rn][sd]; if (!seg) return;
+            total++;
+            if (seg.F144 === 'hung' && seg.OCS === 'hung' && seg.CAT6 === 'hung') hung++;
+          });
+        });
+        rows.push({ name: hall.name, total: total, hung: hung,
+          pct: total ? Math.round((hung / total) * 100) : 0,
+          planned: (RACKS[hid.slice(7)] || []).length });
+      });
+      if (rows.length) {
+        var pc = document.createElement('div');
+        pc.className = 'card';
+        pc.innerHTML = '<div class=ct>Build progress ' + String.fromCharCode(0x2014) + ' walkthrough vs cutsheet</div>' +
+          rows.map(function (r3) {
+            return '<div class="mrow"><span class="s">' + esc(r3.name) + ' ' + String.fromCharCode(0x00b7) + ' ' + r3.hung + '/' + r3.total +
+              ' sides fully hung (' + r3.pct + '%) ' + String.fromCharCode(0x00b7) + ' ' + r3.planned + ' racks planned</span><span class="n">' + r3.pct + '%</span></div>';
+          }).join('');
+        out.appendChild(pc);
+      }
+    }
+  } catch (e) {}
   out.appendChild(h);
   FAMS.forEach(function (fam) {
     var specs = D.mats[fam] || [];
