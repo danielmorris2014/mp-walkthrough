@@ -123,6 +123,12 @@ with sync_playwright() as p:
       tapBoth(r0);
       doUndo();
       out.undoRestores = JSON.stringify(hall().rows[r0]) === before;
+      // Side vocabulary (one shape-language — arch candidate #4)
+      const mixedSeg = { F144: 'hung', OCS: 'hung', CAT6: 'staged' };
+      out.sideOverall = Side.overall(mixedSeg) === 'MIXED' && Side.overall(Side.empty()) === 'none';
+      out.sideIsAll = Side.isAll(mixedSeg, 'hung') === false && Side.isHung({F144:'hung',OCS:'hung',CAT6:'hung'}) === true;
+      out.sideHasProgress = Side.hasProgress(Side.empty()) === false && Side.hasProgress(mixedSeg) === true;
+      out.sideSides = JSON.stringify(Side.sides()) === JSON.stringify(['11','13']);
       return out;
     }""")
     for k, ok in res6.items():

@@ -76,6 +76,18 @@ function sideOverall(seg, cableFilter) {
   return (seg.F144 === seg.OCS && seg.OCS === seg.CAT6) ? seg.F144 : 'MIXED';
 }
 
+/* Side — the one vocabulary for the Row-Side shape (GLOSSARY). Everything
+   that walks rows x sides x cables speaks these terms; the report, the
+   renderers and the walk-view stats can never drift apart again. */
+var Side = {
+  sides: function () { return ['11', '13']; },
+  empty: function () { return { F144: 'none', OCS: 'none', CAT6: 'none' }; },
+  overall: function (seg) { return sideOverall(seg, null); },  // status | 'MIXED'
+  isAll: function (seg, status) { return seg.F144 === status && seg.OCS === status && seg.CAT6 === status; },
+  isHung: function (seg) { return Side.isAll(seg, 'hung'); },
+  hasProgress: function (seg) { return seg.F144 !== 'none' || seg.OCS !== 'none' || seg.CAT6 !== 'none'; }
+};
+
 function mixedBase(seg) {
   var counts = {};
   CABLES.forEach(function (c) { counts[seg[c]] = (counts[seg[c]] || 0) + 1; });
@@ -356,6 +368,6 @@ function buildReport(style, ctx) {
     buildReport: buildReport,
     STATUS_META: STATUS_META, STATUS_ORDER: STATUS_ORDER,
     REPORT_STATUS_ORDER: REPORT_STATUS_ORDER, CABLES: CABLES, CABLE_LABEL: CABLE_LABEL,
-    sideOverall: sideOverall, hallSentences: hallSentences
+    sideOverall: sideOverall, hallSentences: hallSentences, Side: Side
   };
 })();
