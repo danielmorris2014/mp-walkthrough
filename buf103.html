@@ -233,7 +233,7 @@ function connectionsFor(rack) {
 function rackView() {
   var out = document.getElementById('results');
   out.innerHTML = '';
-  if (!RACK) { out.innerHTML = '<div class="hint">Type a rack in the search box (like dh1-r0411), or Browse to pick one.</div>'; return; }
+  if (!RACK) { return showBrowse(); } // rack tab with no rack = the picker (no dead ends)
   var all = connectionsFor(RACK);
   var groups = [];
   FAMS.forEach(function (fam) {

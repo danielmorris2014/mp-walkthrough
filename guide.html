@@ -115,9 +115,34 @@
     view.appendChild(holder);
     KitData.showError('./data/directory.json.gz', 'barcode database', 'mpDirErr');
   }
+
+  // kit search box on empty find views: the guide's own input lives on its
+  // HOME screen, so deep-linking to #/find (the kit's 'Find a cable' tile)
+  // showed a bare 'Results:' with nothing to do. Inject a search card that
+  // feeds the guide's own handleInput.
+  function ensureFindBox(view) {
+    if (!/Results|Resultados/.test((view.querySelector('.h2') || { textContent: '' }).textContent || view.textContent)) return;
+    if (view.querySelector('input') || document.getElementById('mpFindBox')) return;
+    var box = document.createElement('div');
+    box.id = 'mpFindBox';
+    box.style.cssText = 'margin:6px 0 10px;';
+    box.innerHTML = '<form data-form="search" style="display:flex;gap:8px;">' +
+      '<input type="text" placeholder="Barcode, rack, port or dry-run line" aria-label="Find a cable" ' +
+      'style="flex:1;min-width:0;min-height:44px;font-size:16px;border-radius:10px;border:1px solid var(--line,#363a3f);background:var(--surface,#18191b);color:var(--text,#edeef0);padding:0 12px;">' +
+      '<button type="submit" style="min-height:44px;padding:0 14px;border:0;border-radius:10px;background:#fff;color:#111;font:700 13px -apple-system,sans-serif;">Find</button></form>';
+    box.querySelector('form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var v = box.querySelector('input').value.trim();
+      if (!v) return;
+      if (typeof handleInput === 'function') handleInput(v, 'typed');
+    });
+    view.insertBefore(box, view.firstChild);
+  }
   function augment() {
     var view = document.getElementById('view');
-    if (!view || document.getElementById('mpDirCard')) return;
+    if (!view) return;
+    try { ensureFindBox(view); } catch (e) {}
+    if (document.getElementById('mpDirCard')) return;
     var inp = view.querySelector('input[data-in]') || document.getElementById('rq') || document.getElementById('q');
     var q = '';
     if (inp && inp.offsetParent && (!inp.type || inp.type === 'text' || inp.type === 'search')) q = inp.value;

@@ -897,7 +897,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v62';
+var APP_VERSION = 'v63';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2067,10 +2067,8 @@ var KIT_PAGES = [
     url: './buf103.html', precache: true, group: 'Field data' },
   { name: 'Find a cable', sub: 'Barcode, rack, port or dry-run line', icon: 'search',
     guide: 'find', group: 'Field data' },
-  { name: 'Scan barcode', sub: 'Camera scanner into the 29K directory', icon: 'scan',
-    guide: 'scan', group: 'Field data' },
-  { name: 'Read a Label', sub: 'Offline OCR when the barcode won\u2019t scan', icon: 'search',
-    url: './ocr.html', precache: true, group: 'Field data' },
+  { name: 'Scan a Label', sub: 'Barcodes live + printed text via OCR', icon: 'scan',
+    url: './scan.html', precache: true, group: 'Field data' },
   { name: 'Flag labels', sub: 'A/Z flag labels with barcode + serial', icon: 'lines',
     url: './labels.html', precache: true, group: 'Field data' },
   { name: 'Wrong labels', sub: 'Log cables whose label is wrong', icon: 'flag',
