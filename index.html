@@ -456,6 +456,18 @@
   .home-card.soon { opacity: 0.55; border-style: dashed; cursor: default; }
   .home-card.soon:active { transform: none; }
   .home-card.soon .home-tile { background: transparent; border-style: dashed; }
+  /* v51: secondary tools live in a compact tile grid - 9 tall cards became
+     2 primary cards + 7 tiles; grouped with space, not more rows of cards */
+  .tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+  .tool-tile {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    min-height: 60px; padding: 10px 12px; cursor: pointer; color: var(--text);
+    display: flex; align-items: center; gap: 10px; text-align: left;
+    transition: transform var(--dur-press) var(--ease-2);
+  }
+  .tool-tile:active { transform: scale(0.97); }
+  .tool-tile svg { width: 20px; height: 20px; flex: none; color: var(--muted); }
+  .tool-tile .tile-name { font: 800 12.5px var(--font-family, -apple-system, sans-serif); color: var(--slate-12); line-height: 1.2; }
   /* Chrome is opt-in per screen via the SCREENS registry (has-* classes).
      A new screen with no chrome flags gets a clean layout by default. */
   .status-dock, .bottom-nav, .hall-tabs { display: none; }
@@ -633,62 +645,36 @@
         </span>
         <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
       </button>
-      <button class="home-card" onclick="openGuide()">
-        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
-        <span style="min-width:0;">
-          <span class="home-name">Find a cable</span>
-          <span class="home-sub">Search by barcode, rack, port or a dry-run line - see every hop</span>
-        </span>
-        <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+    <div class="tool-grid">
+      <button class="tool-tile" onclick="openGuide()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span class="tile-name">Find a cable</span>
       </button>
-      <button class="home-card" onclick="openGuide('mislabel')">
-        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg></span>
-        <span style="min-width:0;">
-          <span class="home-name">Wrong labels</span>
-          <span class="home-sub">Log cables whose label is wrong, with a report list</span>
-        </span>
-        <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      <button class="tool-tile" onclick="openGuide('mislabel')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+        <span class="tile-name">Wrong labels</span>
       </button>
-      <button class="home-card" onclick="location.href='./training/DataHall4_Cable_Training/START_HERE.html'">
-        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg></span>
-        <span style="min-width:0;">
-          <span class="home-name">Training</span>
-          <span class="home-sub">17-lesson course + reference guide — offline</span>
-        </span>
-        <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      <button class="tool-tile" onclick="location.href='./training/DataHall4_Cable_Training/START_HERE.html'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
+        <span class="tile-name">Training</span>
       </button>
-      <button class="home-card" onclick="location.href='./labels.html'">
-        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v14"/><path d="M7 5v14"/><path d="M11 5v14"/><path d="M15 5v14"/><path d="M19 5v14"/><path d="M21 5v14"/></svg></span>
-        <span style="min-width:0;">
-          <span class="home-name">Flag labels</span>
-          <span class="home-sub">Make A/Z flag labels with their own barcode and serial</span>
-        </span>
-        <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      <button class="tool-tile" onclick="location.href='./labels.html'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v14"/><path d="M7 5v14"/><path d="M11 5v14"/><path d="M15 5v14"/><path d="M19 5v14"/><path d="M21 5v14"/></svg>
+        <span class="tile-name">Flag labels</span>
       </button>
-      <button class="home-card" onclick="location.href='./buf103.html'">
-        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
-        <span style="min-width:0;">
-          <span class="home-name">BUF103 Cutsheet</span>
-          <span class="home-sub">321K planned cables: search, rack view, materials</span>
-        </span>
-        <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      <button class="tool-tile" onclick="location.href='./buf103.html'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="tile-name">BUF103 Cutsheet</span>
       </button>
-      <button class="home-card" onclick="location.href='./reference.html'">
-        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg></span>
-        <span style="min-width:0;">
-          <span class="home-name">Field Reference</span>
-          <span class="home-sub">Standards, cable paths, trunk landings, part numbers</span>
-        </span>
-        <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      <button class="tool-tile" onclick="location.href='./reference.html'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+        <span class="tile-name">Field Reference</span>
       </button>
-      <button class="home-card" onclick="openGuide('clean')">
-        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg></span>
-        <span style="min-width:0;">
-          <span class="home-name">Clean fiber steps</span>
-          <span class="home-sub">Step-by-step cleaning and inspection</span>
-        </span>
-        <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      <button class="tool-tile" onclick="openGuide('clean')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+        <span class="tile-name">Clean fiber steps</span>
       </button>
+    </div>
     </div>
   </div>
 
@@ -943,7 +929,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v50';
+var APP_VERSION = 'v51';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
