@@ -988,8 +988,8 @@ const HELP_TOPICS = [
     es: ["Etiquetas", ["Las troncales se etiquetan completas, no cada ramal.", "El puerto r2-e10 es CommScope E10-2: columna E, puerto 10, fila 2 desde abajo.", "¿Falta la etiqueta? Escanee el QR del rack, elija el cable de la lista y recórralo."]] },
   { id: "report", kw: "daily report informe diario", en: ["Daily report", ["Open Daily report from Home.", "It counts today's confirmed points, inspections and finished walks on this device.", "Add notes, then Copy or Share."]],
     es: ["Informe diario", ["Abra Informe diario desde Inicio.", "Cuenta los puntos confirmados, inspecciones y recorridos terminados hoy en este dispositivo.", "Agregue notas y luego Copiar o Compartir."]] },
-  { id: "data", kw: "load data files csv offline cargar datos archivos", en: ["Site data and offline", ["Practice data loads by default.", "More → Site data → Load site files: pick the racks, routes, SASL and photo-record CSVs.", "The data stays on this device and works offline.", "Remove site data from this device when you are done."]],
-    es: ["Datos del sitio y sin conexión", ["Los datos de práctica se cargan por defecto.", "Más → Datos del sitio → Cargar archivos: elija los CSV de racks, rutas, SASL y registros de fotos.", "Los datos se quedan en este dispositivo y funcionan sin conexión.", "Borre los datos del sitio de este dispositivo cuando termine."]] },
+  { id: "data", kw: "load data files csv offline cargar datos archivos", en: ["Site data and offline", ["Site data loads automatically.", "More → Site data → Load site files: pick the racks, routes, SASL and photo-record CSVs.", "The data stays on this device and works offline.", "Remove site data from this device when you are done."]],
+    es: ["Datos del sitio y sin conexión", ["Los datos del sitio se cargan automáticamente.", "Más → Datos del sitio → Cargar archivos: elija los CSV de racks, rutas, SASL y registros de fotos.", "Los datos se quedan en este dispositivo y funcionan sin conexión.", "Borre los datos del sitio de este dispositivo cuando termine."]] },
   { id: "language", kw: "language spanish english idioma español ingles menu", en: ["Language and menus", ["Tap EN | ES at the top.", "Tabs: Home, Routes, Scan, My Work, More.", "The ? button opens help any time."]],
     es: ["Idioma y menús", ["Toque EN | ES arriba.", "Pestañas: Inicio, Rutas, Escanear, Mi trabajo, Más.", "El botón ? abre la ayuda en cualquier momento."]] },
 ];
@@ -3753,7 +3753,7 @@ const Cloud = (() => {
       <div class="frrow"><button class="btn frgo">${esc(t("findRoute"))}</button><button type="button" class="btn frscan" data-act="scan">${esc(t("scan"))}</button></div></form>`;
     html += `<div class="status"><span class="dot ${navigator.onLine ? "" : "off"}"></span>${esc(navigator.onLine ? t("online") : t("offline"))} · ${esc(t("dataVer", { v: M.version, time: fmtTime(M.loadedAt) }))} · ${esc(M.mode === "demo" ? t("practiceData") : t("siteDataOn", { site: M.site }))}</div>`;
     if (Cloud.enabled() && CL.partial()) html += CL.notIndexed() ? `<div class="alert warn"><div class="grow">${esc(t("notIndexed"))}</div></div>` : `<div class="alert info"><div class="grow">${esc(t("rackByRack"))}</div></div>`;
-    if (M.mode === "demo" && PACK && !Data.hasSiteFiles()) html += `<div class="card hl"><div style="font-weight:700;font-size:17px">🔒 ${esc(t("lockedHere", { site: PACK.site }))}</div><div class="muted" style="margin:4px 0 12px">${esc(t("lockedCrew"))}</div>
+    if (M.mode === "demo" && PACK && !PACK.plain && !Data.hasSiteFiles()) html += `<div class="card hl"><div style="font-weight:700;font-size:17px">🔒 ${esc(t("lockedHere", { site: PACK.site }))}</div><div class="muted" style="margin:4px 0 12px">${esc(t("lockedCrew"))}</div>
       <div class="row"><button class="btn fib" style="flex:1" data-act="unlockSheet">${esc(t("enterCode"))}</button><a class="btn" style="flex:1" href="#/help?video=1" data-act="seen">${esc(t("tryDemo"))}</a></div></div>`;
     else if (M.mode === "demo") html += `<div class="alert warn"><div class="grow">${esc(t("demoLoad"))}</div><a class="btn sm" href="#/more">${esc(t("more"))}</a></div>`;
     if (!S.seenVideo) html += `<div class="card row"><div class="grow" style="flex:1;font-weight:700">▶ ${esc(t("newHere"))}</div><a class="btn sm pri" href="#/help?video=1" data-act="seen">${esc(t("watch"))}</a><button class="btn sm" data-act="seen">${esc(t("notNow"))}</button></div>`;
@@ -4345,11 +4345,11 @@ const Cloud = (() => {
         ${Cloud.enabled() ? (Cloud.approved() && !Cloud.st.sites.length ? `<div class="alert warn">${esc(t("noSiteYet"))}</div>` : "") : `<div class="faint" style="font-size:14px">${esc(t("siteOnDevice"))}</div>`}
         ${Cloud.enabled() && Cloud.canUpload() && M.mode === "site" && Data.hasSiteFiles() && Cloud.myCompany() && Data.LS.get("spfg.from", "") === "upload" ? `<label class="row" style="min-height:48px"><input type="checkbox" id="share-sub" ${Cloud.children(Cloud.myCompany().id).length ? "" : "disabled"} style="width:24px;height:24px"> ${esc(t("shareSub"))}</label>
           <button class="btn fib block" data-act="saveCloudSite">☁ ${esc(t("saveToCompany", { company: Cloud.myCompany().name }))}</button>` : ""}
-        ${PACK ? `<div class="alert info"><div class="grow">🔒 ${esc(t("lockedFile", { site: PACK.site, date: PACK.made }))}</div></div>${M.mode === "demo" && !Data.hasSiteFiles() ? `<button class="btn fib block" data-act="unlockSheet">${esc(t("enterCode"))}</button>` : ""}` : ""}
+        ${PACK && !PACK.plain ? `<div class="alert info"><div class="grow">🔒 ${esc(t("lockedFile", { site: PACK.site, date: PACK.made }))}</div></div>${M.mode === "demo" && !Data.hasSiteFiles() ? `<button class="btn fib block" data-act="unlockSheet">${esc(t("enterCode"))}</button>` : ""}` : ""}
         ${M.mode === "site" && Data.hasSiteFiles() && !IN_FRAME && !Cloud.enabled() ? `<button class="btn block" data-act="makeCrewSheet">🔒 ${esc(t("makeCrew"))}</button>` : ""}
         ${!Cloud.enabled() || Cloud.canUpload() ? `<label class="btn pri block">⇪ ${esc(t("loadFiles"))}<input type="file" id="files" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple hidden></label>
         <div class="faint" style="font-size:13px">${esc(t("fileHint"))}</div>` : ""}
-        ${Data.hasSiteFiles() && !Cloud.enabled() ? `<button class="btn block" data-act="mode" data-v="${M.mode === "demo" ? "site" : "demo"}">${esc(M.mode === "demo" ? t("useSite") : t("useDemo"))}</button>` : ""}
+        
         ${Data.hasSiteFiles() && !Cloud.enabled() ? `<button class="btn block" style="color:var(--bad)" data-act="wipe">${esc(PACK ? t("lockDevice") : t("wipe"))}</button>` : ""}
       </div></div>
       <div style="display:flex;flex-direction:column;gap:12px">
@@ -5052,7 +5052,7 @@ const Cloud = (() => {
   }
 
   // ================= crew tools =================
-  const needCloud = () => { if (PACK && !Data.hasSiteFiles()) { view().innerHTML = `<div class="card hl"><div style="font-weight:700;font-size:17px">🔒 Enter the crew code first</div><div class="muted" style="margin:4px 0 12px">Training and the site data open after you enter the code.</div><button class="btn fib block" data-act="unlockSheet">${esc(t("enterCode"))}</button></div>`; return; } view().innerHTML = `<div class="alert warn">${esc(PACK ? "This page needs the online site and isn't in this copy." : t("needCloud"))}</div>`; };
+  const needCloud = () => { if (PACK && !PACK.plain && !Data.hasSiteFiles()) { view().innerHTML = `<div class="card hl"><div style="font-weight:700;font-size:17px">🔒 Enter the crew code first</div><div class="muted" style="margin:4px 0 12px">Training and the site data open after you enter the code.</div><button class="btn fib block" data-act="unlockSheet">${esc(t("enterCode"))}</button></div>`; return; } view().innerHTML = `<div class="alert warn">${esc(PACK ? "This page needs the online site and isn't in this copy." : t("needCloud"))}</div>`; };
   const hhmm = m => `${Math.floor(m / 60)}h ${String(Math.round(m % 60)).padStart(2, "0")}m`;
   const dayKey = iso => new Date(iso).toLocaleDateString();
   function worked(list, now = Date.now()) {   // list = one person's punches, oldest first → minutes worked + state
@@ -5802,6 +5802,7 @@ const Cloud = (() => {
       else M = Data.useDemo(true);
       
     }
+    if (PACK && PACK.plain && !Data.hasSiteFiles()) { try { Data.importObject(await Pack.unlock(PACK, ""), "pack"); M = Data.useDemo(false); if (S.hall && M.halls.has(S.hall)) M.hall = S.hall; } catch (e) {} }  // unlocked pack: load before first paint
     shell(); route();
     if (PACK && (PACK.plain || window.SPFG_AUTO) && !Data.hasSiteFiles()) { try { const files = await Pack.unlock(PACK, window.SPFG_AUTO || ""); Data.importObject(files, "pack"); M = Data.model; if (S.hall && M.halls.has(S.hall)) M.hall = S.hall; shell(); route(); } catch (e) {} }
   })();
