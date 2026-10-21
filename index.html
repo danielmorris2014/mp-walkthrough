@@ -465,9 +465,13 @@
     display: flex; align-items: center; gap: 10px; text-align: left;
     transition: transform var(--dur-press) var(--ease-2);
   }
-  .tool-tile:active { transform: scale(0.97); }
+  .tool-tile:active { transform: scale(0.96); }
   .tool-tile svg { width: 20px; height: 20px; flex: none; color: var(--muted); }
   .tool-tile .tile-name { font: 800 12.5px var(--font-family, -apple-system, sans-serif); color: var(--slate-12); line-height: 1.2; }
+  .tool-group { margin-top: 24px; }
+  .tool-group-h { font: 800 11px var(--font-family, -apple-system, sans-serif);
+    letter-spacing: 1px; text-transform: uppercase; color: var(--slate-8, #777b84); margin-bottom: 8px; }
+  .tool-grid-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   /* Chrome is opt-in per screen via the SCREENS registry (has-* classes).
      A new screen with no chrome flags gets a clean layout by default. */
   .status-dock, .bottom-nav, .hall-tabs { display: none; }
@@ -641,11 +645,11 @@
         <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M13 14h-2l-1.5 7h5z"/><path d="M8.5 8 5 11l1 4"/><path d="M15.5 8 19 11l-1 4"/><path d="M9 21h6"/></svg></span>
         <span style="min-width:0;">
           <span class="home-name">Cable Field Guide</span>
-          <span class="home-sub">Lookup, racks, routes, walk mode + 29,335-barcode directory</span>
+          <span class="home-sub">Find a cable · scan · wrong labels · clean fiber · 29K-barcode directory</span>
         </span>
         <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
       </button>
-    <div class="tool-grid" id="toolGrid"></div>
+    <div id="toolGrid"></div>
     </div>
   </div>
 
@@ -900,7 +904,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v57';
+var APP_VERSION = 'v58';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2067,23 +2071,17 @@ var SCREENS = {
    precache so a page cannot ship half-wired. */
 var KIT_PAGES = [
   { name: 'BUF103 Cutsheet', sub: 'Planned cables: search, rack view, materials', icon: 'grid',
-    url: './buf103.html', precache: true },
-  { name: 'Field Reference', sub: 'Standards, cable paths, trunk landings', icon: 'book',
-    url: './reference.html', precache: true },
-  { name: 'Training', sub: '17-lesson course + reference guide', icon: 'bars',
-    url: './training/DataHall4_Cable_Training/START_HERE.html', precache: false },
-  { name: 'Knowledge Cards', sub: 'Flashcards from the Data Hall 4 glossary', icon: 'book',
-    url: './flashcards.html', precache: true },
+    url: './buf103.html', precache: true, group: 'Field data' },
+  { name: 'Read a Label', sub: 'Offline OCR when the barcode won\u2019t scan', icon: 'search',
+    url: './ocr.html', precache: true, group: 'Field data' },
   { name: 'Flag labels', sub: 'A/Z flag labels with barcode + serial', icon: 'lines',
-    url: './labels.html', precache: true },
-  { name: 'Read a Label', sub: 'Offline OCR when the barcode won’t scan', icon: 'search',
-    url: './ocr.html', precache: true },
-  { name: 'Find a cable', sub: 'Barcode, rack, port or dry-run line', icon: 'search',
-    guide: 'find' },
-  { name: 'Wrong labels', sub: 'Log cables whose label is wrong', icon: 'flag',
-    guide: 'mislabel' },
-  { name: 'Clean fiber steps', sub: 'Step-by-step cleaning and inspection', icon: 'spark',
-    guide: 'clean' }
+    url: './labels.html', precache: true, group: 'Field data' },
+  { name: 'Training', sub: '17-lesson course + reference guide', icon: 'bars',
+    url: './training/DataHall4_Cable_Training/START_HERE.html', precache: false, group: 'Learn' },
+  { name: 'Knowledge Cards', sub: 'Flashcards from the Data Hall 4 glossary', icon: 'book',
+    url: './flashcards.html', precache: true, group: 'Learn' },
+  { name: 'Field Reference', sub: 'Standards, cable paths, trunk landings', icon: 'spark',
+    url: './reference.html', precache: true, group: 'Learn' }
 ];
 var KIT_ICONS = {
   grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
@@ -2095,16 +2093,23 @@ var KIT_ICONS = {
   spark: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>'
 };
 function renderKitTiles() {
-  var grid = document.getElementById('toolGrid');
-  if (!grid) return;
-  grid.innerHTML = KIT_PAGES.map(function (pg) {
-    var act = pg.url ? "location.href='" + pg.url + "'" : "openGuide('" + pg.guide + "')";
-    return '<button class="tool-tile" onclick="' + act + '">' +
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + KIT_ICONS[pg.icon] + '</svg>' +
-      '<span class="tile-name">' + pg.name + '</span></button>';
+  var wrap = document.getElementById('toolGrid');
+  if (!wrap) return;
+  var groups = [];
+  KIT_PAGES.forEach(function (pg) {
+    if (groups.indexOf(pg.group) < 0) groups.push(pg.group);
+  });
+  wrap.innerHTML = groups.map(function (g) {
+    var tiles = KIT_PAGES.filter(function (pg) { return pg.group === g; }).map(function (pg) {
+      var act = pg.url ? "location.href='" + pg.url + "'" : "openGuide('" + pg.guide + "')";
+      return '<button class="tool-tile" onclick="' + act + '">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + KIT_ICONS[pg.icon] + '</svg>' +
+        '<span class="tile-name">' + pg.name + '</span></button>';
+    }).join('');
+    return '<div class="tool-group"><div class="tool-group-h">' + g + '</div>' +
+      '<div class="tool-grid-row">' + tiles + '</div></div>';
   }).join('');
-}
-var currentTab = null;
+}var currentTab = null;
 // Measure the real height of the fixed bottom chrome and expose it as --chrome-h,
 // so body padding and toast placement always match what's actually on screen.
 function applyChromeHeight() {
