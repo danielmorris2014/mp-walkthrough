@@ -39,3 +39,13 @@ The domain language of the MP Kit. Implementation details live in AGENTS.md, not
 **Barcode Directory** — The 29,335-barcode + 193K-preset dataset inside the Cable Field Guide. Searchable by barcode number, rack, device, or port. Not a separate app — it lives in the Field Guide's search.
 
 **Cable Field Guide** — The second tool in the MP Kit. Contains the sitepack model (racks, routes, walk mode, clean-fiber steps), the Barcode Directory, and the scanner. Opens from the Home launcher.
+
+**BUF103** — The next data hall build after BUF102. Its engineering data (Cutsheet, Patch Panel Matrix) exists before barcodes are assigned; the kit's BUF103 tools work from that pre-build data.
+
+**Cutsheet** — The master engineering source listing every cable in a build: A end, Z end, ports, and cable spec, organized into families (TPU<>OCS, TOR<>DCN-SPN, BMS, copper, management...). One row = one planned connection.
+
+**Patch Panel Matrix** — The per-rack panel layout: which FPP/CPP panels sit at which RU, their rear trunks with far-end peers, and front device ports. The kit derives a rack view from Cutsheet data; the matrix is the authoritative source.
+
+**Field Reference** — The offline in-kit copy of the Reference Guide: standards, cable paths, trunk landing sheets, part numbers. For looking things up on the job, not for tracking progress.
+
+**Wrong Label** — A cable whose printed flag disagrees with the database. Logged from the Field Guide; open items ride the nightly report and now warn at scan time.
