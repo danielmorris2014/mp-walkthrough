@@ -4,13 +4,22 @@
    193K presets), and appends a "Barcode directory" results card to any
    Find page render - so typed searches AND scans hit the full label
    directory, not just the sitepack model. Self-contained: own overlay,
-   own clipboard path; styled with the guide's theme variables. */
+   own clipboard path; styled with the guide's theme variables.
+
+   v48: a failed load is VISIBLE (error card with a Retry button) and
+   recoverable (auto-retry when signal returns) — before, one offline
+   cache miss silenced the directory for the whole session with no
+   indication why scans found nothing. */
 (function () {
-  var DIR = null, DIR_STATE = 'idle';
+  var DIR = null, DIR_STATE = 'idle', DIR_ERR = '';
   function dirLoad() {
     if (DIR_STATE !== 'idle') return;
-    DIR_STATE = 'loading';
-    if (typeof DecompressionStream === 'undefined') { DIR_STATE = 'error'; return; }
+    DIR_STATE = 'loading'; DIR_ERR = '';
+    if (typeof DecompressionStream === 'undefined') {
+      DIR_STATE = 'error';
+      DIR_ERR = 'This phone’s iOS is too old for the offline barcode database (needs iOS 16.4+).';
+      return;
+    }
     fetch('./data/directory.json.gz').then(function (r) {
       if (!r.ok) throw new Error('http');
       return new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).json();
@@ -24,13 +33,20 @@
       }
       DIR = { byNum: byNum, hay: hay, n: bc.length };
       DIR_STATE = 'ready';
-    }).catch(function () { DIR_STATE = 'error'; });
+    }).catch(function () {
+      DIR_STATE = 'error';
+      DIR_ERR = 'Could not load the offline barcode database' + (navigator.onLine ? ' (server problem — try Retry).' : ' (no signal — open the app once with signal, then it works offline again).');
+    });
   }
+  // signal returned -> recover automatically instead of staying poisoned
+  window.addEventListener('online', function () {
+    if (DIR_STATE === 'error') { DIR_STATE = 'idle'; dirLoad(); }
+  });
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function parts(lbl) {
     var m = /^([A-Z0-9]{3,6})-([A-Z]{0,3}\d{1,2})-(R\d{4})-(.+)$/i.exec(lbl || '') ||
             /^([A-Z0-9]{3,6}) \/ ([A-Z]{0,3}\d{1,2}) \/ (R\d{4}) \/ (.+)$/i.exec(lbl || '');
-    return m ? m[2] + ' / ' + m[3] + ' \u00b7 ' + m[4] : lbl;
+    return m ? m[2] + ' / ' + m[3] + ' · ' + m[4] : lbl;
   }
   function search(q) {
     q = String(q || '').trim().toUpperCase();
@@ -76,6 +92,28 @@
       }
     });
     document.body.appendChild(ov);
+  }
+  function mountError(view) {
+    if (document.getElementById('mpDirCard')) return;
+    var ec = document.createElement('div');
+    ec.id = 'mpDirCard'; ec.className = 'card hl'; ec.style.marginTop = '10px';
+    ec.innerHTML = '<div class="eyebrow">\u{1F4CB} Barcode directory · unavailable</div>' +
+      '<div class="muted" style="font-size:12px;line-height:1.5;">' + esc(DIR_ERR || 'Could not load the barcode database.') + '</div>';
+    var rb = document.createElement('button');
+    rb.textContent = 'Retry loading database';
+    rb.style.cssText = 'margin-top:8px;min-height:44px;width:100%;border:0;border-radius:10px;background:#fff;color:#111;font:700 14px -apple-system,sans-serif;';
+    rb.onclick = function () {
+      DIR_STATE = 'idle'; DIR_ERR = '';
+      var c = document.getElementById('mpDirCard'); if (c) c.remove();
+      dirLoad();
+      var iv = setInterval(function () {
+        if (DIR_STATE === 'ready') { clearInterval(iv); var cc = document.getElementById('mpDirCard'); if (cc) cc.remove(); augment(); }
+        if (DIR_STATE === 'error') { clearInterval(iv); var cc2 = document.getElementById('mpDirCard'); if (cc2) cc2.remove(); augment(); }
+      }, 400);
+      setTimeout(function () { clearInterval(iv); }, 30000);
+    };
+    ec.appendChild(rb);
+    view.appendChild(ec);
   }
   function augment() {
     var view = document.getElementById('view');
@@ -133,13 +171,21 @@
       view.appendChild(card);
     };
     if (DIR_STATE === 'ready') mount();
-    else { dirLoad(); var iv = setInterval(function () { if (DIR_STATE === 'ready') { clearInterval(iv); mount(); } if (DIR_STATE === 'error') clearInterval(iv); }, 400); setTimeout(function () { clearInterval(iv); }, 20000); }
+    else if (DIR_STATE === 'error') mountError(view);
+    else {
+      dirLoad();
+      var iv = setInterval(function () {
+        if (DIR_STATE === 'ready') { clearInterval(iv); mount(); }
+        if (DIR_STATE === 'error') { clearInterval(iv); mountError(view); }
+      }, 400);
+      setTimeout(function () { clearInterval(iv); }, 20000);
+    }
   }
   var t = null;
   new MutationObserver(function () { clearTimeout(t); t = setTimeout(augment, 250); }).observe(document.documentElement, { childList: true, subtree: true });
   document.addEventListener('input', function (e) {
     var i = e.target;
-    if (i && (i.id === 'q' || i.id === 'rq' || i.getAttribute && i.getAttribute('data-in') !== null)) {
+    if (i && (i.id === 'q' || i.id === 'rq' || (i.getAttribute && i.getAttribute('data-in') !== null))) {
       clearTimeout(t); t = setTimeout(augment, 300);
     }
   }, true);
