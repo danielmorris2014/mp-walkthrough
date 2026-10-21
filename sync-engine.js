@@ -11,6 +11,10 @@ var Sync = (function () {
   var lastSyncAt = 0;          // ms timestamp of last successful sync
   var pendingChanges = 0;      // local changes since last push
   var status = 'standalone';   // standalone | synced | pending | error
+  // The one list of keys shared across phones. mergeStates, sync and push all
+  // derive from it; baselines ride along (ADR-0002: what syncs = everything).
+  var SHARED_KEYS = ['halls', 'blockers', 'crewPool', 'meta', 'history', 'baseline'];
+  var lastMarked = null;       // snapshot of shared keys at last markChanged
 
   // ---- site code codec ----
   function encodeCode(tok) {
@@ -60,19 +64,36 @@ var Sync = (function () {
     });
   }
 
-  // ---- merge: latest-per-key across top-level state keys ----
+  // ---- merge: latest-per-key across top-level state keys (ADR-0002) ----
   function mergeStates(remote, local) {
     if (!remote) return local;
     if (!local) return remote;
-    var merged = {};
-    var keys = ['halls', 'blockers', 'crewPool', 'meta', 'history'];
-    keys.forEach(function (k) {
+    var merged = {}, meta = {};
+    SHARED_KEYS.forEach(function (k) {
       var rAt = (remote._meta && remote._meta[k + '_at']) || 0;
       var lAt = (local._meta && local._meta[k + '_at']) || 0;
-      merged[k] = lAt >= rAt ? local[k] : remote[k];
+      var localWins = lAt >= rAt;
+      merged[k] = localWins ? local[k] : remote[k];
+      meta[k + '_at'] = localWins ? lAt : rAt; // carry the winner's stamp forward
     });
-    merged._meta = { syncedAt: Date.now() };
+    merged._meta = meta;
+    merged._meta.syncedAt = Date.now();
     return merged;
+  }
+
+  // markChanged(s, silent): diff the shared keys against the last snapshot and
+  // stamp (_at) only what actually moved — honest inputs for the next merge.
+  // Called from saveState; the first call just seeds the snapshot. silent=true
+  // (post-sync) only re-seeds, so a merge doesn't mark itself pending.
+  function markChanged(s, silent) {
+    if (!s) return;
+    if (lastMarked && !silent) {
+      SHARED_KEYS.forEach(function (k) {
+        if (JSON.stringify(s[k]) !== lastMarked[k]) touch(k);
+      });
+    }
+    lastMarked = {};
+    SHARED_KEYS.forEach(function (k) { lastMarked[k] = JSON.stringify(s[k]); });
   }
 
   // ---- public interface ----
@@ -112,7 +133,7 @@ var Sync = (function () {
   function push(localState) {
     if (!token) return Promise.resolve(false);
     var stateObj = {};
-    ['halls', 'blockers', 'crewPool', 'meta', 'history'].forEach(function (k) {
+    SHARED_KEYS.forEach(function (k) {
       stateObj[k] = localState[k];
     });
     stateObj._meta = localState._meta || {};
@@ -137,12 +158,24 @@ var Sync = (function () {
         return push(localState).then(function () { return localState; });
       }
       var merged = mergeStates(remote, localState);
-      // always push the merged result so both phones converge
-      var mergedState = localState;
-      ['halls', 'blockers', 'crewPool', 'meta', 'history'].forEach(function (k) {
-        mergedState[k] = merged[k];
+      var changed = SHARED_KEYS.some(function (k) {
+        return JSON.stringify(merged[k]) !== JSON.stringify(localState[k]);
       });
-      return push(mergedState).then(function () { return mergedState; });
+      // Return a NEW object only when the merge moved something: callers use
+      // `if (m !== state)` to decide whether to re-render, so smuggling the
+      // same reference back would leave the screen stale.
+      var mergedState = localState;
+      if (changed) {
+        mergedState = {};
+        for (var k in localState) mergedState[k] = localState[k]; // personal keys ride along
+        SHARED_KEYS.forEach(function (k) { mergedState[k] = merged[k]; });
+        mergedState._meta = merged._meta;
+      }
+      // always push the merged result so both phones converge
+      return push(mergedState).then(function () {
+        markChanged(mergedState, true); // re-seed: post-merge state is the new baseline
+        return mergedState;
+      });
     }).catch(function () { return localState; });
   }
 
@@ -180,6 +213,7 @@ var Sync = (function () {
     push: push,
     sync: sync,
     touch: touch,
+    markChanged: markChanged,
     getStatus: getStatus,
     timeAgo: timeAgo,
     encodeCode: encodeCode

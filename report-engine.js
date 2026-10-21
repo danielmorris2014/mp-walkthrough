@@ -141,9 +141,9 @@ function hallSentences(hall, cableFilter, style) {
   });
 }
 
-function hallBlock(hall) {
+function hallBlock(hall, ns) {
   var lines = [];
-  var sents = hallSentences(hall, null, (typeof numStyleVal !== 'undefined') ? numStyleVal : 'short');
+  var sents = hallSentences(hall, null, ns || 'short');
   if (sents.length) lines.push(hall.name + ' ' + sents.join('   '));
   (hall.notes || []).forEach(function (n) { lines.push(hall.name + ' ' + n); });
   return lines;
@@ -198,8 +198,8 @@ function formalizeNote2(n) {
   return polishSentence(t);
 }
 
-function formalHallLines2(hall) {
-  var style = (typeof numStyleVal !== 'undefined') ? numStyleVal : 'short';
+function formalHallLines2(hall, ns) {
+  var style = ns || 'short';
   var out = [];
   REPORT_STATUS_ORDER.forEach(function (target) {
     var sides = []; // cls 0 = both sides, 1 = 11-side, 2 = 13-side
@@ -282,7 +282,7 @@ function buildReport(style, ctx) {
     out += 'WORK PERFORMED\n\n';
     var blocks = [];
     Object.values(hallsNow).forEach(function (h) {
-      var hl = formalHallLines2(h);
+      var hl = formalHallLines2(h, numStyleVal);
       if (hl.length) blocks.push('MP | ' + h.name + '\n' + hl.join('\n'));
     });
     if (blocks.length) out += blocks.join('\n\n') + '\n\n';
@@ -303,7 +303,7 @@ function buildReport(style, ctx) {
     out += 'Personnel Count: MP ' + mpCount + ', SP ' + spCount + (activeCrew.length ? ' (' + activeCrew.join(', ') + ')' : '') + '\n\n';
     out += 'Work Completed:\nMP:\n';
     Object.values(hallsNow).forEach(function (h) {
-      hallBlock(h).forEach(function (l) { out += l + '\n'; });
+      hallBlock(h, numStyleVal).forEach(function (l) { out += l + '\n'; });
     });
     out += '\nSP:\n' + ((m.spWorkNotes || '').trim() || 'None') + '\n\n';
     out += 'Blockers:\n';
@@ -318,7 +318,7 @@ function buildReport(style, ctx) {
     out += 'Location: ' + locs + '\n';
     out += 'Work Completed:\n';
     Object.values(hallsNow).forEach(function (h) {
-      hallBlock(h).forEach(function (l) { out += l + '\n'; });
+      hallBlock(h, numStyleVal).forEach(function (l) { out += l + '\n'; });
     });
     out += '\nCompany/Crew: ServicePoint (SP)\n';
     out += 'Headcount: ' + spCount + '\n';

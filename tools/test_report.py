@@ -84,4 +84,17 @@ with sync_playwright() as p:
         for m in missing: print("  X", m)
         sys.exit(1)
     print("ALL", len(EXPECT_SUBSTRINGS), "EXPECTED LINES PRESENT")
+
+    # numStyle regression guard: 'plain' must reach hallBlock/formalHallLines2
+    # (a v37 fix — these used to read an out-of-scope var and always render
+    # 'short', silently dead-ening the Row-numbers dropdown).
+    plain = pg.evaluate(
+        "() => { document.getElementById('numStyle').value = 'plain'; renderReport();"
+        " return document.getElementById('reportOutput').textContent; }")
+    plain_ok = ("(both sides)" in plain or "(11 side)" in plain or "(13 side)" in plain) \
+               and "1711\u20132411" not in plain
+    print("NUMSTYLE PLAIN:", "PASS" if plain_ok else "FAIL")
+    if not plain_ok:
+        print("  plain report still renders short-style tokens")
+        sys.exit(1)
     b.close()

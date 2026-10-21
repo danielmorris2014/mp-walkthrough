@@ -922,7 +922,7 @@ hallSentences = ReportEngine.hallSentences;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v39';
+var APP_VERSION = 'v40';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1062,7 +1062,9 @@ function loadState() {
   var d = defaultState(); d.version = STATE_VERSION; return d;
 }
 function saveState() {
-  try { Sync.touch('halls'); } catch (e) {}
+  // markChanged diffs the shared keys and stamps only what moved — honest
+  // per-key timestamps for the next latest-wins merge (ADR-0002).
+  try { Sync.markChanged(state); } catch (e) {}
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     var t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
