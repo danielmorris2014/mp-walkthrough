@@ -318,7 +318,57 @@ body{background:#fff} main.ref{margin:0 auto;max-width:1040px;padding:30px 28px 
 section.lsec{box-shadow:none} figure.fig svg.dg{min-width:0}
 dl.gl dd em{color:#59616B;font-size:13px;font-style:normal}
 @media print{ main.ref{padding:0} .cover{-webkit-print-color-adjust:exact;print-color-adjust:exact} section.lsec{break-inside:auto} h2{break-after:avoid} table.t th{-webkit-print-color-adjust:exact;print-color-adjust:exact} .sw,.chip{-webkit-print-color-adjust:exact;print-color-adjust:exact} svg{-webkit-print-color-adjust:exact;print-color-adjust:exact} @page{size:letter;margin:12mm} }
-</style><link rel="stylesheet" href="../../chrome.css"></head><body><a class="mp-back-pill" href="../../index.html#/home">&#8249; MP Kit</a><main class="ref">
+</style><link rel="stylesheet" href="../../chrome.css">
+<style id="mp-mobile-fix">
+/* Friction fixes on the vendor's own (clean-auditing) light theme:
+   diagrams scale to the phone instead of sideways-scrolling (their
+   min-width 560px boxes caused the left-right scroll), body text gets
+   phone-sized, images clamp. A full Graphite re-theme needs per-element
+   work: their tokens are dual-role (text AND background), so a plain
+   remap inverts 280+ pairs - measured, reverted, deferred. */
+/* diagrams are light-drawn: mount them on light plates, sized to the phone */
+figure.fig .svgbox { background: #f5f2eb; border-radius: 12px; padding: 10px;
+  overflow-x: visible !important; }
+figure.fig svg.dg { min-width: 0 !important; width: 100% !important; height: auto; }
+img { max-width: 100%; height: auto; }
+/* phone-sized reading: bigger body text, meta no longer print-tiny */
+@media (max-width: 720px) {
+  html, body { overflow-x: clip; }
+  main p, main li, .lesson p, .lesson li { font-size: 15.5px; line-height: 1.62; }
+  main .muted, main .meta, .lesson .muted { font-size: 13px !important; }
+  /* wide tables (l13 had a 560px one) stack into labeled cards - the same
+     treatment the Field Reference got; no content past a scroll edge */
+  table { display: block; width: 100%; }
+  table thead { display: none; }
+  table tr { display: block; background: rgba(0,0,0,.035);
+    border: 1px solid rgba(0,0,0,.13); border-radius: 10px;
+    padding: 6px 10px; margin: 8px 0; }
+  table td { display: block; border: 0; padding: 3px 0; text-align: left; }
+  table td[data-label]:not([data-label=""])::before {
+    content: attr(data-label) ": "; font-weight: 700; opacity: .55; font-size: .85em; }
+}
+</style>
+</head><body><a class="mp-back-pill" href="../../index.html#/home">&#8249; MP Kit</a><script id="mp-table-labels">
+(function () {
+  function labelTables() {
+    document.querySelectorAll('table').forEach(function (tb) {
+      if (tb.getAttribute('mp-labeled')) return;
+      var head = tb.querySelectorAll('thead th, tr:first-child th');
+      var labels = Array.from(head).map(function (h) { return (h.textContent || '').trim().slice(0, 18); });
+      if (!labels.length) return;
+      tb.setAttribute('mp-labeled', '1');
+      tb.querySelectorAll('tr').forEach(function (tr) {
+        if (tr.querySelector('th')) return;
+        Array.from(tr.querySelectorAll('td')).forEach(function (td, i) { td.setAttribute('data-label', labels[i] || ''); });
+      });
+    });
+  }
+  new MutationObserver(function () { setTimeout(labelTables, 50); })
+    .observe(document.documentElement, { childList: true, subtree: true });
+  document.addEventListener('DOMContentLoaded', labelTables);
+})();
+</script>
+<main class="ref">
 <div class="cover"><div class="kicker" style="color:#F2B134">Reference guide · keep with you on the job</div><h1>Data Hall 4 Cable Installation</h1>
 <p>Large site, data hall 4: pods 10, 11, 12 · 144F and 192F trunks · network rows 1-2.</p>
 <p>Built from the Large Site Cable Installation Guide (D. Moore; cover Rev D, page footers Rev C, 10/8/2026) and the Fluidstack DRS sheets added so far (DRS 01.00.00 to 01.00.03.01). Companion to the interactive beginner course. A study aid: never a substitute for the DRS.</p>
