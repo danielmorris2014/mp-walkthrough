@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+< +!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -604,7 +604,7 @@
 
 <header>
   <div class="top-bar" style="min-height:60px; align-items:center;">
-    <button class="kit-back" onclick="switchTab('home')">&#8249;</button>
+    <button class="kit-back" aria-label="Back to MP Kit home" onclick="switchTab('home')">&#8249;</button>
     <div style="flex:1; min-width:0;">
       <div class="app-title" id="appTitle">MP Kit</div>
     </div>
@@ -672,19 +672,19 @@
       <div class="card-title">Shift &amp; personnel</div>
       <div class="form-grid">
         <div class="form-field">
-          <label>Superintendents on site</label>
+          <label for="supers">Superintendents on site</label>
           <input type="text" id="supers" oninput="saveMeta()">
         </div>
         <div class="form-field">
-          <label>Shift time</label>
+          <label for="shiftTime">Shift time</label>
           <input type="text" id="shiftTime" oninput="saveMeta()">
         </div>
         <div class="form-field">
-          <label>Midpoint (MP) count</label>
+          <label for="mpCount">Midpoint (MP) count</label>
           <input type="number" id="mpCount" oninput="saveMeta()">
         </div>
         <div class="form-field">
-          <label>ServicePoint (SP) count <span class="muted">(auto from chips)</span></label>
+          <label for="spCount">ServicePoint (SP) count <span class="muted">(auto from chips)</span></label>
           <input type="number" id="spCount" oninput="saveMeta()" readonly>
         </div>
       </div>
@@ -905,7 +905,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v59';
+var APP_VERSION = 'v60';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1370,7 +1370,7 @@ function renderHallStrip() {
     var s13 = sideOverall(h.rows[r]['13'], null);
     var cls11 = s11 === 'MIXED' ? 's-mixed' : 's-' + s11;
     var cls13 = s13 === 'MIXED' ? 's-mixed' : 's-' + s13;
-    html += '<div class="hs-col" data-row="' + r + '" onclick="scrollToRow(' + r + ')">' +
+      html += '<div class="hs-col" role="button" tabindex="0" aria-label="Row ' + r + '" data-row="' + r + '" onclick="scrollToRow(' + r + ')" onkeydown="if(event.key===&#39;Enter&#39;){scrollToRow(' + r + ')}">' +
       '<div class="hs-cell ' + cls11 + '"></div>' +
       '<div class="hs-cell ' + cls13 + '"></div></div>';
   });
@@ -1392,7 +1392,7 @@ function renderHallNotes() {
   // hall notes live in the Blockers panel (v35) — rendered here, called by renderBlockersTab
   nw.innerHTML = (hall.notes || []).map(function (n, i) {
     return '<div class="note-item"><span>\uD83D\uDCCC ' + escapeHtml(n) + '</span>' +
-      '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:28px;" onclick="removeNote(' + i + ')">\u2715</button></div>';
+      '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:44px; min-width:44px; border-radius:10px;" aria-label="Remove note" onclick="removeNote(' + i + ')">\u2715</button></div>';
   }).join('');
 }
 function renderWalk() {
@@ -1711,7 +1711,7 @@ function renderBlockers() {
   el.innerHTML = state.blockers.length ? state.blockers.map(function (b, i) {
     var hallTag = b.hall ? '<span style="color:var(--accent); font-weight:800;">' + escapeHtml(b.hall) + '</span> ' : '';
     return '<div class="note-item" style="border-left-color:var(--s-remed);"><span>' + hallTag + '<strong>' + escapeHtml(b.date) + '</strong> – ' + escapeHtml(b.text) + '</span>' +
-      '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:28px;" onclick="removeBlocker(' + i + ')">\u2715</button></div>';
+      '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:44px; min-width:44px; border-radius:10px;" aria-label="Remove blocker" onclick="removeBlocker(' + i + ')">\u2715</button></div>';
   }).join('') : '<div class="muted">No blockers added.</div>';
 }
 
