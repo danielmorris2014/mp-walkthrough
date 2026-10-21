@@ -8,6 +8,9 @@ if [ -z "$PY" ]; then
   else echo "pre-commit: no python found, skipping verify (CI still runs it)"; exit 0; fi
 fi
 "$PY" tools/verify.py || exit 1
+# Staged version-pair check: the commit ships STAGED content, not the
+# working tree — this catches a forgotten `git add sw.js` (v42-v46 lesson).
+"$PY" tools/staged_check.py || exit 1
 if grep -rEn --exclude-dir=.git "ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|x-access-""token:|Authorization: Basic [A-Za-z0-9+/=]{30,}" . ; then
   echo "pre-commit: credential-shaped string found" >&2
   exit 1

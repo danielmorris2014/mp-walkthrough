@@ -21,6 +21,7 @@ These rules prevent stale-code overwrites. Follow them every time, no exceptions
 6. **Before every commit**: `git pull --rebase origin main` — if there are new remote commits, rebase onto them, resolve conflicts, THEN commit.
 7. **After conflict resolution**: verify no `<<<<<<<` / `=======` / `>>>>>>>` markers remain in ANY file (`grep -r "<<<<<<" . --exclude-dir=.git`).
 8. **Commit message must say WHAT and WHY** — the other agent reads these to understand your changes.
+8b. **Bulk edits via script files, never inline shell heredocs** — write the script with the file-writing tool, run it, delete it. The shell eats backslashes (broke JS regexes three separate times) and a failed mid-write can zero the target file (index.html was truncated to 0 bytes once). Commit first so git is the undo.
 
 ### Before pushing
 
