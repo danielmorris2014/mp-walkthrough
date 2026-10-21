@@ -268,7 +268,7 @@
   .palette-sheet.ov-open { display: flex; }
   .palette-card {
     background: var(--card); border: 1px solid var(--border2); border-radius: 20px 20px 0 0;
-    padding: 16px; width: 100%; max-height: 70vh; overflow-y: auto;
+    padding: 16px; width: 100%; max-height: 70vh; overflow-y: auto; overscroll-behavior: contain;
   }
   .palette-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
   .palette-tile {
@@ -293,7 +293,7 @@
   .hall-menu.ov-open { display: flex; }
   .hall-menu-card {
     background: var(--card); border: 1px solid var(--border2); border-radius: 20px 20px 0 0;
-    padding: 16px; width: 100%; max-height: 70vh; overflow-y: auto;
+    padding: 16px; width: 100%; max-height: 70vh; overflow-y: auto; overscroll-behavior: contain;
   }
   .pod-header {
     background: none; padding: 4px 2px 6px 2px; margin: 16px 0 8px 0;
@@ -305,8 +305,9 @@
   .pod-btn {
     background: rgba(255,255,255,0.045); border: 1px solid var(--border); color: var(--muted); font-size: 11px;
     font-weight: 800; padding: 5px 9px; border-radius: 8px; cursor: pointer; min-height: 44px;
+    transition: transform var(--dur-press) var(--ease-2), filter var(--dur-press) var(--ease-2), background-color var(--dur-press) var(--ease-2);
   }
-  .pod-btn:active { transform: scale(0.95); filter: brightness(0.85); }
+  .pod-btn:active { transform: scale(0.96); filter: brightness(0.85); }
   .pod-count { font-size: 12px; color: var(--st-hung); font-weight: 700; font-variant-numeric: tabular-nums; }
 
   .aisle-legend {
@@ -322,7 +323,7 @@
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; padding: 2px; text-align: center;
   }
-  .row-center-pill:active { transform: scale(0.95); border-color: var(--accent); }
+  .row-center-pill:active { transform: scale(0.96); border-color: var(--accent); }
   .row-num { font-weight: 900; font-size: 22px; color: #fff; font-variant-numeric: tabular-nums; }
   .row-both-hint { display: none; }
 
@@ -349,7 +350,7 @@
     border: 1px solid rgba(255,255,255,0.08); line-height: 1.25; min-height: 44px;
     display: flex; align-items: center; justify-content: center; overflow-wrap: break-word;
   }
-  .mini-pill:active { transform: scale(0.92); }
+  .mini-pill:active { transform: scale(0.96); }
 
   .sc-none   { background: #15161a; border-color: #363a3f40; border-left-color: var(--slate-7); }
   .sc-staged { background: var(--blue-2);   border-color: #0090ff30; border-left-color: var(--blue-9); }
@@ -400,7 +401,7 @@
     background: rgba(255,255,255,0.045); border: 1px solid transparent; color: var(--muted);
     box-shadow: none; -webkit-touch-callout: none; -webkit-user-select: none; cursor: pointer;
   }
-  .dock-brush .brush-btn:active { transform: scale(0.94); }
+  .dock-brush .brush-btn:active { transform: scale(0.96); }
   .b-hung { color: var(--green-11); } .b-ran { color: var(--violet-11); } .b-prog { color: var(--amber-11); }
   .b-staged { color: var(--blue-11); } .b-remed { color: var(--red-11); } .b-none { color: var(--slate-11); }
   .b-hung.active   { background: var(--green-9);  color: #fff; border-color: #fff; box-shadow: 0 0 16px #30a46c80; }
@@ -422,7 +423,7 @@
     display: grid; grid-template-columns: repeat(4, 1fr);
     padding: 4px 6px calc(4px + env(safe-area-inset-bottom));
   }
-  .nav-btn {
+  .nav-btn { transition-property: background-color, color, transform;
     background: none; border: none; color: var(--muted); display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 2px; font-size: 11px; font-weight: 800;
     letter-spacing: 0.3px; padding: 5px 2px; border-radius: 10px; cursor: pointer; min-height: 48px;
@@ -572,7 +573,7 @@
   .overlay.ov-open { display: flex; align-items: center; justify-content: center; }
   .overlay-card {
     background: var(--card); border: 1px solid var(--border2); border-radius: 20px;
-    padding: 20px; max-width: 420px; width: 100%; max-height: 84vh; overflow-y: auto;
+    padding: 20px; max-width: 420px; width: 100%; max-height: 84vh; overflow-y: auto; overscroll-behavior: contain;
     box-shadow: 0 30px 80px rgba(0,0,0,0.6);
   }
   .overlay h2 { margin: 0 0 8px 0; font-size: 17px; }
@@ -904,7 +905,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v58';
+var APP_VERSION = 'v59';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {

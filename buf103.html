@@ -72,13 +72,13 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 .rackcell { min-height: 48px; border: 1px solid var(--line); border-radius: 10px; background: var(--card2);
   color: var(--text); font: 800 12px ui-monospace, monospace; cursor: pointer;
   display: flex; align-items: center; justify-content: center; }
-.rackcell:active { transform: scale(.95); background: rgba(255,255,255,.08); }
+.rackcell:active { transform: scale(.96); background: rgba(255,255,255,.08); }
 /* detail sheet */
 .sheetbg { position: fixed; inset: 0; z-index: 90; background: rgba(3,6,12,.88); display: none; }
 .sheetbg.ov-open { display: block; }
 .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 95; background: #141518;
   border-top: 1px solid var(--line); border-radius: 20px 20px 0 0; padding: 16px 16px calc(18px + env(safe-area-inset-bottom));
-  display: none; max-height: 82vh; overflow-y: auto; }
+  display: none; max-height: 82vh; overflow-y: auto; overscroll-behavior: contain; }
 .sheet.ov-open { display: block; }
 .sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: #3a3e45; margin: 0 auto 12px; }
 .kv { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-top: 8px; }
