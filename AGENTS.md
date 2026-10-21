@@ -29,7 +29,8 @@ These rules prevent stale-code overwrites. Follow them every time, no exceptions
 
 ### Version numbering
 
-11. **Bump `APP_VERSION` in index.html AND `CACHE_VERSION` in sw.js together** — they must match.
+11. **Bump `APP_VERSION` in index.html AND `CACHE_VERSION` in sw.js together** — they must match, and verify.py enforces the pair.
+11b. **`git add sw.js` in the SAME commit as index.html** — the bump means nothing if it rides the working tree (v42-v46 all shipped the v41 sw.js; only CI's version-pair check caught it, because the local gate reads the dirty tree and passes). `git status` before every commit: a dirty sw.js you meant to include is a red flag.
 12. **If both agents pushed since your last pull, bump past the highest version** (e.g., if remote is v35.3, your push is v35.4+ even if you expected v35).
 13. **Never reuse a version number** — the service worker uses this to trigger phone updates.
 
