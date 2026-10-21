@@ -3160,7 +3160,7 @@ const Cloud = (() => {
       u.onend = () => { if (it === items[items.length - 1]) it.classList.remove("tr-now"); }; speechSynthesis.speak(u); }); }
   async function pageTrain(qs) {
     setTab("");
-    if (!Cloud.active && !localTrain()) return needCloud();
+    if (!Cloud.active && !localTrain()) { view().innerHTML = '<div class="h2">🎓 ' + esc(t("trainNav")) + '</div>' + '<div class="card hl" style="margin-top:10px"><div style="font-weight:700">The full course lives in the MP Kit now.</div>' + '<div class="muted" style="margin:6px 0 12px">17 lessons with the reference guide — works offline.</div>' + '<a class="btn fib block" href="./training/DataHall4_Cable_Training/START_HERE.html">Open the training course</a></div>'; return; }
     if (!TRAIN.length) { view().innerHTML = `<div class="h2">🎓 ${esc(t("trainNav"))}</div><div class="skel"></div>`; await loadTraining(); }
     let mine = new Map(); if (Cloud.active) { try { const r = await CL.myTraining(); mine = new Map(r.map(x => [x.module, x])); } catch (e) {} } else mine = new Map(Object.entries(trainLog()));
     const card = m => { const x = mine.get(m.id), es = S.lang === "es"; return `<details class="card" data-train="${esc(m.id)}"><summary><span class="tr-ic g-${esc(m.group)}${x && x.done_at ? " done" : ""}">${x && x.done_at ? "✅" : TRAIN_ICON[m.id] || (m.group === "safety" ? "🦺" : "📘")}</span><b>${esc(es && m.title_es || m.title)}</b>${m.size ? ` <span class="chip">${esc(m.size)}</span>` : ""}${x ? ` <span class="faint" style="font-size:12px">${hhmm(x.seconds / 60)}</span>` : ""}</summary>
