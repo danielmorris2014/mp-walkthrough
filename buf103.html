@@ -73,6 +73,14 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
   color: var(--text); font: 800 12px ui-monospace, monospace; cursor: pointer;
   display: flex; align-items: center; justify-content: center; }
 .rackcell:active { transform: scale(.96); background: rgba(255,255,255,.08); }
+/* visual hall map: rack-density mini-grid on each hall card */
+.hallmap { display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px; margin-top: 10px; }
+.hallmap .hm-cell { height: 14px; border-radius: 2px; background: rgba(255,255,255,.06); }
+.hm-0 { background: rgba(255,255,255,.06); }
+.hm-1 { background: rgba(48,164,108,.2); }
+.hm-2 { background: rgba(48,164,108,.4); }
+.hm-3 { background: rgba(48,164,108,.6); }
+.hm-4 { background: rgba(48,164,108,.85); }
 /* detail sheet */
 .sheetbg { position: fixed; inset: 0; z-index: 90; background: rgba(3,6,12,.88); display: none; }
 .sheetbg.ov-open { display: block; }
@@ -197,11 +205,25 @@ function showBrowse() {
     var g = document.createElement('div');
     g.className = 'card';
     var hallsHtml = D.halls.map(function (hall) {
-      var n = (RACKS[hall] || []).length;
-      return '<button class="chip" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:104px;min-height:64px;border-radius:14px;" data-hall="' + esc(hall) + '">' +
+      var racks = RACKS[hall] || [];
+      var n = racks.length;
+      var conns = racks.reduce(function (a, r) { return a + r.n; }, 0);
+      // rack density mini-map: 16 cells, each = ~n/16 racks, colored by density
+      var maxConns = Math.max.apply(null, racks.map(function (r) { return r.n; }).concat([1]));
+      var cells = '';
+      var cellCount = Math.min(16, Math.max(8, Math.ceil(n / 40)));
+      var per = Math.ceil(n / cellCount);
+      for (var ci = 0; ci < cellCount; ci++) {
+        var slice = racks.slice(ci * per, (ci + 1) * per);
+        var avg = slice.length ? slice.reduce(function (a, r) { return a + r.n; }, 0) / slice.length : 0;
+        var lvl = avg === 0 ? 0 : avg < maxConns * 0.25 ? 1 : avg < maxConns * 0.5 ? 2 : avg < maxConns * 0.75 ? 3 : 4;
+        cells += '<span class="hm-cell hm-' + lvl + '"></span>';
+      }
+      return '<button class="chip" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:104px;min-height:84px;border-radius:14px;" data-hall="' + esc(hall) + '">' +
         '<span style="font:800 17px ui-monospace,monospace;color:var(--text)">' + esc(hall) + '</span>' +
         '<span style="font:700 10.5px -apple-system,sans-serif;color:var(--dim)">' + n + ' racks \u00b7 ' +
-        ((RACKS[hall] || []).reduce(function (a, r) { return a + r.n; }, 0)).toLocaleString() + ' connections</span></button>';
+        conns.toLocaleString() + ' conns</span>' +
+        '<span class="hallmap">' + cells + '</span></button>';
     }).join('');
     g.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">' + hallsHtml + '</div>';
     out.appendChild(g);
@@ -249,6 +271,21 @@ function rackView() {
   h.className = 'count';
   h.textContent = RACK + ' \u00b7 ' + all.length + ' connections';
   out.appendChild(h);
+  // visual family distribution bar
+  var fams2 = [];
+  FAMS.forEach(function (fam) {
+    var cnt = all.filter(function (x) { return x[0] === fam; }).length;
+    if (cnt) fams2.push({ fam: fam, n: cnt, c: cnt / all.length });
+  });
+  if (fams2.length > 1) {
+    var bar = document.createElement('div');
+    bar.style.cssText = 'display:flex;height:8px;border-radius:4px;overflow:hidden;margin:8px 0 4px;';
+    var colors = ['#30a46c', '#55d0d6', '#ffca16', '#e5484d', '#6aa9e8', '#ff7ab8', '#46a758', '#f5a524'];
+    bar.innerHTML = fams2.map(function (f3, i) {
+      return '<span title="' + esc(f3.fam) + ': ' + f3.n + '" style="flex:' + f3.n + ';background:' + colors[i % colors.length] + '"></span>';
+    }).join('');
+    out.appendChild(bar);
+  }
   var chips = document.createElement('div');
   chips.className = 'chiprow';
   chips.innerHTML = FAMS.map(function (fam) {
