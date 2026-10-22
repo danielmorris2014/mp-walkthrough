@@ -1,6 +1,6 @@
 // MP Walkthrough — minimal offline-first service worker.
 // Bump CACHE_VERSION whenever index.html/icons change so every phone picks up the update.
-var CACHE_VERSION = 'mp-walk-v67';
+var CACHE_VERSION = 'mp-walk-v68';
 
 self.addEventListener('message', function (event) {
   if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
@@ -96,13 +96,23 @@ self.addEventListener('fetch', function (event) {
     caches.match(event.request).then(function (cached) {
       if (cached) return cached;
       return fetch(event.request).then(function (resp) {
+        // CDN hiccups (404/500 during deployment) on same-origin GETs:
+        // don't pass the error through - fall back to cached app shell
+        // for navigations, or let non-navigations fail gracefully
+        if (!resp.ok && new URL(event.request.url).origin === location.origin) {
+          if (event.request.mode === 'navigate') {
+            return caches.match('./index.html').then(function (fallback) {
+              return fallback || resp;
+            });
+          }
+        }
         if (resp && resp.ok && !event.request.headers.get('range') && new URL(event.request.url).origin === location.origin) {
           var copy = resp.clone();
           caches.open(CACHE_VERSION).then(function (cache) { cache.put(event.request, copy); });
         }
         return resp;
       }).catch(function () {
-        // offline + not cached: return a helpful offline page for navigation
+        // offline + not cached: serve the app shell for navigations
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
