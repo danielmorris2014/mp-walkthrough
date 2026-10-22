@@ -111,7 +111,7 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
   </div>
   <div class="seg" id="seg">
     <button data-v="browse" class="on">Browse</button>
-    <button data-v="rack">Rack view</button>
+    <button data-v="trace">Trace</button>
     <button data-v="mats">Materials</button>
   </div>
 </div>
@@ -179,8 +179,8 @@ document.getElementById('view').addEventListener('click', function (e) {
   var hall = e.target.closest('[data-hall]');
   if (hall) { HALL = hall.getAttribute('data-hall'); RACK = null; render(); return; }
   var rk = e.target.closest('[data-rack]');
-  if (rk) { RACK = rk.getAttribute('data-rack'); MODE = 'rack'; FAMFILTER = null;
-    document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-v') === 'rack'); });
+  if (rk) { RACK = rk.getAttribute('data-rack'); MODE = 'browse'; FAMFILTER = null;
+    document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-v') === 'browse'); });
     render(); return; }
   var fam = e.target.closest('[data-fam]');
   if (fam) { FAMFILTER = FAMFILTER === fam.getAttribute('data-fam') ? null : fam.getAttribute('data-fam'); render(); return; }
@@ -190,7 +190,7 @@ document.getElementById('view').addEventListener('click', function (e) {
 function render() {
   if (!D) return;
   if (MODE === 'mats') return showMats();
-  if (MODE === 'rack') return rackView();
+  if (MODE === 'trace') return showTrace();
   return showBrowse();
 }
 /* ---------- browse: halls -> racks ---------- */
@@ -416,6 +416,132 @@ function showMats() {
     out.appendChild(c);
   });
 }
+
+/* ---------- trace: visual cable paths ---------- */
+function showTrace() {
+  var out = document.getElementById('results');
+  out.innerHTML = '';
+  var q = document.getElementById('q').value.trim();
+  var head = document.createElement('div');
+  head.className = 'count';
+  head.textContent = q ? 'Tracing: ' + q : 'Type a rack (like dh1-r0411) to see its cable paths visually';
+  out.appendChild(head);
+  if (!q) {
+    out.innerHTML += '<div class="trace-instruction">The Trace view draws every connection from a rack as a visual path diagram \u2014 A end on the left, Z end on the right, cable colored by family. Use Browse to find your rack first if needed.</div>';
+    return;
+  }
+  var rack = rackNorm(q);
+  if (!rack) { out.innerHTML += '<div class="trace-instruction">Could not parse \u201c' + esc(q) + '\u201d as a rack. Try dh1-r0411.</div>'; return; }
+  var hits = connectionsFor(rack);
+  if (!hits.length) { out.innerHTML += '<div class="trace-instruction">No connections found for ' + esc(rack) + '</div>'; return; }
+  renderTraceDiagram(rack, hits, out);
+}
+
+function renderTraceDiagram(rack, hits, out) {
+  // group by family for coloring
+  var famColors = { 'TPU RACK PP <> OCS': '#30a46c', 'TOR <> DCN-SPN': '#55d0d6', 'RMU + TOR <> EOR': '#ffca16',
+    'MACHINE <> TOR (INTRA RACK)': '#e5484d', 'MACHINE <> TPU (INTRA RACK)': '#6aa9e8', 'MACHINE BMC <> RMU (INTRA RACK)': '#ff7ab8',
+    'RMU <> BAT + RECT (INTRA RACK)': '#46a758', 'BMS <> FB0 <> FB1': '#f5a524' };
+  var defaultColor = '#b0b4ba';
+  var groups = [];
+  FAMS.forEach(function (fam) {
+    var fh = hits.filter(function (h) { return h[0] === fam; });
+    if (fh.length) groups.push({ fam: fam, color: famColors[fam] || defaultColor, hits: fh });
+  });
+  var total = hits.length;
+  var title = document.createElement('div');
+  title.className = 'count';
+  title.textContent = rack + ' \u00b7 ' + total + ' connections \u00b7 ' + groups.length + ' families';
+  out.appendChild(title);
+
+  groups.forEach(function (g) {
+    var card = document.createElement('div');
+    card.className = 'tracecard';
+    var svg = buildTraceSVG(rack, g);
+    card.appendChild(svg);
+    var label = document.createElement('div');
+    label.className = 'trace-label';
+    label.textContent = g.fam + ' \u00b7 ' + g.hits.length + ' connections';
+    card.appendChild(label);
+    out.appendChild(card);
+  });
+}
+
+function buildTraceSVG(rack, group) {
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.createElementNS(NS, 'svg');
+  var W = 350, H = Math.max(60, group.hits.length * 18 + 40);
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', 'Cable paths for ' + rack);
+  var maxShow = Math.min(group.hits.length, 12);
+  var rows = group.hits.slice(0, maxShow);
+  var y0 = 30;
+  var rowH = Math.min(18, (H - 50) / maxShow);
+  var rackShort = rack.split('-R')[1] || rack.slice(-4);
+
+  // A-side rack label
+  var aLabel = document.createElementNS(NS, 'text');
+  aLabel.setAttribute('x', 10); aLabel.setAttribute('y', 16);
+  aLabel.setAttribute('fill', '#edeef0'); aLabel.setAttribute('font-size', '11');
+  aLabel.setAttribute('font-weight', '800'); aLabel.setAttribute('font-family', 'monospace');
+  aLabel.textContent = 'R' + rackShort;
+  svg.appendChild(aLabel);
+
+  rows.forEach(function (hit, i) {
+    var row = hit[1];
+    var aLoc = D.d[row[0]] || '?';
+    var zLoc = D.d[row[2]] || '?';
+    var zShort = zLoc.split('-R')[1] || zLoc.slice(-4);
+    var isA = aLoc === rack;
+    var y = y0 + i * rowH;
+    // the cable path line
+    var line = document.createElementNS(NS, 'line');
+    line.setAttribute('x1', 55); line.setAttribute('x2', W - 55);
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    line.setAttribute('stroke', group.color);
+    line.setAttribute('stroke-width', '2');
+    line.setAttribute('stroke-linecap', 'round');
+    // arrow direction: A→Z
+    line.setAttribute('marker-end', 'url(#arrow' + group.fam.replace(/\W/g, '') + ')');
+    svg.appendChild(line);
+    // A-side port
+    var aPort = document.createElementNS(NS, 'text');
+    aPort.setAttribute('x', 52); aPort.setAttribute('y', y - 3);
+    aPort.setAttribute('text-anchor', 'end');
+    aPort.setAttribute('fill', '#b0b4ba'); aPort.setAttribute('font-size', '8');
+    aPort.setAttribute('font-family', 'monospace');
+    aPort.textContent = (D.d[row[1]] || '').split(' ').pop().slice(0, 8);
+    svg.appendChild(aPort);
+    // Z-side rack + port
+    var zText = document.createElementNS(NS, 'text');
+    zText.setAttribute('x', W - 52); zText.setAttribute('y', y - 3);
+    zText.setAttribute('fill', '#b0b4ba'); zText.setAttribute('font-size', '8');
+    zText.setAttribute('font-family', 'monospace');
+    zText.textContent = zShort + ' ' + (D.d[row[3]] || '').split(' ').pop().slice(0, 6);
+    svg.appendChild(zText);
+  });
+
+  // Z-side header
+  var zHeader = document.createElementNS(NS, 'text');
+  zHeader.setAttribute('x', W - 10); zHeader.setAttribute('y', 16);
+  zHeader.setAttribute('text-anchor', 'end');
+  zHeader.setAttribute('fill', '#edeef0'); zHeader.setAttribute('font-size', '11');
+  zHeader.setAttribute('font-weight', '800'); zHeader.setAttribute('font-family', 'monospace');
+  zHeader.textContent = 'far end';
+  svg.appendChild(zHeader);
+
+  if (group.hits.length > maxShow) {
+    var more = document.createElementNS(NS, 'text');
+    more.setAttribute('x', W / 2); more.setAttribute('y', H - 6);
+    more.setAttribute('text-anchor', 'middle');
+    more.setAttribute('fill', '#777b84'); more.setAttribute('font-size', '9');
+    more.textContent = '+' + (group.hits.length - maxShow) + ' more';
+    svg.appendChild(more);
+  }
+  return svg;
+}
+
 /* ---------- detail sheet ---------- */
 function openSheet(hit) {
   if (!hit) return;

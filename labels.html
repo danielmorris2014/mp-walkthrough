@@ -5,7 +5,7 @@
 <style>
 :root{--bg:#111418;--card:#1a1f26;--b:#2d3540;--t:#e8edf2;--m:#93a0ae;--y:#f5c542;--r:#ff6b6b;--g:#4ade80}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--t);font:16px/1.4 -apple-system,system-ui,Segoe UI,sans-serif;padding:12px 14px 80px;max-width:720px;margin:0 auto}
+body{margin:0;background:var(--bg);color:var(--t);font:16px/1.4 -apple-system,system-ui,Segoe UI,sans-serif;padding:calc(12px + env(safe-area-inset-top)) 14px calc(80px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto}
 h1{font-size:20px;margin:8px 0 2px}.sub{color:var(--m);font-size:13px;margin-bottom:12px}
 .card{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:12px;margin-bottom:12px}
 label{display:block;font-size:13px;color:var(--m);margin:8px 0 3px}
