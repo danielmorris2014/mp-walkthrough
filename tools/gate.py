@@ -54,3 +54,8 @@ if started:
 
 print("\n" + ("GATE: ALL PASS" if not fails else "GATE FAILED: " + ", ".join(fails)))
 sys.exit(1 if fails else 0)
+
+if '--full' in sys.argv:
+    print('
+=== full page-by-page review (--full) ===')
+    sys.exit(subprocess.call([sys.executable, 'tools/full_review.py']))

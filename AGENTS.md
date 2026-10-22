@@ -21,7 +21,9 @@ These rules prevent stale-code overwrites. Follow them every time, no exceptions
 6. **Before every commit**: `git pull --rebase origin main` — if there are new remote commits, rebase onto them, resolve conflicts, THEN commit.
 7. **After conflict resolution**: verify no `<<<<<<<` / `=======` / `>>>>>>>` markers remain in ANY file (`grep -r "<<<<<<" . --exclude-dir=.git`).
 8. **Commit message must say WHAT and WHY** — the other agent reads these to understand your changes.
-8b. **Bulk edits via script files, never inline shell heredocs** — write the script with the file-writing tool, run it, delete it. The shell eats backslashes (broke JS regexes three separate times) and a failed mid-write can zero the target file (index.html was truncated to 0 bytes once). Commit first so git is the undo.
+8b. **Bulk edits via script files, never inline shell heredocs** — and use `tools/patch_page.py` for ANY scripted splice of index.html/buf103/guide/labels JS: it asserts the anchor matches exactly, esprima-checks every script block, and refuses to write broken edits (every build incident v53-v60 was a hand-rolled splice the gates caught — this helper makes the safe path the only path). Use it in one-off scripts too: `from patch_page import Patch`.
+8c. After any large change (or a "hella issues" field report): `python tools/gate.py --full` — runs `tools/full_review.py`, a real-interaction sweep of every page (stamps, undo, drill-downs, searches, destinations). Its output is a checklist: `ok` = verified, `!!` = finding with evidence. Ship nothing with an open `!!`.
+ — write the script with the file-writing tool, run it, delete it. The shell eats backslashes (broke JS regexes three separate times) and a failed mid-write can zero the target file (index.html was truncated to 0 bytes once). Commit first so git is the undo.
 
 ### Before pushing
 
