@@ -52,10 +52,11 @@ else:
 if started:
     started.shutdown()
 
-print("\n" + ("GATE: ALL PASS" if not fails else "GATE FAILED: " + ", ".join(fails)))
-sys.exit(1 if fails else 0)
+print("\n" + ("GATE: ALL PASS" if not fails else "GATE: FAILED - " + ", ".join(fails)))
 
 if '--full' in sys.argv:
-    print('
-=== full page-by-page review (--full) ===')
-    sys.exit(subprocess.call([sys.executable, 'tools/full_review.py']))
+    print("=== full page-by-page review (--full) ===")
+    rc = subprocess.call([sys.executable, 'tools/full_review.py'])
+    if rc != 0:
+        print("GATE: FAILED - full review found issues")
+sys.exit(1 if fails else 0)
