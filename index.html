@@ -897,7 +897,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v70';
+var APP_VERSION = 'v71';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1044,14 +1044,14 @@ var Hall = (function () {
           g.rows.forEach(function (r2) { rows[r2] = emptyRow(); });
         });
         pushUndo();
-        state.halls[id] = makeHall(id, 'BUF103 ' + h, cfg[h].maxRow, groups);
+        state.halls[id] = makeHall(id, 'CB3 ' + h, cfg[h].maxRow, groups);
         // makeHall builds its own rows; splice in the real row set
         state.halls[id].rows = rows;
         added++;
       });
-      if (!added) { showToast('BUF103 halls already added'); return; }
+      if (!added) { showToast('CB3 halls already added'); return; }
       afterChange();
-      showToast(added + ' BUF103 hall' + (added > 1 ? 's' : '') + ' added');
+      showToast(added + ' CB3 hall' + (added > 1 ? 's' : '') + ' added');
     }).catch(function () { showToast('Could not load BUF103 hall data'); });
   }
   return { list: list, active: active, switchTo: switchTo, add: add, remove: remove, addBuf103Halls: addBuf103Halls };
@@ -2063,7 +2063,7 @@ var SCREENS = {
    from it; tools/probes.py cross-checks it against the service worker's
    precache so a page cannot ship half-wired. */
 var KIT_PAGES = [
-  { name: 'BUF103 Cutsheet', sub: 'Planned cables: search, rack view, materials', icon: 'grid',
+  { name: 'BUF103 Cutsheet', sub: 'CB3 pre-build: search, trace, materials', icon: 'grid',
     url: './buf103.html', precache: true, group: 'Field data' },
   { name: 'Find a cable', sub: 'Barcode, rack, port or dry-run line', icon: 'search',
     guide: 'find', group: 'Field data' },

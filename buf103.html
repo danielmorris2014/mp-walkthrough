@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>BUF103 Cutsheet</title>
+<title>CB3 Cutsheet (BUF103)</title>
 <link rel="stylesheet" href="./chrome.css">
 <style>
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -103,7 +103,7 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 <div class="topbar">
   <div class="row1">
     <button class="back" onclick="location.href='./index.html#/home'">&#8249; MP Kit</button>
-    <div class="h1">BUF103 Cutsheet<small id="meta">DH1&#8211;DH4 &#183; pre-build data</small></div>
+    <div class="h1">CB3 Cutsheet<small id="meta">DH1&#8211;DH4 &#183; pre-build data</small></div>
   </div>
   <div class="searchwrap">
     <input type="text" id="q" aria-label="Search the cutsheet" placeholder="Rack (dh1-r0411), device, port or spec" enterkeyhint="search" autocapitalize="off" autocomplete="off" spellcheck="false">
@@ -376,7 +376,7 @@ function showMats() {
     if (st && st.halls) {
       var rows = [];
       Object.keys(st.halls).forEach(function (hid) {
-        if (hid.indexOf('BUF103_') !== 0) return;
+        if (hid.indexOf('BUF103_') !== 0) return; // hall ids stay BUF103_ (the cutsheet prefix)
         var hall = st.halls[hid];
         var total = 0, hung = 0;
         Object.keys(hall.rows || {}).forEach(function (rn) {

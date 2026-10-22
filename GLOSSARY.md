@@ -40,6 +40,8 @@ The domain language of the MP Kit. Implementation details live in AGENTS.md, not
 
 **Cable Field Guide** — The second tool in the MP Kit. Contains the sitepack model (racks, routes, walk mode, clean-fiber steps), the Barcode Directory, and the scanner. Opens from the Home launcher.
 
+**CB** — Conversational Building — the physical building number. CB1, CB2, CB3, CB4, CB5. Each CB contains four data halls (DH1–DH4). The crew says "CB3 DH2" in the field; the cutsheet prefix is BUF103. Same thing, two names: BUF103 = CB3, BUF102 = the CB4/CB5 area.
+
 **BUF103** — The next data hall build after BUF102. Its engineering data (Cutsheet, Patch Panel Matrix) exists before barcodes are assigned; the kit's BUF103 tools work from that pre-build data.
 
 **Cutsheet** — The master engineering source listing every cable in a build: A end, Z end, ports, and cable spec, organized into families (TPU<>OCS, TOR<>DCN-SPN, BMS, copper, management...). One row = one planned connection.
