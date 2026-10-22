@@ -1,0 +1,2149 @@
+REFERENCE GUIDE · KEEP WITH YOU ON THE JOB
+Data Hall 4 Cable Installation
+Large site, data hall 4: pods 10, 11, 12 · 144F and 192F trunks · network rows 1-2.
+Built from the Large Site Cable Installation Guide (D. Moore; cover Rev D, page
+footers Rev C, 10/8/2026) and the Fluidstack DRS sheets added so far (DRS
+01.00.00 to 01.00.03.01). Companion to the interactive beginner course. A study
+aid: never a substitute for the DRS.
+The current DRS says how the work must be done and must be on hand where
+you work. Your site's cutsheet is the final word on any port. If a label, this guide,
+the DRS or the cutsheet disagree, stop and ask your lead.
+Fluidstack Internal Use Only content. Keep within the project.
+Contents: DRS sheetsConnection tablesDone-when checklistsOpen items
+GlossarySources & coverage
+DRS sheets in this course
+Every Fluidstack DRS sheet added so far, in plain words. The current DRS from the
+portal is the requirement: check its revision date and have it on hand.
+Data Hall 4 Cable Installation · Reference Guide · page 1 of 50
+DRS 01.00.00  Introduction: what a DRS is
+Portal page · approved 6/9/2026 · approved by Tom Marsh, Infrastructure Deployment
+Manager
+1. DRS = Deployment Requirement Sheet: Fluidstack's technical standards
+for how installation work must be done. Requirements, not guidelines.
+Every on-site task has a matching DRS.
+2. Contains step-by-step requirements, specifications, approved
+materials, diagrams, and references to ANSI/TIA, BICSI, NEC and NEMA
+standards.
+3. Exists so every deployment meets the same quality standard, whoever
+does the work; protects equipment and lowers outage risk.
+4. Approved by Fluidstack ICT leadership. New revisions are announced
+through the portal. Always use the current version: check the revision
+date on the cover page.
+5. Get it from Fluidstack Confluence (fluidstack.atlassian.net → LVC
+Deployment space → DEPLOYMENT REQUIREMENTS SHEETS).
+Backup: your Fluidstack PM or site supervisor.
+6. On site: have the applicable DRS on hand, printed or on a device.
+Working from memory alone is not acceptable. No DRS: stop work and
+get it.
+Standards named: ANSI/TIA, BICSI, NEC, NEMA
+Taught in: Lesson 0 · What a DRS is · Lesson 0 · Getting the right DRS · Lesson 0 · The on-site
+rule · Video: Lesson 0 video · Open items: 14, 17
+Data Hall 4 Cable Installation · Reference Guide · page 2 of 50
+DRS 01.00.01  General Fiber Cable Dressing
+Drawing + portal summary · portal title: General Cable Dressing · revised 6/9/2026 · approved
+by Tom Marsh
+1. Dress cables in accordance with ANSI/TIA-568, ANSI/TIA-606 and
+ANSI/TIA-942.
+2. Bundle with 1/2-inch hook-and-loop (Velcro). Nylon zip ties are not
+allowed.
+3. Bend radius: follow the manufacturer's spec; minimum 20 × diameter
+loaded (under tension), 10 × unloaded. See DRS 01.00.07 for fiber bend
+radius.
+4. Cable supports must not damage the cable: no metal staples.
+5. Support every 4-5 feet on horizontal runs (TIA-568 recommendation).
+6. Rated cable for the space: plenum OFNP / CMP in plenum spaces, riser
+OFNR / CMR in vertical risers, LSZH where local code requires.
+Standards named: ANSI/TIA-568, ANSI/TIA-606, ANSI/TIA-942, NEC (cable ratings)
+Taught in: Lesson 5 · The six rules · Lesson 5 · The standards behind the rules · Lesson 5 ·
+Ties, bends and supports · Lesson 5 · Rated cable · Lesson 5 · Bend radius worked example ·
+Lesson 3 · Handling fiber · Video: Lesson 5 video; Lesson 3 video (Handling fiber) · Open
+items: 12, 13, 15, 16
+Data Hall 4 Cable Installation · Reference Guide · page 3 of 50
+DRS 01.00.02  Front of Rack Cable Dressing
+Drawing + portal summary · revised 6/9/2026 · approved by Tom Marsh
+1. Cables shall not cross devices they do not patch into. Every device
+must be replaceable without unpatching cables that end in another
+device.
+2. Cable shall exit the basket tray directly above the rack edge or the
+vertical cable managers (VCMs).
+3. All cables entering or leaving the basket tray must be supported by
+waterfalls to keep the proper bend radius.
+4. Over-the-top waterfalls must be used for network racks.
+5. Bundle cable neatly with 1/2-inch Velcro.
+6. Cables should use the waterfall next to the side of the rack they patch
+into.
+7. Drawing note: each waterfall lines up with the rack VCM. Tray
+accessories must fit trays made by Basor, WBT, Legrand or equivalent,
+with 2 × 4 inch (50 × 100 mm) openings and 5 mm wire.
+Taught in: Lesson 5B · Front of the rack · Lesson 5B · Worked example · Lesson 9 · Landing
+the 192F (network rack) · Lesson 9 · Cords to the spines (network rack) · Video: Lesson 5B
+video (Front of the rack) · Open items: 12, 18, 19
+Data Hall 4 Cable Installation · Reference Guide · page 4 of 50
+DRS 01.00.03  Cable Dressing Basket Trays
+Drawing + portal summary · portal title: Basket Tray Cable Dressing · revised 6/9/2026 ·
+approved by Tom Marsh
+1. Bundle cables neatly in the tray with Velcro 12 to 18 inches apart.
+2. Do not secure bundles to the basket tray except going around bends,
+exiting the tray, or running vertically. Secure 3× at corners and 3× at
+exits.
+3. 1/2-inch Velcro for all cable bundling.
+4. Waterfalls centered over the rack VCMs.
+5. Cables keep the manufacturer's recommended bend radius at all
+times. Drawing: fiber bend radius at a tray corner shown as 20 × cable
+diameter.
+6. Portal summary: never allow cable to drop over a tray edge
+unsupported. Waterfalls keep the bend radius at every tray exit.
+Taught in: Lesson 5B · From the tray to the device · Lesson 5B · In the basket tray · Lesson 5B
+· Worked example · Lesson 11 · Pulling and dressing the OCS bundles · Lesson 12 · Routing and
+labels · Video: Lesson 5B video (In the basket tray); Lesson 11 video (Pulling and dressing) ·
+Open items: 12, 20
+Data Hall 4 Cable Installation · Reference Guide · page 5 of 50
+DRS 01.00.03.01  Cable Dressing Vertical Pathways
+Drawing + portal summary · portal title: Vertical Pathway Dressing · revised 6/9/2026 ·
+approved by Tom Marsh
+1. Bundle cables neatly with Velcro 12 to 18 inches apart, in vertical tray
+as well.
+2. Secure bundles to the cable tray when running vertically (horizontal
+bundles float).
+3. Cable in vertical tray or ladder must be secured to be self-supporting.
+Excessive cable weight on horizontal transitions damages the tray and
+the cable.
+4. Waterfalls are required at all vertical transitions to keep the cable
+bend radius. A missing waterfall can damage the cable.
+5. 3/4-inch Velcro may be used to secure cable to vertical tray.
+6. Drawing: all bends greater than 20 × the cable diameter. Portal: too
+little Velcro on vertical runs lets cable drop to the bottom under its
+own weight, damaging cable and tray.
+Taught in: Lesson 5B · From the tray to the device · Lesson 5B · Vertical pathways · Lesson 5B
+· Worked example · Lesson 5 · Velcro sizes · Lesson 11 · Pulling and dressing the OCS bundles ·
+Video: Lesson 5B video (Vertical pathways) · Open items: 12, 20
+Referenced, not yet in the course:
+DRS 01.00.07: Fiber bend radius. DRS 01.00.01 says "see DRS
+01.00.07".
+DRS 01.00, 01.01, 02.00, 05.00, 10.01, 10.04, 10.08, 10.10: The DRS
+sections the installation guide says it was built from (guide p.1). Which
+3-part sheets belong to each is not stated.
+Data Hall 4 Cable Installation · Reference Guide · page 6 of 50
+Connection tables and rules
+The current DRS says how the work must be done; your site's cutsheet is the final
+word on any port. These tables come from the guide (cover Rev D, footers Rev C,
+10/8/2026) and the DRS sheets added so far (01.00.00 to 01.00.03.01). They are a
+study aid, not a substitute for the DRS. If anything here disagrees with the current
+DRS or your cutsheet, follow the DRS and the cutsheet and tell your lead.
+0. The DRS: Deployment Requirement Sheets (DRS
+01.00.00)
+What: Fluidstack's technical standards for how installation work must be
+done. Requirements, not guidelines. Every on-site task has a matching DRS.
+Contains: step-by-step requirements, specifications, approved materials,
+diagrams, and references to ANSI/TIA, BICSI, NEC and NEMA standards.
+Approved by Fluidstack ICT leadership. Revisions are announced through the
+portal: always use the current version and check the revision date on the
+cover page.
+Where: Fluidstack Confluence, fluidstack.atlassian.net  → LVC
+Deployment space → DEPLOYMENT REQUIREMENTS SHEETS. Backup: your
+Fluidstack PM or site supervisor (they can send the document or restore
+access).
+On site: the applicable DRS must be on hand where you work, printed or on a
+device. Working from memory alone is not acceptable. No DRS: stop work
+and get it.
+Internal Use Only: DRS documents are confidential Fluidstack property. Do
+not copy, post or share them outside the job.
+Sheets in this course so far: 01.00.00 (introduction), 01.00.01 (general cable
+dressing), 01.00.02 (front of rack cable dressing), 01.00.03 (basket tray cable
+dressing), 01.00.03.01 (vertical pathways). See the DRS sheets list.
+Document Answers
+DRS (current revision) How each task must be done
+Data Hall 4 Cable Installation · Reference Guide · page 7 of 50
+Document Answers
+Cutsheet Where each cable goes: the final word on any port
+Installation guide Built from the DRS and the BUF102 matrix v0.97; explains
+the system
+This course, reference,
+Field Kit
+Training and checking aids only
+1. The ﬁve cable paths (guide p.4)
+#Cable From → to Lessons
+1 144F trunk (1 per TPU
+rack)
+TPU rack TOR odd ports 1-31 → EOR/AIO MPO
+panel front (RU 32)
+7, 8
+TPU RACK
+where you start
+EOR / AIO RACK
+DCN PATCH PANEL
+network rows 1-2
+DCN SPINE
+trunks end here
+SPOCS RACKS
+3 per pod
+MGMT SPINE
+network rows
+144F TRUNK
+1 per TPU rack
+6 CAT6 COPPER RUNS
+8 × 192F TRUNKS
+1 per DCN-PP (A-H)
+MPO CORDS
+3 OCS CABLES (18F)
+red · orange · yellow
+12F / 24F MGMT TRUNKSSPOCS MGMT CORDS
+(to EOR w/BMS)
+The five cable paths your crew installs.
+Data Hall 4 Cable Installation · Reference Guide · page 8 of 50
+#Cable From → to Lessons
+28 × 192F trunks per
+AIO + MPO cords
+AIO MPO panel rear → DCN-PP racks (rows 1-2)
+→ DCN spines
+8, 9
+33 × 18F OCS cables
+per TPU rack
+pp1 ports 1-8 / 9-16 / 17-24 → SPOCS racks 1 / 2
+/ 3 of the pod
+10, 11
+46 × CAT6 home runs
+per TPU rack
+TOR ETH + CON, RMU1 and RMU2 GIG E 1 +
+CON → EOR copper panels RU 24 / 30 / 22
+12
+512F / 24F mgmt trunks
++ SPOCS mgmt cords
+AIO RU 39 LC panel → management spines
+R131 / R204; SPOCS mgmt1/mgmt2 → w/BMS
+EOR
+13, 14
+Do not touch: anything inside the TPU rack (machines, trays, DAC and CDFP
+cables, batteries), or anything past the spines.
+2. Hall map facts (guide p.5, 18, 25, 33, 44)
+Location code
+SITE-DH4-R0512 = site · hall 4 · row 05 · spot 12. Map shows
+row+spot: 512. Last two digits = spot.
+Rows Network rows 1-2 (west end). Compute rows 3-26. Rows pair across
+hot aisles; even rows mirrored.
+Spots in every
+compute row
+02-10: 9 TPU racks (north) · 11: EOR for north · 12: middle aisle
+(SPOCS in some rows) · 13: EOR for south · 14-22: 9 TPU racks
+(south). CDU blocks at row ends (not yours).
+Which EOR? Spots 2-10 → spot 11 of the same row. Spots 14-22 → spot 13.
+Pods
+144 TPU racks sharing 3 SPOCS racks. Pod 10 rows 3-10 · pod 11
+rows 11-18 · pod 12 rows 19-26. 432 TPU racks, 48 AIO racks in the
+hall.
+SPOCS racks
+(spot 12)
+Pod 10: 512 red · 612 orange · 712 yellow. Pod 11: 1312 · 1412 · 1512.
+Pod 12: 2112 · 2212 · 2312.
+Data Hall 4 Cable Installation · Reference Guide · page 9 of 50
+EOR w/BMS racks 611, 613, 1411, 1413, 2211, 2213 (24F management trunks, FB0 BMSswitch).
+DCN-PP pairs (N /
+S)
+A 107/108 · B 114/115 · C 120/121 · D 127/128 · E 207/208 · F 214/215 ·
+G 220/221 · H 227/228.
+Management
+spines
+R131 and R204.
+3. 144F trunk at the TOR (guide p.13) and AIO front
+(p.36)
+TOR port = 2 × leg − 1  ·  legs 17-18 spare
+Leg Color TOR port AIO front column
+1 Blue 1 A (port 1)
+2 Orange 3 A (port 2)
+3 Green 5 B (port 3)
+4 Brown 7 B (port 4)
+5 Slate 9 C (port 5)
+Row 1
+101Oxide
+102Oxide
+103Oxide
+104SASL
+105Spine
+106Spine
+107PP A-N
+108PP A-S
+109Spine
+110Spine
+111Oxide
+112Spine
+113Spine
+114PP B-N
+115PP B-S
+116Spine
+117Spine
+118Spine
+119Spine
+120PP C-N
+121PP C-S
+122Spine
+123Spine
+124Oxide
+125Spine
+126Spine
+127PP D-N
+128PP D-S
+129Spine
+130Spine
+131MGMT
+132Oxide
+133Oxide
+134Oxide
+Row 2
+201Oxide
+202Oxide
+203Oxide
+204MGMT
+205Spine
+206Spine
+207PP E-N
+208PP E-S
+209Spine
+210Spine
+211FU
+212Spine
+213Spine
+214PP F-N
+215PP F-S
+216Spine
+217Spine
+218Spine
+219Spine
+220PP G-N
+221PP G-S
+222Spine
+223Spine
+224Oxide
+225Spine
+226Spine
+227PP H-N
+228PP H-S
+229Spine
+230Spine
+231SASL
+232Oxide
+233Oxide
+234Oxide
+Spine (DCN) DCN-PP (passive) MGMT spine Oxide SASL FU
+Network rows 1 and 2.
+Data Hall 4 Cable Installation · Reference Guide · page 10 of 50
+Leg Color TOR port AIO front column
+6 White 11 C (port 6)
+7 Red 13 D (port 7)
+8 Black 15 D (port 8)
+9 Yellow 17 E (port 9)
+10 Violet 19 E (port 10)
+11 Rose 21 F (port 11)
+12 Aqua 23 F (port 12)
+13 Blue (2nd round) 25 G (port 13)
+14 Orange (2nd round) 27 G (port 14)
+15 Green (2nd round) 29 H (port 15)
+16 Brown (2nd round) 31 H (port 16)
+17 Slate (2nd round) spare — not plugged I (port 17)
+18 White (2nd round) spare — not plugged I (port 18)
+AIO front: one TPU rack per row (lowest-numbered rack on row 1 … row 9), legs
+left to right, legs 17-18 in column I, rows 10-12 and columns J-L open. Label format
+(column)(port)-(row) : TPU 3 leg 5 = C5-3 .
+ARISTA 7060 · TOR SWITCH
+1
+1
+2
+▼
+3
+2
+4
+▼
+5
+3
+6
+▼
+7
+4
+8
+▼
+9
+5
+10
+▼
+11
+6
+12
+▼
+13
+7
+14
+▼
+15
+8
+16
+▼
+17
+9
+18
+▼
+19
+10
+20
+▼
+21
+11
+22
+▼
+23
+12
+24
+▼
+25
+13
+26
+▼
+27
+14
+28
+▼
+29
+15
+30
+▼
+31
+16
+32
+▼
+ETH
+CON
+copper
+ODD
+top row
+EVEN
+to machines
+17 18 Legs 17 and 18: spares. Not plugged in at the TOR. Dressed off the floor.
+TOR switch with all 16 legs in the odd ports.
+Data Hall 4 Cable Installation · Reference Guide · page 11 of 50
+4. 192F trunks: AIO rear (guide p.37)
+Facing the rear, column A is on the right. One 192F per column: A = DCN-PP 1
+(A) … H = DCN-PP 8 (H). Column I = TPU spares; J-L open.
+Legs go up: legs 1-2 row 1 … 23-24 row 12. Odd legs on the right port, even on
+the left (rear view). Legs 19-24 (rows 10-12) spares.
+Front row N meets rear row N: TPU N's legs 1-2 → DCN-PP 1 (trunk legs 2N−1,
+2N) … legs 15-16 → DCN-PP 8.
+5. Trunk Landing Sheet — every AIO rack (guide p.44-
+45)
+Spot 11 AIO → N rack; spot 13 → S rack. Rows 3-14 → RU 35 panel; rows 15-26 →
+RU 39 panel (halls 1-3 land in RU 11-31). Lane = AIO-PP number · column pair · lane
+1 or 2.
+L K J I H G F E D C B A
+2 1
+4 3
+6 5
+8 7
+10 9
+12 11
+14
+ 13
+16
+ 15
+18
+ 17
+20
+ 19
+22
+ 21
+24
+ 23
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+DCN-PP 1DCN-PP 2DCN-PP 3DCN-PP 4DCN-PP 5DCN-PP 6DCN-PP 7DCN-PP 8I: TPU spares · J-L: unused
+REAR VIEW (facing the back of the AIO rack) — column A is on the RIGHT
+AIO MPO panel, rear view.
+Data Hall 4 Cable Installation · Reference Guide · page 12 of 50
+AIO
+rack
+DCN-PP
+panel Lane ColA B C D E F G H
+R0311 RU 35 AIO-PP1 ·
+AB #1
+R107 R114R120 R127 R207 R214R220 R227
+R0411 RU 35 AIO-PP2
+· AB #2
+R107 R114R120 R127 R207 R214R220 R227
+R0511 RU 35 AIO-PP3
+· CD #1
+R107 R114R120 R127 R207 R214R220 R227
+R0611
+bms
+RU 35 AIO-PP4
+· CD #2
+R107 R114R120 R127 R207 R214R220 R227
+R0711 RU 35 AIO-PP5
+· EF #1
+R107 R114R120 R127 R207 R214R220 R227
+R0811 RU 35 AIO-PP6
+· EF #2
+R107 R114R120 R127 R207 R214R220 R227
+R0911 RU 35 AIO-PP7
+· GH #1
+R107 R114R120 R127 R207 R214R220 R227
+R1011 RU 35 AIO-PP8
+· GH #2
+R107 R114R120 R127 R207 R214R220 R227
+R1111 RU 35 AIO-PP9
+· IJ #1
+R107 R114R120 R127 R207 R214R220 R227
+R1211 RU 35 AIO-PP10
+· IJ #2
+R107 R114R120 R127 R207 R214R220 R227
+R1311 RU 35 AIO-PP11
+· KL #1
+R107 R114R120 R127 R207 R214R220 R227
+R1411
+bms
+RU 35 AIO-PP12
+· KL #2
+R107 R114R120 R127 R207 R214R220 R227
+R1511 RU 39 AIO-PP1 ·
+AB #1
+R107 R114R120 R127 R207 R214R220 R227
+R1611 RU 39 AIO-PP2
+· AB #2
+R107 R114R120 R127 R207 R214R220 R227
+Data Hall 4 Cable Installation · Reference Guide · page 13 of 50
+AIO
+rack
+DCN-PP
+panel Lane ColA B C D E F G H
+R1711 RU 39 AIO-PP3
+· CD #1
+R107 R114R120 R127 R207 R214R220 R227
+R1811 RU 39 AIO-PP4
+· CD #2
+R107 R114R120 R127 R207 R214R220 R227
+R1911 RU 39 AIO-PP5
+· EF #1
+R107 R114R120 R127 R207 R214R220 R227
+R2011 RU 39 AIO-PP6
+· EF #2
+R107 R114R120 R127 R207 R214R220 R227
+R2111 RU 39 AIO-PP7
+· GH #1
+R107 R114R120 R127 R207 R214R220 R227
+R2211
+bms
+RU 39 AIO-PP8
+· GH #2
+R107 R114R120 R127 R207 R214R220 R227
+R2311 RU 39 AIO-PP9
+· IJ #1
+R107 R114R120 R127 R207 R214R220 R227
+R2411 RU 39 AIO-PP10
+· IJ #2
+R107 R114R120 R127 R207 R214R220 R227
+R2511 RU 39 AIO-PP11
+· KL #1
+R107 R114R120 R127 R207 R214R220 R227
+R2611 RU 39 AIO-PP12
+· KL #2
+R107 R114R120 R127 R207 R214R220 R227
+R0313 RU 35 AIO-PP1 ·
+AB #1
+R108 R115 R121 R128 R208 R215 R221 R228
+R0413 RU 35 AIO-PP2
+· AB #2
+R108 R115 R121 R128 R208 R215 R221 R228
+R0513 RU 35 AIO-PP3
+· CD #1
+R108 R115 R121 R128 R208 R215 R221 R228
+R0613
+bms
+RU 35 AIO-PP4
+· CD #2
+R108 R115 R121 R128 R208 R215 R221 R228
+R0713 RU 35 AIO-PP5
+· EF #1
+R108 R115 R121 R128 R208 R215 R221 R228
+Data Hall 4 Cable Installation · Reference Guide · page 14 of 50
+AIO
+rack
+DCN-PP
+panel Lane ColA B C D E F G H
+R0813 RU 35 AIO-PP6
+· EF #2
+R108 R115 R121 R128 R208 R215 R221 R228
+R0913 RU 35 AIO-PP7
+· GH #1
+R108 R115 R121 R128 R208 R215 R221 R228
+R1013 RU 35 AIO-PP8
+· GH #2
+R108 R115 R121 R128 R208 R215 R221 R228
+R1113 RU 35 AIO-PP9
+· IJ #1
+R108 R115 R121 R128 R208 R215 R221 R228
+R1213 RU 35 AIO-PP10
+· IJ #2
+R108 R115 R121 R128 R208 R215 R221 R228
+R1313 RU 35 AIO-PP11
+· KL #1
+R108 R115 R121 R128 R208 R215 R221 R228
+R1413
+bms
+RU 35 AIO-PP12
+· KL #2
+R108 R115 R121 R128 R208 R215 R221 R228
+R1513 RU 39 AIO-PP1 ·
+AB #1
+R108 R115 R121 R128 R208 R215 R221 R228
+R1613 RU 39 AIO-PP2
+· AB #2
+R108 R115 R121 R128 R208 R215 R221 R228
+R1713 RU 39 AIO-PP3
+· CD #1
+R108 R115 R121 R128 R208 R215 R221 R228
+R1813 RU 39 AIO-PP4
+· CD #2
+R108 R115 R121 R128 R208 R215 R221 R228
+R1913 RU 39 AIO-PP5
+· EF #1
+R108 R115 R121 R128 R208 R215 R221 R228
+R2013 RU 39 AIO-PP6
+· EF #2
+R108 R115 R121 R128 R208 R215 R221 R228
+R2113 RU 39 AIO-PP7
+· GH #1
+R108 R115 R121 R128 R208 R215 R221 R228
+R2213
+bms
+RU 39 AIO-PP8
+· GH #2
+R108 R115 R121 R128 R208 R215 R221 R228
+Data Hall 4 Cable Installation · Reference Guide · page 15 of 50
+AIO
+rack
+DCN-PP
+panel Lane ColA B C D E F G H
+R2313 RU 39 AIO-PP9
+· IJ #1
+R108 R115 R121 R128 R208 R215 R221 R228
+R2413 RU 39 AIO-PP10
+· IJ #2
+R108 R115 R121 R128 R208 R215 R221 R228
+R2513 RU 39 AIO-PP11
+· KL #1
+R108 R115 R121 R128 R208 R215 R221 R228
+R2613 RU 39 AIO-PP12
+· KL #2
+R108 R115 R121 R128 R208 R215 R221 R228
+6. DCN-PP panels and spines (guide p.38-41)
+DCN-PP rack: 52 RU, eight 4RU panels (12 rows, columns A-L, 2 ports each).
+2×2 shuffle modules, P/N 760262482 (stop if 760262479 = 4×4).
+Rear: odd legs in the 1st column of the pair, even legs in the 2nd; legs go up;
+legs 19-24 spares; one lane per trunk; 12 AIO trunks per panel; two different
+AIO trunks per module.
+Front: each module's 4 ports (a1 a2 b3 b4, c5 c6 d7 d8, e9 e10 f11 f12 …) →
+spines 1, 2, 3, 4 of the group; each row → next line-card port (cutsheet gives
+it).
+DCN-PP Racks Spines
+A R107 / R108 1-4
+B R114 / R115 5-8
+C R120 / R121 9-12
+D R127 / R128 13-16
+E R207 / R208 17-20
+F R214 / R215 21-24
+Data Hall 4 Cable Installation · Reference Guide · page 16 of 50
+DCN-PP Racks Spines
+G R220 / R221 25-28
+H R227 / R228 29-32
+7. OCS cables (guide p.15, 18-23)
+Jacket Cable pp1 ports (TPU end) Leg labels Goes to
+Red OCS 1 1-8 (side A) 1-8 SPOCS rack 1
+Orange OCS 2 9-12 (side A) + 13-16 (side B) 9-16 SPOCS rack 2
+Yellow OCS 3 17-24 (side B) 17-24 SPOCS rack 3
+18F Type B, 9 LC/APC duplex legs each end. Leg position colors 1-8: blue, orange,
+green, brown, slate, white, red, black; position 9 yellow = spare (fibers 17-18). In
+each group blue = lowest port, black = highest. Check reel part number and length
+before pulling.
+Legs
+(position) Length
+SPOCS
+slot Ports
+1-2 1480 mm (~4
+ft 10 in)
+1 (top) odd leg on X, even leg on X+1 — same X on
+all 4 slots and all 3 SPOCS racks
+3-4 1840 mm (~6
+ft 0 in)
+2
+SIDE "A" · ports 1-12
+1 2 3 4 5 6 7 8 9 10 11 12
+SIDE "B" · ports 13-24
+13 14 15 16 17 18 19 20 21 22 23 24
+OCS 1 · RED
+ports 1-8 · spare = leg 9
+OCS 2 · ORANGE
+ports 9-16 · spare = leg 9
+OCS 3 · YELLOW
+ports 17-24 · spare = leg 9
+OCS panel pp1.
+Data Hall 4 Cable Installation · Reference Guide · page 17 of 50
+Legs
+(position)
+Length SPOCS
+slot
+Ports
+5-6 2200 mm (~7
+ft 3 in)
+3
+7-8 2560 mm (~8
+ft 5 in)
+4
+(bottom)
+OCS shelf: 320 LC ports 001-320, pairs odd-over-even, count down a column
+of 20 then right; 145-160 not used. Left half 001-160 = TPU 1-72 (exit/dress
+left); right half 161-320 = TPU 73-144 (exit/dress right).
+Pull from the OCS rack to the TPU rack. Split point 12-18 in above the OCS
+rack. Tier 1 tray. OCS slack on top of the TPU rack. Spares: coil on top of the
+rack (drawings) or "left hanging" (reference cutsheet) — ask your lead.
+Labels: wrap-around on the bundle 1-2 in from the boot; flag on each leg 4 in
+from the boot.
+8. Copper home runs (guide p.14, 26-27)
+From Port
+EOR copper
+panel Switch
+TOR (side A) ETH
+(Management1)
+RU 24 MGMT leaf
+TOR CONSOLE RU 30 console
+switch
+TROSS / RMU1 (side A, RU
+38)
+GIG E 1 RU 22 TROSS leaf
+RMU1 CONSOLE RU 30 console
+switch
+TROSS / RMU2 (side B, RU
+38)
+GIG E 1 RU 22 TROSS leaf
+Data Hall 4 Cable Installation · Reference Guide · page 18 of 50
+From Port EOR copper
+panel
+Switch
+RMU2 CONSOLE RU 30 console
+switch
+Home run: RJ45 plug at the TPU rack, straight to the jack the cutsheet gives (no
+panel at the TPU end). Patch cord jack N → switch port N. Flag label 4 in from the
+plug at both ends. Velcro, VCM fingers closest to the switch, nothing on the floor.
+Tier 2 at this site (p.14 says Tier 1 — ask).
+9. Management trunks and SPOCS management
+(guide p.28-30)
+Rack type Trunk
+Spine 1
+(RU 39
+rear)
+Spine 2 Duplex assignments (same on both
+trunks)
+AIO EOR 12F (6
+duplex)
+A1:A2,
+rows 1-3
+C5:C6,
+rows 1-3
+1 MGMT leaf · 2 TROSS leaf · 3-6
+spares
+AIO EOR
+w/BMS
+24F (12
+duplex)
+A1:B4,
+rows 1-3
+C5:D8,
+rows 1-3
+1 MGMT leaf · 2 TROSS leaf · 3 FB0
+BMS · 4-9 SPOCS mgmt · 10-12
+spares
+Pod SPOCS racks mgmt1 → (spot 11) mgmt2 → (spot 13)
+10 512, 612, 712 611 613
+A1
+1
+2
+3
+A2
+4
+5
+6
+A
+B3
+7
+8
+9
+B4
+10
+11
+12
+B
+C5
+1
+2
+3
+C6
+4
+5
+6
+C
+D7
+7
+8
+9
+D8
+10
+11
+12
+D
+E9 E10
+E
+F11 F12
+F
+G13 G14
+G
+H15 H16
+H
+I17 I18
+I
+J19 J20
+J
+K21 K22
+K
+L23 L24
+L
+1
+2
+3
+MGMT SPINE 1 (24F) MGMT SPINE 2 (24F)
+FRONT VIEW. Chips show the trunk's duplex number (1 = blue). Row 1 is the bottom row. The trunk lands on the rear.
+RU 39 LC panel, 24F layout (front view, duplex numbers).
+Data Hall 4 Cable Installation · Reference Guide · page 19 of 50
+Pod SPOCS racks mgmt1 → (spot 11) mgmt2 → (spot 13)
+11 1312, 1412, 1512 1411 1413
+12 2112, 2212, 2312 2211 2213
+SPOCS uplinks: long 2F LC cords to the front of the w/BMS RU 39 panel, position
+from the cutsheet; each switch has 2 uplinks (one toward each spine). At
+R131/R204: trunk lands on a panel; breakout harness joins 4 LC legs into one MPO-
+8 at the spine port. Final patching before rack turn-up.
+10. Labels and color codes (guide p.8)
+Machine printed only. Calibri Bold, 8 pt min on 2-in labels, 10 pt on larger
+labels.
+Line 1 = A device and port. Line 2 = Z device and port. Same text both ends,
+matching the cutsheet.
+Flag label (single connector, breakout leg, copper): 4 in from the boot, both
+sides printed, barcode at bottom. Wrap-around (trunks): 1-2 in from the boot
+at each end, 1 in wide minimum.
+Port lists: [1:4] = 1 through 4 · [1,3,5,7] = list · / separates line card / port /
+channel.
+Copper colors: orange OOB management · blue BMS · green FIS · black intra-
+rack (check site stock).
+11. Dressing rules (DRS 01.00.01, 01.00.03,
+1
+Blue
+2
+Orange
+3
+Green
+4
+Brown
+5
+Slate
+6
+White
+7
+Red
+8
+Black
+9
+Yellow
+10
+Violet
+11
+Rose
+12
+Aqua
+TIA-598 colors 1-12. Positions 13+ repeat — always read the number.
+Data Hall 4 Cable Installation · Reference Guide · page 20 of 50
+01.00.03.01, 01.00.02 and guide p.7)
+DRS 01.00.01 General Fiber Cable Dressing (revised 6/9/2026)
+1. Dress cables per ANSI/TIA-568, ANSI/TIA-606 and ANSI/TIA-942.
+2. 1/2-inch hook-and-loop (Velcro) only. Nylon zip ties are not allowed.
+3. Bend radius: follow the manufacturer's spec; minimum 20× diameter loaded
+(under tension), 10× unloaded (no tension). See DRS 01.00.07 for fiber bend
+radius.
+4. Supports must not damage the cable. No metal staples.
+5. Support every 4-5 ft on horizontal runs (TIA-568 recommendation).
+6. Rated cable: plenum OFNP / CMP in plenum spaces; riser OFNR / CMR in
+vertical risers; LSZH where local code requires.
+Cable diameter
+(example)
+Loaded minimum radius
+(20×)
+Unloaded minimum radius
+(10×)
+0.20 in 4 in 2 in
+0.25 in 5 in 2.5 in
+0.30 in 6 in 3 in
+0.40 in 8 in 4 in
+0.50 in 10 in 5 in
+Use your cable's real diameter. If the manufacturer's spec is larger, use the spec. A radius is half the
+width of the loop.
+DRS 01.00.03 Cable Dressing Basket Trays (revised 6/9/2026)
+1. Bundle neatly in the tray with Velcro every 12-18 in.
+2. Do not secure bundles to the tray except at corners, exits and vertical runs:
+3× at each corner, 3× at each exit.
+3. 1/2-inch Velcro for all cable bundling.
+4. Waterfalls centered over the rack VCMs.
+5. Keep the manufacturer's recommended bend radius at all times (drawing:
+20× cable diameter at a tray corner).
+Data Hall 4 Cable Installation · Reference Guide · page 21 of 50
+Never let cable drop over a tray edge unsupported. Waterfalls keep the bend radius at every tray
+exit.
+DRS 01.00.03.01 Cable Dressing Vertical Pathways (revised
+6/9/2026)
+1. Velcro every 12-18 in, in vertical tray as well.
+2. Secure bundles to the tray when running vertically (horizontal bundles
+float).
+3. Vertical cable secured to be self-supporting: too much weight on horizontal
+transitions damages tray and cable.
+4. Waterfalls at all vertical transitions.
+5. 3/4-inch Velcro may secure cable to vertical tray (bundling stays 1/2-inch).
+Drawing: all bends greater than 20× cable diameter. Too little Velcro lets cable drop to the bottom.
+DRS 01.00.02 Front of Rack Cable Dressing (revised 6/9/2026)
+1. Never cross devices you do not patch into. Every device must be
+replaceable without unpatching another device's cables.
+2. Exit the basket tray directly above the rack edge or VCM.
+3. Waterfalls support every cable entering or leaving the tray (bend radius);
+each lines up with the rack VCM.
+4. Over-the-top waterfalls at network racks (guide p.39, 41: DCN-PP and spine
+racks).
+5. Bundle neatly with 1/2-inch Velcro.
+6. Use the waterfall on the side of the rack you patch into.
+Tray accessories must fit trays made by Basor, WBT, Legrand or equivalent: 2 × 4 in (50 × 100 mm)
+openings, 5 mm wire.
+VCM, slack and tiers (guide p.7; their DRS sheet has not been added
+yet)
+9. VCM: exit between the fingers closest to the device; slack downstream;
+nothing touches the floor.
+10. Trunk slack above the split point on top of the rack, never in the tray.
+11. Tiers from the bottom: Tier 1 OCS · Tier 2 144F + CAT6 (this site).
+Data Hall 4 Cable Installation · Reference Guide · page 22 of 50
+Guide p.7 also allows 3/4-inch Velcro on vertical tray (DRS 01.00.03.01 agrees: for securing cable to
+vertical tray) and recommends 15× long-term bend radius (not on any DRS so far: open item 13).
+Done-when checklists
+TPU rack (guide p.16) OCS cables (guide p.23)
+16 legs of the 144F trunk in TOR odd
+ports 1-31, in order (leg N in the Nth
+odd port).
+✓
+Legs 17 and 18 not plugged in at the
+TOR. Dressed and labeled. Not
+touching the floor.
+✓
+OCS cable 1 (red) in ports 1-8, cable 2
+(orange) in 9-16, cable 3 (yellow) in
+17-24.
+✓
+Three spare OCS legs handled the
+way your site decided. Labeled.
+✓
+6 CAT6 cables: TOR ETH and console,
+RMU1 GIG E 1 and console, RMU2 GIG
+E 1 and console.
+✓
+Every fiber scoped and cleaned
+before it went in.
+✓
+Every cable flag-labeled at both ends,
+matching its cutsheet row.
+✓
+Nothing touched on the machine
+trays, batteries or rectifiers.
+✓
+Right cable color to the right SPOCS
+rack: red 1, orange 2, yellow 3.
+✓
+Cable part number and length on the
+reel match the cutsheet.
+✓
+Legs 1-2 in slot 1, 3-4 in slot 2, 5-6 in
+slot 3, 7-8 in slot 4. Shortest legs at
+the top.
+✓
+Odd leg on port X, even leg on port
+X+1. Same X on all 4 slots and all 3
+SPOCS racks.
+✓
+Spare leg (fibers 17-18) labeled and
+handled the way your site decided.
+✓
+Split point 12-18 inches above the
+OCS rack.
+✓
+TPU 1-72 dressed left. TPU 73-144
+dressed right.
+✓
+Slack on top of the TPU rack, not in
+the tray. Nothing touches the floor.
+✓
+Every leg scoped and cleaned.
+Bundle and legs labeled at both ends.
+✓
+Data Hall 4 Cable Installation · Reference Guide · page 23 of 50
+EOR copper and management
+(guide p.31)
+Large trunks (guide p.42)
+The guide's p.42 checklist says "192F odd legs left, even legs right"; its own p.37
+drawing and notes say odd legs on the right port (rear view). The list above uses
+the rear-view wording from p.37 — see "Ask your lead" below.
+Ask your lead: open items
+Every copper home run terminated on
+the jack the cutsheet gives.
+✓
+A patch cord from each jack to the
+switch port with the same number.
+✓
+Management trunk to spine 1 in A1:A2
+(12F) or A1:B4 (24F), rows 1-3.
+✓
+Management trunk to spine 2 in
+C5:C6 (12F) or C5:D8 (24F), rows 1-3.
+✓
+Switch cords in the front of the RU 39
+panel: duplex 1 MGMT leaf, 2 TROSS
+leaf, 3 FB0 (w/BMS only).
+✓
+SPOCS management cords in the
+w/BMS panel (611/613, 1411/1413,
+2211/2213): mgmt1 to spot 11, mgmt2
+to spot 13.
+✓
+Far end patched at the management
+spine rack before turn-up.
+✓
+Trunk slack on top of the rack. Every
+cable labeled at both ends. Nothing
+touches the floor.
+✓
+Each AIO front row = one TPU rack:
+TPU 1 on row 1, up to TPU 9 on row 9.
+✓
+144F legs 1-16 left to right in columns
+A-H. Legs 17-18 in column I.
+✓
+Rows 10-12 and columns J-L left open
+on the front.
+✓
+One 192F trunk per column on the AIO
+rear: A = DCN-PP 1 … H = DCN-PP 8.
+✓
+192F odd legs right, even legs left
+(rear view), legs going up. Legs 19-24
+in rows 10-12.
+✓
+At the DCN-PP: 192F on the rear, in
+the trunk lane the cutsheet gives.
+✓
+Every 2×2 module holds trunks from
+2 different AIO racks. Module P/N
+760262482.
+✓
+Cords from the DCN-PP front to the
+spines patched per the cutsheet.
+✓
+Every leg scoped and cleaned. Trunk
+slack on top of the rack. Both ends
+labeled.
+✓
+Data Hall 4 Cable Installation · Reference Guide · page 24 of 50
+# Open item Guide pages What the course does
+1 Revision mismatch: the cover says Rev
+D - October 8, 2026; every page
+footer says Rev C, 10/8/2026.
+p.1 vs all
+footers
+Notes both. Confirm you
+have the current
+revision.
+2 CAT6 tray tier: Tier 2 at this site
+(recently changed) vs p.14 "Run
+copper in the Tier 1 tray".
+p.7, 14, 16, 31,
+47
+Teaches Tier 2 (four
+places agree, one
+explains the change)
+and flags p.14.
+3 OCS spare leg: drawings say coil on
+top of the rack; reference cutsheet
+says "left hanging".
+p.15, 21, 22 Teaches "follow what
+your site decided" (as
+the guide does).
+4 w/BMS management trunk size: one
+drawing says 12F; patching drawing
+and patch data say 24F.
+p.30 Teaches 24F (the
+guide's choice); stop
+and ask if you see 12F at
+a w/BMS rack.
+5 Shuffle module: patch data lists 2×2
+P/N 760262482 (3 packs per panel);
+field reports mention a 4×4 (P/N
+760262479).
+p.40 Teaches the P/N check;
+stop if 760262479.
+6 SPOCS uplinks: 24F table reserves 6
+duplex positions (4-9) per trunk; the
+p.30 description (3 SPOCS racks × 1
+switch × 1 uplink per spine) gives 3 per
+trunk.
+p.29, 30 Teaches "use the
+cutsheet positions";
+flags the count.
+7 192F at the AIO rear: p.42 checklist
+says "odd legs left, even legs right";
+p.37 says odd legs on the right port
+(rear view). Likely the same physical
+position described from different sides.
+p.37, 42 Teaches the p.37 rear-
+view wording with the
+mirror explanation.
+8 AIO elevations are not RU-exact (the
+drawing shows 2 blank units between
+the RU 39 LC panel and the 4RU MPO
+p.26, 35 Uses the checked RU
+values (39, 32, 30, 24,
+22); flags the rest.
+Data Hall 4 Cable Installation · Reference Guide · page 25 of 50
+# Open item Guide pages What the course does
+panel at RU 32-35, which leaves RU
+36-38; the guide names RU 36-37 as
+blank), show a 4th copper panel with
+no stated purpose, and do not show the
+console switch or the w/BMS FB0
+switch / copper panel.
+9 Two port-code notations: cutsheet r1-
+a1 (row, column, port) and AIO panel
+pre-label A1-1 (column, port, row).
+p.6, 36 Teaches both.
+10 DCN-PP racks are numbered 1-8
+(p.37) and lettered A-H (p.41, 44).
+p.37, 41, 44 Teaches 1 = A … 8 = H.
+11 OCS "leg" numbering: position 1-8 (+9
+spare) in the text vs printed labels 9-16
+and 17-24 on cables 2 and 3.
+p.15, 20, 21 Teaches both: label = pp1
+port, color = position.
+12 Velcro width (answered by DRS
+01.00.03.01). Bundling: 1/2-inch
+everywhere (DRS 01.00.01 rule 2,
+01.00.02 rule 5, 01.00.03 rule 3 "for all
+cable bundling"). Securing cable to
+vertical tray: 3/4-inch may be used
+(DRS 01.00.03.01 rule 5), matching
+guide p.7.
+Guide p.7;
+DRS 01.00.01,
+01.00.02,
+01.00.03,
+01.00.03.01
+Teaches 1/2-inch to
+bundle and 3/4-inch
+only to secure to vertical
+tray. Confirm this
+reading.
+13 Bend radius 15× long-term. Guide p.7
+recommends 15× for long-term
+installed cable. DRS 01.00.01 gives 20×
+loaded / 10× unloaded (or the
+manufacturer spec) and points to DRS
+01.00.07, which has not been supplied.
+Guide p.7;
+DRS 01.00.01
+Teaches the DRS
+minimums and shows
+15× as the guide's
+recommendation. Ask
+for DRS 01.00.07.
+14 DRS numbering. The guide lists DRS
+sections with two parts (01.00, 01.01,
+02.00, 05.00, 10.01, 10.04, 10.08, 10.10;
+page drawings cite 01.02, 08.01 …).
+The sheets use three parts (01.00.00 to
+Guide p.1; DRS
+sheets
+Cites DRS sheets by
+their full numbers. Ask
+your lead for the list of
+sheets per task.
+Data Hall 4 Cable Installation · Reference Guide · page 26 of 50
+# Open item Guide pages What the course does
+01.00.03; 01.00.07 is referenced), and
+some add a fourth (01.00.03.01 builds
+on 01.00.03). Which sheets, and which
+current revisions, govern each of the
+five cable paths is not stated.
+15 Support spacing wording. The DRS
+01.00.01 drawing says "TIA-568
+recommends" support every 4-5 ft; the
+portal summary says "Support cable
+every 4-5 feet".
+DRS 01.00.01 Teaches 4-5 ft as the
+DRS rule.
+16 Scope of DRS 01.00.01. The drawing
+title says "General Fiber Cable
+Dressing"; the portal title says
+"General Cable Dressing", and rule 6
+names copper ratings (CMP/CMR).
+DRS 01.00.01 Applies it to every cable
+you dress; confirm
+whether copper has its
+own DRS.
+17 Having the DRS on the floor. The DRS
+allows a printed copy or a digital copy
+on a device. Not stated: whether crews
+get portal logins or printed sets, and
+whether phones or tablets are allowed
+in the hall.
+DRS 01.00.00 Teaches "get or print it
+before you go onto the
+floor". Ask your lead
+how your crew gets its
+copies.
+18 Which racks are "network racks"?
+DRS 01.00.02 rule 4 requires over-the-
+top waterfalls for network racks but
+does not list them. The guide puts the
+note on the DCN-PP and spine rack
+pages (network rows 1-2).
+DRS 01.00.02;
+guide p.39, 41
+Teaches over-the-top at
+DCN-PP, spine and
+management spine
+racks in network rows 1-
+2. Ask about EOR (AIO)
+and SPOCS racks.
+19 "Should" on a DRS. DRS 01.00.02 rule
+6 says cables should use the waterfall
+on their side; the other rules say shall
+or must.
+DRS 01.00.02;
+DRS 01.00.00
+Teaches it as required
+(DRS 01.00.00: every
+DRS is a requirement).
+Confirm.
+20Bend radius in tray pathways. The
+DRS 01.00.03 drawing marks 20×
+DRS 01.00.01,
+01.00.03,
+Teaches: in tray
+pathways (corners,
+Data Hall 4 Cable Installation · Reference Guide · page 27 of 50
+# Open item Guide pages What the course does
+cable diameter at a tray corner, and
+the DRS 01.00.03.01 drawing says "all
+bends greater than 20× diameter of
+cable". DRS 01.00.01 gives 20× loaded
+and 10× unloaded, plus the
+manufacturer's spec and DRS
+01.00.07.
+01.00.03.01 vertical transitions) keep
+every bend above 20×,
+or the spec if larger.
+Confirm.
+Details the guide does not give
+Missing detail Why it matters What to provide or ask
+Which physical rack is TPU 1-144 in
+each pod
+Decides OCS port X
+and left/right
+dressing
+Cutsheet rows (device
+names include rack
+number in pod, e.g.
+rack1)
+OCS port X for each TPU rack; copper
+jack numbers; spine line-card ports
+Exact port
+assignments
+Cutsheet / BOM Builder
+extract
+Copper termination standard
+(T568A/B), jack type, copper
+test/certification
+Termination and
+verification
+Site standard or spec
+Fiber test requirements beyond scope-
+and-clean
+Verification Site test plan
+FB0 BMS switch and its copper panel:
+RU, connected devices, who cables
+them; meaning of "FB0"
+BMS connections Rack integration spec /
+BMS drawings
+Which spine racks are spines 1-32;
+which MGMT rack (R131/R204) is
+spine 1
+Final patching Cutsheet
+Meaning of TROSS, RMU, FIS, SASL,
+Oxide, FU, CDU
+Vocabulary only Ask your lead (CDU is
+commonly Coolant
+Distribution Unit)
+Data Hall 4 Cable Installation · Reference Guide · page 28 of 50
+Missing detail Why it matters What to provide or ask
+Ports 305-320 on the OCS shelf: the
+guide marks only 145-160 unused, but
+144 TPU racks × 2 ports = 288 ports
+Avoid assuming
+unused ports
+Cutsheet
+Glossary
+144F trunk — 144-fiber trunk
+A trunk cable with 144 fibers. It splits into 18 MPO-8 legs (18 × 8 = 144). 16 legs are
+used and 2 are spares. One runs from each TPU rack's TOR switch to its EOR (AIO)
+rack. (guide p.12, 13, 46)
+192F trunk — 192-fiber trunk
+A trunk with 192 fibers in 24 MPO-8 legs. Each AIO rack sends 8 of them from the
+back of its MPO panel, one to each DCN patch panel rack (columns A-H). (guide
+p.34, 37, 46)
+2×2 shuffle module
+A cassette at the DCN patch panel that mixes 2 MPO-8 inputs (from 2 different AIO
+trunks) into 2 MPO-8 outputs, so every output carries fibers from both inputs. Each
+module holds 2 shuffles. Large sites use P/N 760262482. If a module reads
+760262479 (the 4×4), stop and ask. (guide p.38, 40)
+A / Z — A end / Z end
+The two ends of one cable. A is where it starts, Z is where it finishes. Every
+cutsheet row and every label is written A first, Z second. (guide p.6, 8)
+AIO rack — All-In-One rack
+The end-of-row rack. Same rack as the EOR. It holds the MPO 4RU panel (144F in
+front, 192F out the back), the copper panels, the management switches and the RU
+39 LC panel. (guide p.25, 34, 46)
+Data Hall 4 Cable Installation · Reference Guide · page 29 of 50
+AIO-PP number — AIO patch panel number
+On a DCN patch panel, the slot number a particular AIO rack's trunk uses (AIO-PP1
+to AIO-PP12). One DCN-PP panel holds 12 AIO trunks. (guide p.39, 45)
+ANSI/TIA — American National Standards Institute / Telecommunications Industry Association
+TIA writes telecommunications standards; ANSI accredits them as American
+National Standards. DRS 01.00.01 says cable must be dressed per ANSI/TIA-568,
+ANSI/TIA-606 and ANSI/TIA-942. TIA-598 (fiber color code) is also a TIA
+standard. (DRS 01.00.00, 01.00.01; public (TIA))
+APC — Angled Physical Contact
+A fiber connector whose glass end face is polished at an 8° angle. APC connectors
+are usually green. Never plug an APC connector into a UPC (usually blue)
+connector: the cores do not line up and the end faces can be damaged. OCS legs
+use LC/APC. (guide p.20; public (Fluke Networks))
+Basket tray — wire mesh cable tray
+The overhead tray made of welded wire that cables run in above the racks. In it,
+bundle with 1/2-inch Velcro every 12-18 inches and secure to the tray only at
+corners, exits and vertical runs, 3 times at each corner and exit (DRS 01.00.03).
+Tray accessories such as waterfalls must fit trays made by Basor, WBT, Legrand or
+equivalent, with 2 × 4 inch (50 × 100 mm) openings and 5 mm wire (DRS 01.00.02).
+(DRS 01.00.02, 01.00.03; guide p.7)
+Bend radius
+How tightly a cable is allowed to curve, measured from the center of the curve out
+to the cable. DRS 01.00.01 rule 3: follow the manufacturer's spec, with at least 20
+× the cable diameter when loaded (under tension, such as while pulling) and 10 ×
+when unloaded. DRS 01.00.03 rule 5: keep the manufacturer's recommended bend
+radius at all times; its drawing marks 20 × at a tray corner, and the DRS
+01.00.03.01 drawing says all bends greater than 20 ×. DRS 01.00.01 points to DRS
+01.00.07 for fiber detail. The guide (p.7) adds 15 × as the long-term
+recommendation. (DRS 01.00.01, 01.00.03, 01.00.03.01; guide p.7)
+BICSI — Building Industry Consulting Service International
+Data Hall 4 Cable Installation · Reference Guide · page 30 of 50
+A professional association for the ICT industry. It publishes design and installation
+standards and runs training and credentials. DRS documents reference BICSI. (DRS
+01.00.00 (named); public (BICSI, ANSI))
+BMS — Building Management System
+A control system that monitors and manages a building's mechanical and electrical
+systems, such as power, cooling, water detection and fire safety. In this hall, six
+EOR racks are the "w/BMS" type and carry the BMS network switch (FB0 BMS)
+and its uplink. (guide p.25-26, 29; public (TechTarget))
+BOM Builder — Bill of Materials Builder
+The tool that lists every part and port for a site. The guide says exact OCS ports
+come from the cutsheet or BOM Builder. (guide p.21)
+Boot
+The rubber cover behind a connector. Label distances are measured from the boot.
+(guide p.8)
+Breakout
+A cable end where one connector splits into several smaller ones, such as one
+MPO plug splitting into several LC legs. (guide p.46)
+CAT6 — Category 6 copper network cable
+Copper network (Ethernet) cable with an RJ45 plug. Each TPU rack sends 6 CAT6
+home runs to its EOR rack. (guide p.13, 46)
+CDFP cable — a 400 Gb/s pluggable form factor (CD = 400 in Roman numerals)
+High-speed cables used inside the TPU rack. They arrive pre-installed. You do not
+touch them. (guide p.4 (named only); general)
+CDU — Coolant Distribution Unit (not defined in the guide)
+The CDU blocks at the ends of each compute row on the hall map. In liquid-cooled
+data centers a CDU manages the flow, temperature and pressure of coolant to the
+racks. Not part of your cable work. (guide p.5 (map label only); public (Supermicro, Hot Chips
+2025))
+Data Hall 4 Cable Installation · Reference Guide · page 31 of 50
+Column (panel)
+A lettered position across a panel, A to L. On the MPO and LC panels each column
+has 2 ports. (guide p.35, 46)
+Column pair
+Two side-by-side columns on a DCN patch panel (AB, CD, EF, GH, IJ, KL) that hold
+one 2×2 module. (guide p.39)
+Confluence (Fluidstack portal)
+The authoritative source for all current DRS documents. Log in at
+fluidstack.atlassian.net, open the LVC Deployment space, then DEPLOYMENT
+REQUIREMENTS SHEETS. It needs a login and a connection. If you cannot get in,
+contact your Fluidstack PM or site supervisor. (DRS 01.00.00)
+Console port
+A port that gives a direct, text-only connection to a device for setup and recovery.
+The TOR and both TROSS/RMU units each send a console run to the EOR console
+panel (RU 30). (guide p.13-14; general (WTI))
+Cutsheet
+The spreadsheet that lists every cable and every stop it makes. Your site's
+cutsheet is the final word on any port. (guide p.1, 6)
+DAC cable — Direct Attach Copper
+Short copper cables inside the TPU rack. Pre-installed. Not yours. (guide p.4 (named
+only); general)
+DCN — Data Center Network
+The main data network. Its big switches are the DCN spines in network rows 1 and
+2. (guide p.4, 46)
+DCN-PP — DCN Patch Panel rack
+A passive rack in the network rows where the 192F trunks end. It holds eight 4RU
+panels with 2×2 shuffle modules. Pairs: A (R107/R108) to H (R227/R228). The guide
+also numbers them DCN-PP 1-8 (1 = A ... 8 = H). (guide p.34, 38, 41, 44)
+Data Hall 4 Cable Installation · Reference Guide · page 32 of 50
+DH — Data Hall
+One room of racks. This course covers Data Hall 4 (DH4). (guide p.5)
+Downstream
+The side of a connection toward the end device. Slack goes on the downstream
+side. (guide p.7)
+DRS — Deployment Requirement Sheet
+Fluidstack's required technical standard for how one on-site task must be done.
+Requirements, not guidelines. Each DRS has a number (such as 01.00.01), a title, a
+revision date and an approver, and references industry standards (ANSI/TIA, BICSI,
+NEC, NEMA). The current version is in Fluidstack Confluence. Have the applicable
+DRS on hand (printed or on a device) when you do the work; if you do not, stop
+work and get it. The guide was built from DRS sections 01.00, 01.01, 02.00, 05.00,
+10.01, 10.04, 10.08 and 10.10. (DRS 01.00.00; guide p.1)
+Duplex
+One LC leg with 2 fibers (usually one to send and one to receive). A 12F trunk has
+6 duplex legs; a 24F trunk has 12. (guide p.21, 28, 46)
+Elevation
+A front view of a rack showing every rack unit. Elevations are subject to change;
+the rack integration spec has the final view. (guide p.26, 35)
+EOR rack — End Of Row rack
+The rack at spot 11 or 13 of a compute row. Same rack as the AIO. Each EOR
+serves the 9 TPU racks on its side of the middle aisle. (guide p.11, 25, 46)
+F (as in 144F) — fibers
+The number in front of F is a fiber count. 144F = 144 fibers. 2F = 2 fibers (one LC
+duplex cord). (guide p.4, 46)
+FB0 BMS switch — (FB0 is not expanded in the guide)
+A switch for building systems, found only in AIO EOR w/BMS racks. Its uplink rides
+duplex 3 of the 24F management trunks. (guide p.26, 29, 46)
+Data Hall 4 Cable Installation · Reference Guide · page 33 of 50
+FIS (green copper) — (not defined in the guide)
+The guide lists green copper as "FIS" without explaining it. Ask your lead if you see
+it. (guide p.8)
+Flag label
+A self-laminating label that sticks out from the cable like a flag. Used on single
+connectors, breakout legs and copper runs. Placed 4 inches from the boot, printed
+on both sides, barcode at the bottom. (guide p.8)
+Fluidstack
+The company whose data center deployments these DRS documents govern.
+Fluidstack writes and approves every DRS, and its DRS rules apply to every
+contractor and every site on its deployments. (DRS 01.00.00)
+GIG E 1 — Gigabit Ethernet port 1
+The network port on each TROSS / RMU that you cable to the EOR TROSS leaf
+panel (RU 22). (guide p.14)
+Home run
+One copper cable straight from a device in the TPU rack to a jack in the EOR rack,
+with no panel at the TPU end. (guide p.14, 27)
+ICT — Information and Communications Technology
+Networks, cabling and computing equipment. Fluidstack ICT leadership reviews
+and approves every DRS. (DRS 01.00.00 (named); general)
+Jack
+The socket on a copper panel. Each home run is terminated on a jack; a short
+patch cord connects the jack to the switch port with the same number. (guide p.14,
+27)
+Jacket
+The outer cover of a cable. On OCS cables the jacket color is the cable's ID: red =
+OCS 1, orange = OCS 2, yellow = OCS 3. (guide p.20)
+Data Hall 4 Cable Installation · Reference Guide · page 34 of 50
+Lane / trunk lane
+Two meanings in the guide: (1) one of the signals inside an optic port; (2) the ports
+one trunk uses inside a DCN-PP column pair (lane 1 or lane 2). (guide p.39, 46)
+LC connector — LC (a small push-pull fiber connector)
+A small push-pull fiber plug. LC duplex = 2 fibers side by side. OCS legs use the
+angled LC/APC type. (guide p.20, 46)
+Leg
+One connector at the end of a trunk or bundle. The 144F trunk has 18 legs, the
+192F has 24, an OCS cable has 9 at each end. (guide p.6, 13, 46)
+Line card
+A slot in a spine switch that holds ports. Each row of a DCN-PP panel lands on the
+next line-card port of its 4 spines; the cutsheet gives the exact port. (guide p.41)
+LSZH — Low Smoke Zero Halogen
+Cable jacket material that gives off little smoke and no halogen gases when it
+burns. DRS 01.00.01: use LSZH where local code requires it. (DRS 01.00.01; public (cable
+manufacturers))
+MGMT — Management
+The small network used to control and monitor equipment. Also called OOB (out-
+of-band). (guide p.46-47)
+MGMT leaf / TROSS leaf
+Pre-installed switches in the AIO rack. The MGMT leaf takes the TOR management
+runs (RU 24 panel). The TROSS leaf takes the TROSS / RMU GIG E 1 runs (RU 22
+panel). (guide p.26, 46)
+MGMT spine — Management spine
+A switch that gathers all management traffic. The management spine racks are
+R131 and R204. (guide p.25, 30)
+MPO / MPO-8 — Multi-fiber Push-On (8-fiber)
+Data Hall 4 Cable Installation · Reference Guide · page 35 of 50
+A rectangular push-on plug that holds many fibers. MPO-8 holds 8. Every 144F and
+192F trunk leg is an MPO-8. (guide p.13, 40, 46)
+NEC — National Electrical Code (NFPA 70)
+The U.S. electrical safety code, published by NFPA. Its Article 770 (optical fiber)
+and Article 800 (communications) set the fire ratings on cable jackets, such as
+OFNP plenum and OFNR riser. DRS documents reference the NEC. (DRS 01.00.00
+(named); public (NFPA))
+NEMA — National Electrical Manufacturers Association
+A U.S. association that publishes standards for electrical products such as
+enclosures, wire and cable, and cable tray. DRS documents reference NEMA. (DRS
+01.00.00 (named); public (NEMA))
+OCS — Optical Circuit Switch
+A shelf that steers light between fibers. Public research from Google describes
+these switches using tiny movable mirrors (MEMS), so racks can be reconnected in
+new shapes without anyone unplugging cables. In this guide "OCS" also names the
+3 OCS cables and the OCS panel on the TPU rack. (guide p.18, 46; public (Mission Apollo
+paper))
+OCS bundle
+The guide's other name for an OCS cable: the 18-fiber cable with 9 LC legs at each
+end. (guide p.46)
+Odd port
+A port with an odd number: 1, 3, 5 ... On the TOR switch the odd ports are the top
+row and are the ports you use for the 144F trunk (1, 3, 5 ... 31). (guide p.13, 46)
+OOB — Out-Of-Band
+The management network: a separate path to reach and control equipment, apart
+from the main data network. Orange copper = OOB management at this site (check
+what your site stocks). (guide p.8, 47; general (WTI))
+Outage
+Data Hall 4 Cable Installation · Reference Guide · page 36 of 50
+When a network or system stops working. Following the DRS lowers the risk of
+outages. (DRS 01.00.00; general)
+Over-the-top waterfall
+A waterfall that carries cable up and over the top edge of the basket tray. Required
+at network racks (DRS 01.00.02 rule 4). In this guide the note appears on the DCN
+patch panel and spine rack pages (p.39, 41). (DRS 01.00.02; guide p.39, 41)
+Oxide, SASL, FU racks — (not defined in the guide)
+Rack types shown in network rows 1-2 on the map. The guide does not explain
+them and you do not install anything in them. (guide p.5, 44)
+Patch cord
+A short cable with a plug on each end, used to connect a panel to a switch. (guide
+p.27, 47)
+Plenum / riser / LSZH — OFNP / CMP (plenum), OFNR / CMR (riser), Low Smoke Zero
+Halogen
+Fire ratings printed on the cable jacket. DRS 01.00.01 rule 6: plenum-rated (OFNP
+fiber / CMP copper) in plenum spaces, riser-rated (OFNR / CMR) in vertical risers,
+LSZH where local code requires. A plenum is a space that is part of the air-
+handling system (NEC Article 100). The ratings come from the NEC: Article 770 for
+optical fiber (OFN...), Article 800 for communications copper (CM...). A higher
+rating can replace a lower one (plenum where riser is asked for), never the other
+way round. (DRS 01.00.01; guide p.7; public (NFPA 70 / NEC))
+Plenum space
+A space that is part of the building's air-handling system, such as some spaces
+above ceilings or below raised floors (NEC Article 100). Only plenum-rated cable
+(OFNP / CMP) may run there (DRS 01.00.01 rule 6). (DRS 01.00.01; public (NFPA 70 / NEC))
+PM — Project Manager
+Your assigned Fluidstack project manager. With your site supervisor, the backup
+way to get a DRS: they can give you the document directly or restore your portal
+access. (DRS 01.00.00)
+Data Hall 4 Cable Installation · Reference Guide · page 37 of 50
+Pod
+A group of 144 TPU racks that share 3 SPOCS racks. Data Hall 4 has pods 10, 11
+and 12. (guide p.5, 33, 47)
+Port X
+Your TPU rack's OCS port number at the SPOCS racks, from the cutsheet. The odd
+leg goes on X and the even leg on X+1, on every slot of all 3 SPOCS racks. (guide
+p.21, 47)
+PP — Patch Panel
+A panel of ports where cables land so they can be connected onward. (guide p.26, 47)
+pp1 — the OCS panel on the TPU rack
+The cutsheet's name for the TPU rack's OCS panel. It has ports 1-24: the drawings
+show 1-12 on side A and 13-24 on side B, but the cutsheet lists them all as one
+panel. (guide p.12, 15)
+Rear view
+A panel seen from the back of the rack. Column A is on the right, so you work right
+to left. (guide p.37, 47)
+Rectifier
+A power unit that converts incoming AC power to the DC power the rack uses. Pre-
+installed. Not yours. (guide p.12 (named); general; public (Hot Chips 2025))
+Revision (DRS)
+A new version of a DRS. When a standard changes, a new revision is issued and
+you are notified through the portal. Always use the current version: check the
+revision date on the cover page (DRS 01.00.01 says REVISED 6/9/2026). (DRS
+01.00.00, 01.00.01)
+Riser
+A vertical pathway that runs between floors. Riser-rated cable (OFNR / CMR) is
+required there (DRS 01.00.01 rule 6). (DRS 01.00.01; public (NFPA 70 / NEC))
+Data Hall 4 Cable Installation · Reference Guide · page 38 of 50
+RJ45 — Registered Jack 45 (the common name for the 8-pin modular plug)
+The square plug on a copper network cable. The TPU end of each home run is an
+RJ45 plug. (guide p.14)
+RMU — (cutsheet name, not expanded in the guide)
+The cutsheet's name for the TROSS units: rmu1 on side A and rmu2 on side B.
+(guide p.12)
+Row
+Two meanings: a row of racks in the hall (row 3, row 4 ...), or a numbered position
+up a panel (row 1 at the bottom). (guide p.47)
+RU — Rack Unit
+One 1.75-inch slot in a rack. RU 1 is at the bottom. A "4RU" panel is 4 rack units
+tall. (guide p.6, 47)
+Scope
+The handheld camera used to look at a fiber end face. Scope and clean every leg
+before it goes in. (guide p.13, 47)
+Self-supporting
+Secured along its length so each section of a vertical run carries its own weight,
+instead of hanging from the top or piling onto the bend at the bottom (DRS
+01.00.03.01 rule 3). (DRS 01.00.03.01)
+Shall / must / should (DRS wording)
+Shall and must mean required. In standards writing, should usually means
+recommended. DRS 01.00.00 says every DRS is a requirement, so treat a should
+on a DRS (such as DRS 01.00.02 rule 6) as required, and ask your lead if you think
+it cannot be met. (DRS 01.00.00, 01.00.02; general (standards wording))
+Slot
+One of the 4 OCS shelf positions in a SPOCS rack. Slot 1 is the top shelf. (guide p.19,
+47)
+Data Hall 4 Cable Installation · Reference Guide · page 39 of 50
+Spare
+A leg that is run and labeled but not plugged in. A cutsheet row that says SPARE is
+a leg you land and label but do not plug into a device. (guide p.6, 47)
+Spine
+A big DCN switch in network rows 1-2. Every TPU rack reaches every spine. There
+are 32 DCN spines in the groups listed on guide p.41. (guide p.41, 47)
+Split point — also called the furcation point
+Where a trunk or bundle breaks into legs. Trunk slack above the split point is stored
+on top of the rack. For OCS bundles the split point is 12-18 inches above the OCS
+rack. (guide p.22, 47)
+SPOCS — Super Pod OCS rack
+A rack that holds 4 OCS shelves. Each pod has 3: red = SPOCS 1, orange = SPOCS
+2, yellow = SPOCS 3. They sit at spot 12 (pod 10: 512, 612, 712; pod 11: 1312, 1412,
+1512; pod 12: 2112, 2212, 2312). (guide p.18-19, 47)
+Spot
+A rack's place in its row. Rack 512 is row 5, spot 12. (guide p.5, 47)
+TIA-568 — Commercial Building Telecommunications Cabling Standards
+The main TIA standard for building telecom cabling: how cable is installed and
+supported. DRS 01.00.01 names it for dressing, and its drawing says TIA-568
+recommends support every 4-5 ft on horizontal runs. (DRS 01.00.01; public (TIA))
+TIA-598 — TIA-598 fiber color code standard
+The standard fiber color order: 1 blue, 2 orange, 3 green, 4 brown, 5 slate, 6 white,
+7 red, 8 black, 9 yellow, 10 violet, 11 rose, 12 aqua. Positions 13 and up repeat the
+colors, so always read the number on the label. (guide p.8, 13, 47; public (FOA))
+TIA-606 — Administration standard for telecommunications infrastructure
+The TIA standard for administration: identifiers, labels and records, so every cable
+and port can be traced. DRS 01.00.01 names it for dressing. Your site's label format
+comes from the guide (p.8) and the cutsheet. (DRS 01.00.01; public (TIA))
+Data Hall 4 Cable Installation · Reference Guide · page 40 of 50
+TIA-942 — Telecommunications Infrastructure Standard for Data Centers
+The TIA standard for the infrastructure of data centers and computer rooms,
+including cabling and pathways. DRS 01.00.01 names it for dressing. (DRS 01.00.01;
+public (TIA))
+Tier
+A tray level, counted from the bottom up. Tier 1: OCS cables. Tier 2: 144F trunks
+and, at this site, CAT6 (guide p.14 still says Tier 1 for copper: ask your lead). (guide
+p.7, 14, 47)
+TOR switch — Top Of Rack switch
+The TPU rack's door to the data network. An Arista 7060 on side A. The 144F trunk
+plugs into its odd ports (top row); it also sends 2 copper runs (ETH and console).
+(guide p.12-13, 47)
+TPU — Tensor Processing Unit
+A computer chip built for AI work. In this guide "TPU rack" (or just "TPU") means a
+rack of these AI computers. The drawings call it an Ironwood TPU rack. (guide p.11-12,
+47; public (Google Cloud))
+TROSS / RMU — (TROSS is not expanded in the guide)
+The TPU rack's management box, one per side at RU 38. The drawings call it
+TROSS; the cutsheet calls it rmu1 (side A) and rmu2 (side B). Each sends 2 CAT6
+runs: GIG E 1 and CONSOLE. (guide p.12, 14, 47)
+Trunk
+A thick multi-fiber cable that splits into legs at each end. Gets a wrap-around label
+1-2 inches from the boot at each end. (guide p.6, 8, 47)
+Turn-up
+When a rack is powered and brought online. Final patching at the management
+spine rack must be done before turn-up. (guide p.30, 47)
+Type B — Type B polarity
+Data Hall 4 Cable Installation · Reference Guide · page 41 of 50
+A cable that crosses send and receive, so one end's transmit fiber meets the other
+end's receive port. OCS cables are Type B. The cutsheet already accounts for it;
+you do not swap anything. (guide p.20, 47; public (SENKO))
+Uplink
+A connection from a switch up to a bigger switch. (guide p.30)
+VCM — Vertical Cable Manager
+The channel on the side of a rack. Cable leaves the tray directly above the rack
+edge or the VCM (DRS 01.00.02 rule 2), over a waterfall centered over the VCM
+(DRS 01.00.03 rule 4). Cables exit between the fingers closest to the device they
+patch (guide p.7). (DRS 01.00.02, 01.00.03; guide p.7, 47)
+Velcro — hook-and-loop strap
+The only tie allowed. Bundle cables with 1/2-inch hook-and-loop everywhere (DRS
+01.00.01 rule 2; DRS 01.00.02 rule 5; DRS 01.00.03 rule 3: for all cable bundling),
+12-18 inches apart in tray (DRS 01.00.03 rule 1; DRS 01.00.03.01 rule 1). 3/4-inch
+Velcro may be used to secure cable to vertical tray (DRS 01.00.03.01 rule 5; guide
+p.7). Nylon zip ties are not allowed. (DRS 01.00.01, 01.00.02, 01.00.03, 01.00.03.01; guide p.7)
+Vertical pathway — vertical tray or ladder
+A tray or ladder that carries cable up or down between levels. DRS 01.00.03.01:
+bundle with Velcro every 12-18 inches, secure the bundles to the tray so the cable
+is self-supporting, use waterfalls at all vertical transitions; 3/4-inch Velcro may be
+used to secure cable to vertical tray. Too little Velcro lets the cable slide to the
+bottom and damage the cable and tray. (DRS 01.00.03.01)
+w/BMS — with Building Management System
+An EOR rack type with extra parts: the FB0 BMS switch and a copper panel. Six in
+this hall: 611, 613, 1411, 1413, 2211, 2213. Their management trunks are 24F. (guide
+p.25, 29, 47)
+Waterfall
+A curved guide on the edge of the tray that supports cable where it enters or
+leaves the tray, so the bend stays wide. Never let cable drop over a tray edge
+Data Hall 4 Cable Installation · Reference Guide · page 42 of 50
+unsupported. Waterfalls are centered over the rack VCMs (DRS 01.00.03 rule 4),
+on the side of the rack the cables patch into (DRS 01.00.02 rules 3, 6), and
+required at all vertical transitions (DRS 01.00.03.01 rule 4). Network racks use
+over-the-top waterfalls (DRS 01.00.02 rule 4). (DRS 01.00.02, 01.00.03, 01.00.03.01; guide p.7,
+47)
+Wrap-around label
+A label that circles the cable. Used on trunks, 1-2 inches from the boot of each end
+connector, at least 1 inch wide. (guide p.8, 47)
+Sources & coverage
+Project sources
+Fluidstack DRS (Deployment Requirement Sheets), Fluidstack Internal Use Only,
+supplied one section at a time:
+DRS 01.00.00 — introduction (portal page): what a DRS is, what it contains,
+why it exists, approval (Tom Marsh, Infrastructure Deployment Manager,
+6/9/2026), revisions, where to get it, and the on-site requirement. Used in
+Lesson 0.
+DRS 01.00.01 — General Fiber Cable Dressing (drawing, REVISED 6/9/2026,
+approved by Tom Marsh) and its portal summary "General Cable Dressing".
+Used in Lessons 0, 3 and 5.
+DRS 01.00.02 — Front of Rack Cable Dressing (drawing, REVISED 6/9/2026,
+approved by Tom Marsh) and its portal summary. Used in Lessons 5B and 9.
+DRS 01.00.03 — Cable Dressing Basket Trays (drawing, REVISED 6/9/2026,
+approved by Tom Marsh) and its portal summary "Basket Tray Cable
+Dressing". Used in Lessons 5B, 11 and 12.
+DRS 01.00.03.01 — Cable Dressing Vertical Pathways (drawing, REVISED
+6/9/2026, approved by Tom Marsh) and its portal summary "Vertical Pathway
+Dressing". Used in Lessons 5, 5B and 11.
+The DRS sheets page lists every sheet in plain words with where it is taught.
+Data Hall 4 Cable Installation · Reference Guide · page 43 of 50
+Where the DRS and the guide differ, the course teaches the DRS and lists the
+difference under Open items.
+Large Site Cable Installation Guide, data hall 4 (pods 10, 11, 12), D. Moore — cover
+Rev D (October 8, 2026), page footers Rev C (10/8/2026), 47 pages. Every
+project-specific instruction, port mapping, color sequence and quiz answer in this
+course comes from this guide. Page numbers are cited throughout.
+The guide says it was built from the DRS (sections 01.00, 01.01, 02.00, 05.00,
+10.01, 10.04, 10.08, 10.10) and the BUF102 patch panel matrix v0.97 (ICT cutsheet
+v0.97). Apart from DRS 01.00.00 to 01.00.03.01, those documents have not been
+supplied, so the guide's "checked against the patch data" statements are reported
+as the guide states them.
+Public sources used for background only
+These explain concepts (what a TPU or an OCS is, why APC connectors must not
+mix with UPC, and so on). They never replace the guide's wiring instructions.
+Google Cloud — TPU7x (Ironwood) documentation: seventh-generation TPU;
+9,216 chips per pod; 64-chip 4×4×4 cubes.
+Google — 3 things to know about Ironwood: superpods of up to 9,216 chips.
+ServeTheHome — Ironwood at Hot Chips 2025: 16 trays × 4 TPUs = 64 per
+rack; liquid-cooled; copper inside the rack, OCS between racks.
+Hot Chips 2025 tutorial (Google data center racks): OCS rack with OCS1-
+OCS4, CDU (Coolant Distribution Unit), AC/DC rectifiers, battery backup.
+Mission Apollo: Landing Optical Circuit Switching at Datacenter Scale (arXiv):
+3D MEMS-mirror optical circuit switches.
+Fiber Optic Association — color codes: TIA-598 order; APC = green
+connector; singlemode = yellow jacket.
+Fluke Networks — What is an APC connector: 8° angle; never mate APC with
+UPC.
+VIAVI — What is fiber inspection: contamination is the #1 reason to
+troubleshoot optical networks; inspect both sides.
+SENKO — MPO connector polarity (TIA-568): transmit must reach receive;
+Type A/B/C.
+Data Hall 4 Cable Installation · Reference Guide · page 44 of 50
+TechTarget — Building management system: what a BMS monitors and
+controls.
+Supermicro — Coolant distribution unit.
+WTI — Out-of-band management in the data center: OOB vs in-band; console
+ports.
+Standards named in the DRS (background only)
+These explain what each standard covers. The DRS turns them into the rules you
+follow; on site, follow the DRS.
+TIA — TIA-568: Commercial Building Telecommunications Cabling Standards.
+TIA — TIA-942: "specifies the requirements for infrastructure of data centers
+and computer rooms".
+Electrical Contractor — TIA redefines telecommunications administration: TIA-
+606 defines how identifiers, labels and records work together.
+Cabling Installation & Maintenance — Boiling down the 606-A labeling
+standard: identifiers and labels; handwritten labels are not acceptable.
+EC&M — Plenum datacom wiring: NEC Article 100 definition of a plenum;
+higher-rated cable may substitute for lower.
+Open Exam Prep — Electrical protection and the NEC: NEC Articles 770 and
+800; CMP for plenums, CMR for floor-to-floor risers; OFNP above OFNR;
+never substitute a lower rating.
+Low smoke zero halogen (Wikipedia): LSZH jackets give off limited smoke and
+no halogen when heated.
+ANSI Standards Portal — BICSI: professional association for the ICT
+profession; ANSI-accredited standards developer; training and credentials.
+NEMA — Standards by product: product standards including enclosures, cable
+tray, wiring devices, and wire and cable.
+Data Hall 4 Cable Installation · Reference Guide · page 45 of 50
+Coverage map: guide →  lesson →  visual →  practice →
+video
+Guide
+page(s) Topic Lesson /section Visual Practice Video
+1 Scope, revision, guide
+sources
+L1 s1; L15 s3 overview — V01,
+V15
+4 Your job: five cable
+paths; do not touch
+L1 s2-s5 overview a1-
+explore,
+a1-match,
+a1-mistake
+V01
+ch.2-4
+5, 11, 18,
+25, 33
+Hall map, location
+codes, row pattern,
+pods
+L2 s1-s5 hallMap,
+locationCode
+a2-pick,
+a2-
+decode
+V02
+6 Device names, port
+codes, cutsheet row,
+SPARE
+L4 s1-s3, s5 cutsheet a4-wrong V04
+ch.1-3
+DRS
+01.00.00
+What a DRS is,
+contents, standards,
+approval, revisions,
+where to get it, on-site
+rule
+L0 all drsStack,
+drsAccess,
+drsSheet,
+standardsMap
+a0-order,
+a0-
+explore,
+a0-scen,
+a0-match
+V00
+DRS
+01.00.01
+General cable
+dressing: standards,
+Velcro, bend radius,
+supports, spacing,
+rated cable
+L5 s1-s4,
+s6-s10; L3
+s6
+dressRules,
+standardsMap,
+bend,
+cableRatings
+a5-
+explore,
+a5-bend,
+a5-match,
+a5-spot
+V05;
+V03
+ch.7
+DRS
+01.00.02
+Front of rack dressing:
+no crossing, tray exit,
+waterfalls, over-the-
+top at network racks,
+Velcro, side, tray
+accessories
+L5B s1, s4,
+s6-s9; L9
+s3, s5
+frontRack a5-front,
+a5b-
+match,
+a5b-spot
+V05B
+ch.3
+DRS
+01.00.03
+Basket tray dressing:
+Velcro every 12-18 in,
+secure 3× at corners
+L5B s1-s2,
+s6-s9; L11
+s6; L12 s5
+trayPlan a5b-tray,
+a5b-
+V05B
+ch.2;
+V11
+Data Hall 4 Cable Installation · Reference Guide · page 46 of 50
+Guide
+page(s) Topic Lesson /section Visual Practice Video
+and exits only, 1/2-in
+Velcro, waterfalls
+centered over VCMs,
+bend radius, no
+unsupported drops
+match,
+a5b-spot
+DRS
+01.00.03.01
+Vertical pathways:
+Velcro 12-18 in,
+secured, self-
+supporting, waterfalls
+at all vertical
+transitions, 3/4-in
+Velcro to secure,
+bends over 20×
+L5B s1, s3,
+s6, s8-s9;
+L5 s3; L11 s6
+vertPath a5b-vert,
+a5b-
+match,
+a5b-spot
+V05B
+ch.3
+7 Cable dressing rules,
+tiers, bend radius
+L5 s3, s5-
+s6; L5B s5;
+L3 s6
+tray, bend a5-order,
+a5-spot
+V05;
+V05B;
+V03
+ch.7
+8 Labels, TIA-598,
+copper colors
+L4 s4; L3
+s4-s5
+labels, colorStrip a4-labels,
+a3-order,
+a3-scen
+V04
+ch.4;
+V03
+ch.4-5
+9 Guide set and install
+order
+Home; L1 s3 — — V01
+12 TPU rack: sides A/B,
+units, what is yours
+L6 s1-s4 tpuRack a6-
+explore,
+a6-pick
+V06
+13 144F trunk at the TOR:
+odd ports 1-31, legs,
+spares, colors
+L7 all trunk144,
+torSwitch
+a7-pick,
+a7-
+mistake
+V07
+14 TROSS / RMU copper;
+all 6 copper cables
+L12 s2-s6 rmuFace,
+mgmtFlow
+a12-
+match,
+a12-scen
+V12
+Data Hall 4 Cable Installation · Reference Guide · page 47 of 50
+Guide
+page(s) Topic Lesson /section Visual Practice Video
+15 OCS panel pp1, port
+groups, spare conflict
+L10 s4-s8 ocsPanel a10-pick,
+a10-
+mistake
+V10
+ch.5-7
+16, 23, 31,
+42
+Done-when checklists L15 s2;
+Tables
+— a15-scen V15
+ch.4
+18-19 SPOCS racks, slots,
+OCS shelf 320 ports
+L10 s2; L11
+s1-s2
+spocsRack,
+ocsShelf
+a11-scen V10
+ch.2;
+V11
+ch.1-2
+20 OCS cable: 18F Type
+B, 9 LC/APC legs,
+jacket colors, labels
+L10 s3-s4 ocsCable a10-pick V10
+ch.3-4
+21 Patching one OCS
+cable: lengths, slots, X
+/ X+1
+L11 s3-s5 spocsRack
+(legs), ocsShelf
+a11-match,
+a11-scen
+V11
+ch.3-5
+22 Dressing OCS: split
+point, left/right, Tier 1,
+slack, spares
+L11 s6 ocsShelf a11-scen V11
+ch.6
+26, 35 AIO EOR rack
+elevation and panel
+RUs
+L8 s1-s2;
+L12 s4
+aioRack — V08
+ch.1
+27 Landing copper runs:
+jack = port, patch
+cords
+L12 s4 copperPanel a12-scen V12
+ch.4
+28 Management trunks
+12F
+L13 s1-s4 lcPanel (12F) a13-scen V13
+ch.1-2
+29 Management trunks
+24F (w/BMS), duplex
+assignments
+L13 s2-s4;
+L14 s2
+lcPanel (24F) a13-pick V13
+ch.2;
+V14
+ch.2
+30 SPOCS management
+uplinks; 12F/24F
+correction
+L13 s5 spocsMgmt a13-scen V13
+ch.4
+Data Hall 4 Cable Installation · Reference Guide · page 48 of 50
+Guide
+page(s) Topic Lesson /section Visual Practice Video
+25-26, 29
+(BMS)
+BMS: w/BMS racks,
+FB0 switch, uplink
+path
+L14 all bmsFlow,
+hallMap
+a14-trace V14
+34 Large trunk path at a
+glance
+L8; L9; L15
+s1
+largePath a15-trace V15
+ch.2
+36 AIO front: 144F, one
+TPU per row
+L8 s3; L7 s6 aioFront a8-front V08
+ch.2;
+V07
+ch.7
+37 AIO back: 192F, mirror
+rule, line-up
+L8 s4-s5 aioRear, aioFront a8-scen V08
+ch.3-4
+38-39 DCN-PP rack, landing
+192F, lanes
+L9 s1-s3 dcnppRear a9-lookup V09
+ch.1-3
+40 2×2 shuffle module,
+P/N check
+L9 s4 shuffle a9-lookup V09
+ch.4
+41 DCN-PP front to
+spines, spine groups
+L9 s5-s6 dcnppFront a9-lookup V09
+ch.5-6
+43-45 Trunk Landing Sheet
+(all 48 AIO racks)
+L8 s6; L9
+s2; Tables
+§5
+networkRows a8-scen,
+a9-lookup
+V08
+ch.5;
+V09
+ch.2
+46-47 Glossary Glossary
+page; term
+pop-ups
+throughout
+— — Term
+cards
+in
+every
+video
+Mandatory focus topics
+Topic Lessons Videos Practice
+DRS — what it is, where to get it, on-
+site rule; dressing per DRS 01.00.01,
+0, 5, 5B V00,
+V05,
+V05B
+Order the steps; explore a
+DRS sheet; which source
+Data Hall 4 Cable Installation · Reference Guide · page 49 of 50
+Topic Lessons Videos Practice
+01.00.02, 01.00.03 and 01.00.03.01
+and the standards they name
+answers it; bend radius;
+which rule says so
+TPU — what it is, the rack, what is
+yours
+6 (and 1) V06 Explore the rack; click
+the parts
+144-fiber arrangement, odd ports 1-
+31, both ends
+7, 8 V07,
+V08
+Plug legs into TOR ports;
+find the wrong leg; AIO
+front ports
+OCS — purpose, cables, colors,
+ports, both ends
+10, 11 V10, V11 pp1 port picking; find the
+swapped legs; slots and
+X/X+1
+Copper / Ethernet 12 V12 Match runs to panels;
+spot problems
+BMS 14 (and
+13)
+V14 Trace the FB0 BMS uplink
+Generated 2026-10-20 from the course data files.
+Data Hall 4 Cable Installation · Reference Guide · page 50 of 50

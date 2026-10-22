@@ -255,7 +255,6 @@ with sync_playwright() as p:
         ("/reference.html", 3500, "reference"),
         ("/labels.html", 2500, "labels"),
         ("/flashcards.html", 3000, "flashcards"),
-        ("/ocr.html", 2500, "ocr"),
         ("/scan.html", 2500, "scan"),
     ]
     for path, wait, name in standalone:

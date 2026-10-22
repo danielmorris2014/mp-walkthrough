@@ -1,6 +1,6 @@
 // MP Walkthrough — minimal offline-first service worker.
 // Bump CACHE_VERSION whenever index.html/icons change so every phone picks up the update.
-var CACHE_VERSION = 'mp-walk-v68';
+var CACHE_VERSION = 'mp-walk-v69';
 
 self.addEventListener('message', function (event) {
   if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
@@ -34,7 +34,6 @@ var HEAVY = [
   './buf103.html',
   './reference.html',
   './scan.html',
-  './ocr.html',
   './labels.html',
   './data/directory.json.gz',
   './data/buf103.json.gz',

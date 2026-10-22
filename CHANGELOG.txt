@@ -1,273 +1,49 @@
-CHANGELOG - MP Walkthrough & Shift Report
-==========================================
-History of changes since the original Gemini-generated prototype HTML.
+MP Kit Changelog
+================
 
-v21 (current) - Team update, bullet format (his 10/19 spec)
-------------------------------------------------------------------
-- Subject line added: 'Subject: Shift Update - M/D/YYYY (shift
-  time)' - date pulled from tonight's blockers, else today.
-- ALL-CAPS section headers with blank lines between sections.
-- Status-first bullets: 'Ran and hung: 111-113, 211-213, 311-611'.
-  Within every status, racks are now collected per side, sorted
-  numerically, and re-compressed into runs - so buckets read in
-  row order and ranges regroup automatically (the grouping his
-  other agent described: same-status racks together, nothing
-  dropped).
-- Mixed rows with identical patterns now share one bullet:
-  '1413, 1513, 1613: 144F and CAT6 ran; OCS staged' - grouped
-  even when separated by other rows, ordered by first rack.
-- Hall notes render as bullets ('Continued working through cut
-  sheet'); SP work notes and Areas of Concern are bulleted lines;
-  blockers are per-entry bullets.
-- Diff-tested against his exact 10/19 target report: all 21
-  expected lines reproduced verbatim (tools/test_report.py).
+v69 (2026-10-22) — PROJECT CLEANUP
+- Deleted 60MB of raw .json data files (only .gz versions used)
+- Deleted ocr.html (superseded by scan.html)
+- Deleted 17 obsolete build/design scripts from tools/
+- Guide pipeline: all 6 hand-patch layers encoded with 9 verification
+  checks (integrate_guide.py) — regeneration is safe
 
-v20 - FULL data haul + real scanning
+v68 (2026-10-22) — SW catches CDN 404s
+- Service worker falls back to cached app on 404/500 navigations
 
-------------------------------------------------------------------
-- Complete dataset shipped: 28,353 barcodes with A/Z ends +
-  192,423 BUF102-relevant preset connection paths (from the full
-  Downloads exports). Stored as a compressed side file
-  (data/directory.json.gz, 1.5MB) decoded in-browser; the service
-  worker precaches it, so it is fully offline after first load.
-  Search stays instant: exact/suffix barcode numeric index plus
-  substring scan, indexed in time-sliced chunks with progress.
-- Real Scan button in the Data Haul Directory: opens the camera,
-  decodes cable-flag barcodes, and drops the result straight into
-  search. Runs on zxing-wasm 3.1.6 (upgraded from 2.2.4 in BOTH
-  apps - fixes a memory leak that matters for all-night scan
-  sessions, faster + better decodes, zero API changes).
-- Scanner hardened with field techniques from the GitHub research:
-  reticle band crop (10x fewer pixels per frame), two-frame voting
-  with a label-character gate (misreads never survive), session
-  dedupe, and a WebAudio confirmation beep (iOS has no vibration
-  API for web apps). Engine shared from vendor/zxing for both apps.
+v67 (2026-10-22) — CRITICAL: SW install split into CORE + HEAVY
+- Core (2MB, atomic) + Heavy (per-file, error-tolerant)
+- Training manifest caching reduced to 40 files at install
 
-v19 - Data Haul Directory (tool #3)
+v66 (2026-10-22) — Quiz mode + visual hall maps
+- Knowledge Cards: quiz mode (15-question rounds, multiple choice)
+- BUF103: rack-density mini-grids on hall cards, family distribution bars
 
-------------------------------------------------------------------
-- New module from the Service Field Guide exports: search every
-  assigned barcode and preset A/Z connection path offline.
-  One search box takes barcode (full or last digits), rack
-  (R0131), device (mgmt-spn-1), or port (Eth38/1); family filter
-  chips (SASL<>MGMT, MLF<>MSPN, TRLF<>TRSPN, SASL<>DCSPN, ...).
-- Tap a result for a detail card: big barcode, family, A-end and
-  Z-end broken into hall/rack/device/port, plus Copy barcode /
-  Copy A / Copy Z buttons (iOS clipboard fallback chain).
-- Reached from the Home launcher (3rd card); no bottom-tab added
-  (stays at the iOS 5-tab max); Home stays highlighted inside.
-- NOTE: the pasted exports arrived truncated by the chat buffer -
-  currently 424 of 29,335 barcode records + 220 presets are
-  embedded. Same pipeline (tools/build_directory.py) ingests the
-  full files the moment they land in Downloads.
+v65 (2026-10-22) — ONE visual identity
+- Graphite dark theme applied to all vendor training/reference pages
+- Both build scripts persist the layer for regeneration
 
-v18 - Guide identity fixes (found by screenshot audit)
-------------------------------------------------------------------
-- REAL bug: the guide was rendering in LIGHT mode on phones set to
-  light - their light-theme CSS rules out-specified our override
-  (:root[data-theme="light"] and :root:not([data-theme]) under
-  prefers-color-scheme:light, both 2x our specificity), so the
-  graphite retheme never showed. Override now mirrors their
-  selectors and wins on order; color-scheme forced dark.
-- REAL bug: the "< MP Kit" back button never appeared - its
-  observer script ran before their #app div existed and crashed.
-  Now DOMContentLoaded-guarded; button verified mounting and
-  surviving their screen re-renders.
-- Identity pass: Scan FAB and active tab now WHITE (our
-  primary-action language) instead of their fiber-yellow;
-  selection outlines white; redundant hamburger hidden (the More
-  tab already does its job); header is back-pill + logo + language.
-  Fiber/copper media colors stay semantic.
-- Audited via headless-browser screenshots of every page of both
-  apps at 390x844 (tools/shoot.py; MSIX-free Playwright + Edge).
-  Known leftovers (their code, phase-2 rewrite): walk-mode rack
-  drawing zoom shows dead space; help FAB floats over content.
+v64 (2026-10-22) — Full page-by-page review
+- tools/full_review.py: 34 real-interaction flows across 9 pages
 
-v17 - Guide rethemed to Graphite Pro + navigation fix
-------------------------------------------------------------------
-- The Cable Field Guide now matches our app: its theme is fully
-  CSS-variable driven, so a single override block remaps it onto
-  our palette (graphite surfaces, white accent, system font
-  instead of Barlow, our status hues, our corner radii). Applies
-  even if their light-mode setting gets turned on.
-- Sizing normalized: 15-16px body text and 56px/17px buttons were
-  inflating everything next to our app - now 14px text, 44px
-  buttons, tighter header/cards/tab bar, slimmer help button.
-- Guide logo recolored to graphite + green (drops the teal/yellow).
-- Navigation fixed: the floating back pill is gone (it fought
-  their header); a proper "< MP Kit" button now sits first in the
-  guide's own header and survives all of its screen re-renders.
-- On narrow phones the guide's title text hides next to its logo
-  so the header never crowds.
+v63 (2026-10-21) — Scan unification, find box, rack picker
+- Scan a Label: ONE kit-native scanner (barcode + OCR)
+- Find a cable: search box on empty guide views; rack tab shows picker
 
-v16 - Cable Field Guide merged in as tool #2
-------------------------------------------------------------------
-- New guide.html: the Cable Field Guide single-file app, hosted in
-  our repo and opened from the Home launcher card. BUF102 site pack,
-  route/rack/cable lookup, walk mode, clean-fiber steps, hall map,
-  reports, and barcode scanner all work offline (the ZXing decoder
-  engine is embedded in the file).
-- Service worker precaches guide.html so it installs to the phone
-  on first load with signal; after that, zero signal needed.
-- Leaflet 1.9.4 (BSD-2) vendored at vendor/leaflet/ and precached:
-  the outside-plant map code now loads offline too (map/satellite
-  tiles themselves still need signal, like any map app).
-- Patched from the original copy: removed the icon/manifest links
-  that pointed at files never uploaded (no more 404s; the page
-  lives inside our PWA, so no separate icon is needed) and added a
-  floating "< Home" pill to return to the launcher.
-- Not carried over (require Claude's servers): phone-to-PC pairing,
-  cloud sign-in/approvals/time clock. They fail gracefully offline.
+v62 (2026-10-21) — Guide embed mode
+- Kit tiles hide guide chrome; destinations arrive as kit screens
 
-v15 - Home launcher (multi-tool platform begins)
-------------------------------------------------------------------
-- New Home tab (first of 5): the app now opens on a launcher with
-  tool cards; the walkthrough is tool #1, a second tool slot is
-  reserved ("coming soon").
-- Home "Tonight" card: live hall status line (active hall, % ran &
-  hung, open blockers), date/time, and backup freshness.
-- Hash routing (#/home, #/walk, ...): screens survive reload and
-  deep links like .../index.html#/walk jump straight into a tool.
-- Stamp dock + hall tabs hide while on Home (clean launcher view);
-  toast repositions.
-- Nav buttons carry data-tab (programmatic switching from cards).
-
-v14 - The rhythm & safety package (9 improvements)
-------------------------------------------------------------------
-- "End of night" button: archives the report, saves the baseline,
-  then offers Copy report / Backup file in one overlay.
-- Backup nag: tracks last backup; amber reminder + dot on the Report
-  tab when missing or 3+ nights old.
-- Screen Wake Lock (guarded; toggle in Preferences) - keeps the
-  screen awake while the app is open where iOS allows it.
-- Crew list edit mode: remove names (Edit button on Crew tab).
-- Blocker date hidden by default (assumes today; "Date: today"
-  button reveals the field for backdating).
-- Report history collapses to the last 3 nights with "Show all".
-- Sign-off line setting appended to the Team update.
-- New graphite app icon (double-check mark, white + green).
-- Text size setting (Normal/Large) in Preferences.
-
-v13 - Simplify pass
-------------------------------------------------------------------
-- Replaced the hand-picked palette with Radix Colors dark scales
-  (MIT, github.com/radix-ui/colors): 12-step scales for surfaces,
-  accent, and all 5 status hues; solid left-edge status rails, status
-  badges on step-9 solids, all colored TEXT on contrast-guaranteed
-  step-11 tones (fixes WCAG AA failures of the previous palette).
-- Open Props (MIT, github.com/argyleink/open-props) adopted:
-  dark-mode shadow/elevation tokens (incl. inner top highlight),
-  easing curves + durations, prefers-reduced-motion guard.
-- Apple HIG craft pass: color-scheme dark (dark keyboard + native
-  controls), iOS segmented-control styling for the cable scope row,
-  iOS Settings-style section headers (13px/600 + count), concentric
-  radii, press states with brightness dip at 120ms.
-- "Stamp landed" glow: tapping a side now fires a 550ms glow ring in
-  the status color (the tap feels alive).
-- Hall progress bar replaced with an SVG progress ring + % counter
-  (Apple/Lightning guidance: rings read as scoreboard, bars as
-  loading).
-- Dock glass recipe per backdrop-filter guidance (blur 20 /
-  saturate 180%), toast and undo restyled to tokens.
-
-v6 - "Midnight" visual redesign + field filters
-------------------------------------------------------------------
-- Full visual overhaul: deeper midnight palette, frosted-glass header
-  and bottom dock, pill-style hall tabs, status cards with colored
-  left rails + tinted backgrounds instead of full-color blocks,
-  solid status badges, tabular numbers so row IDs align.
-- Professional line icons (Lucide v1.59, ISC license, inlined) in the
-  bottom nav, status dock, undo and jump buttons - replaces emoji.
-- "Show: not finished yet" filter - hides fully-hung aisles and
-  collapses finished sides to slim green check strips while walking.
-- Jump-to-row: type a row number, it scrolls to and flashes that aisle.
-- Hall progress bar (% of sides ran & hung) under the stats row.
-- App now toasts "Update installed - close and reopen" when a new
-  version downloads, and nudges the service worker to check for
-  updates every time the app is reopened.
-- iOS polish: long-press callouts suppressed on tappable elements.
-
-v5 - Formal report rewritten to the hand-polished format
-------------------------------------------------------------------
-- "Team update (clean)" template: tokens-first lines
-  ("111-113, 211-213, and 311-611: Ran and hung.") instead of
-  status-first; single newlines everywhere (no blank lines).
-- Mixed-cable sides get their own standalone lines with a full
-  per-cable breakdown, most-advanced cables first:
-  "1311: CAT6 ran; 144F and OCS staged."
-- Uniform "ran" groups render as plain "Ran." (deliberate choice; the
-  user's hand-edited sample had both "Ran." and
-  "Ran 144F, OCS, and CAT6." styles).
-- Notes flip "SUBJECT - Status (detail)" into
-  "SUBJECT: Status (detail)." automatically
-  (e.g. "HAC 17, Rows 33-36: Staged (8 hours per person).").
-- Blocker lines auto-capitalized and period-terminated; hall prefix
-  kept ("CB5 DH1: ...").
-
-v4 - Bottom stamp dock + one-mention mixed rows + night rollover
-------------------------------------------------------------------
-- Status stamps moved from a top sticky card to a dock fixed at the
-  bottom, directly above the tab bar: 6 status buttons (Hung / Ran /
-  In Prog / Staged / Remed / Clear) + 4 cable-scope buttons.
-- Mixed-cable sides now appear ONCE per report line (at the side's
-  majority status, e.g. "1311 (Copper ran)") instead of being
-  scattered across every status line (new mixedBase() majority rule).
-- Night rollover: "Save tonight as baseline" on the Report tab, plus a
-  dropdown to generate reports as "everything" (cumulative, default)
-  or "only changes since baseline". Changes mode builds a synthetic
-  halls copy where sides that did not move read as 'none'; sides that
-  moved keep their FULL current state (effectiveHalls()).
-- Baseline included in undo snapshots and JSON backups.
-
-v3 - Rotate row view + formal template + blocker halls
-------------------------------------------------------------------
-- "Rotate Row View" button cycles 4 orientations: horizontal with
-  11-side or 13-side on the left, or vertical with either side on
-  top; the side legend arrows rotate with it; choice is remembered.
-- New "Team update (clean)" formal report style (Team, / Shift
-  Summary / "MP | hall" sections / Oxford-"and" token joins /
-  "Blockers - <date>" section).
-- Blockers gained an optional hall dropdown; rendered as
-  "CB5 DH1: ..." prefixes in the formal report.
-- Fixed empty "()" in the quick report's personnel line when no crew
-  chips are active.
-
-v2 (first GitHub Pages release) - full rewrite of the Gemini prototype
-------------------------------------------------------------------
-Everything below replaced or rebuilt from the original single HTML:
-- Real site layout encoded from the Large Site Cable Installation
-  Guide PDF: network rows 1-2; compute rows with pods of 8 rows
-  (3-10 / 11-18 / 19-26); CB4 DH2 extends to row 36 (HAC area);
-  EOR anchors at spot 11 and 13; middle SPOCS aisle not tracked.
-  Halls preloaded: CB5 DH1 (pods 1-3), CB4 DH2 (pods 10-12 + rows
-  27-36), CB4 DH4 (pods 10-12). Halls/groups/row counts editable
-  in-app.
-- Data model: per row, per side (11 = X01-X11, 13 = X13-X22), per
-  cable (144F / OCS / CAT6), one status: Not started, Staged, In
-  Progress, Ran, Ran & Hung, Remediation. Statuses carry over
-  night to night.
-- Stamp interactions: status brush + cable scope; tap side = stamp
-  side; tap aisle number = stamp both sides; tap a cable pill =
-  stamp one cable; range stamp (rows A-B); whole-pod bulk buttons;
-  tap-again-to-clear toggle; 60-level undo.
-- Live stats per hall (sides by status + per-cable progress).
-- Crew chips with auto-counted SP headcount; dated blockers;
-  areas of concern; tasks for tomorrow.
-- Report compressor producing the site's row shorthand:
-  "111-113, 211-213, 301-311, 501-511 & 601-611 - Ran and hung.",
-  run compression ("711-1311 & 713-1313"), short/full/plain number
-  styles, mixed-side notations. Templates: quick nightly report,
-  crew/table style, boss roll-up (per hall, per cable, blockers with
-  "(i)", tasks for tomorrow).
-- PWA packaging: versioned service worker (cache-first precache +
-  activate cleanup), web manifest, 180/192/512 icons, apple-touch-
-  icon, viewport-fit=cover + safe-area insets, touch-action
-  hardening, first-run install onboarding, storage.persist().
-- Data safety: autosave to localStorage; one-tap backup via Web
-  Share (files-only payload for the iOS quirk) with clipboard and
-  download fallbacks; restore from file picker or pasted JSON;
-  in-app report history.
-- Fixes vs the Gemini prototype: working iOS clipboard fallback
-  chain (Clipboard API -> hidden textarea + execCommand), real
-  layout instead of fixed 26 rows, export/backup the prototype never
-  had, service worker the prototype never had.
+v61 (2026-10-21) — OCR v2 + guide expanded onto Home
+v60 (2026-10-21) — Interface review: accessibility triggers cleared
+v59 (2026-10-21) — UI polish: press scales, scroll containment
+v58 (2026-10-21) — Home regrouped, duplicate entries retired
+v57 (2026-10-21) — Course: no sideways scroll, phone-sized reading
+v56 (2026-10-21) — Field Reference contrast fix (measured)
+v55 (2026-10-21) — BUF103 × walkthrough: one-tap halls + materials
+v54 (2026-10-21) — Knowledge Cards + offline OCR (tesseract.js)
+v53 (2026-10-21) — Architecture round 2: all six candidates shipped
+v49-v52 — BUF103 toolkit + Field Reference + training + videos
+v41-v48 — Architecture round 1 + sync + scanner fixes
+v36-v40 — Tab-switch sizing, rebase assessment, live bug fixes
+v28-v35 — Screen Registry, report engine, design audit (9 changes)
+v1-v27 — Initial build through BUF102 directory + sync unification
