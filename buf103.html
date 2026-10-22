@@ -234,6 +234,11 @@ function rackView() {
   var out = document.getElementById('results');
   out.innerHTML = '';
   if (!RACK) { return showBrowse(); } // rack tab with no rack = the picker (no dead ends)
+  var backBtn = document.createElement('button');
+  backBtn.className = 'chip';
+  backBtn.textContent = '‹ All racks';
+  backBtn.addEventListener('click', function (e) { e.stopPropagation(); RACK = null; HALL = null; render(); });
+  out.appendChild(backBtn);
   var all = connectionsFor(RACK);
   var groups = [];
   FAMS.forEach(function (fam) {
