@@ -283,7 +283,7 @@ with sync_playwright() as p:
     res12 = pg.evaluate("() => KIT_PAGES")
     import re as _re
     sw = open("sw.js", encoding="utf-8").read()
-    precache = set(_re.findall(r"'([^']+)'", sw.split("PRECACHE")[1].split("]")[0]))
+    precache = set(_re.findall(r"'([^']+)'", sw.split("var CORE")[1].split("]")[0])) | set(_re.findall(r"'([^']+)'", sw.split("var HEAVY")[1].split("]")[0]))
     for entry in res12:
         if entry.get("precache") and entry.get("url"):
             path = entry["url"].lstrip("./")
