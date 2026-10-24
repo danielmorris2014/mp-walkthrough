@@ -899,7 +899,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v77';
+var APP_VERSION = 'v78';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1446,10 +1446,12 @@ function renderWalk() {
     existing.forEach(function (r) {
       Side.sides().forEach(function (s) { if (Side.isHung(hall.rows[r][s])) doneCount++; });
     });
+    var isBuf103 = hall.id.indexOf('BUF103_') === 0;
     var ph = document.createElement('div');
     ph.className = 'pod-header';
     ph.innerHTML = '<span>' + escapeHtml(g.name) + ' <span class="pod-count">' + doneCount + '/' + (existing.length * 2) + ' hung</span></span>' +
       '<div class="pod-actions">' +
+      (isBuf103 && existing.length ? '<button class="pod-btn" onclick="openBuf103Row(\'' + escapeHtml(hall.id) + '\', ' + existing[0] + ')">Cutsheet \u2197</button>' : '') +
       '<button class="pod-btn" onclick="stampRows([' + existing.join(',') + '], \'11\')">11 side</button>' +
       '<button class="pod-btn" onclick="stampRows([' + existing.join(',') + '], \'13\')">13 side</button>' +
       '<button class="pod-btn" onclick="stampRows([' + existing.join(',') + '], \'both\')">All</button>' +
@@ -1471,7 +1473,14 @@ function renderWalk() {
   });
 }
 
-/* ---------------- jump to row ---------------- */
+/* ---------------- jump to row / cutsheet deep-link ---------------- */
+function openBuf103Row(hallId, rowNum) {
+  var hCode = (hallId || '').indexOf('BUF103_') === 0 ? hallId.slice(7) : hallId;
+  try {
+    sessionStorage.setItem('mp.buf103_nav', JSON.stringify({ hall: hCode, row: rowNum, mode: 'browse' }));
+  } catch (e) {}
+  location.href = './buf103.html';
+}
 function gotoRowFn() {
   var n = parseInt((document.getElementById('gotoRow') || {}).value, 10);
   if (!n) { showToast('Enter a row number'); return; }
@@ -1525,7 +1534,18 @@ function buildSideHtml(hall, r, side) {
   var badge = uniform
     ? (st === 'none' ? 'Tap to stamp' : STATUS_META[st].badge)
     : 'Mixed';
-  var span = side === '11' ? (r + '01–' + r + '11') : (r + '13–' + r + '22');
+  var attrBy = '';
+  var attrAt = 0;
+  if (seg._st) {
+    CABLES.forEach(function (c) {
+      if (seg[c] !== 'none' && seg._st[c] && seg._st[c].by && seg._st[c].by !== 'unknown') {
+        var t = seg._st[c].at || 0;
+        if (t >= attrAt) { attrAt = t; attrBy = seg._st[c].by; }
+      }
+    });
+  }
+  var span = (side === '11' ? (r + '01\u2013' + r + '11') : (r + '13\u2013' + r + '22')) +
+    (attrBy ? ' \u00b7 ' + escapeHtml(attrBy) : '');
   var pills = CABLES.map(function (c) {
     var m = STATUS_META[seg[c]];
     var lbl = c === 'CAT6' ? 'CAT6' : CABLE_LABEL[c];
@@ -2056,7 +2076,24 @@ function doBackup() {
   fallbackBackup(json);
 }
 function fallbackBackup(json) {
-  copySomething(json, 'Backup copied — paste it into Notes or an email');
+  var fname = 'walkthrough-backup-' + dateStamp() + '.json';
+  var downloaded = false;
+  try {
+    var blob = new Blob([json], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    downloaded = true;
+  } catch (e) {}
+  state.settings.lastBackup = Date.now();
+  saveState();
+  renderBackupStatus();
+  copySomething(json, downloaded ? 'Backup downloaded (' + fname + ') & copied' : 'Backup copied — paste it into Notes or an email');
 }
 function togglePasteRestore() {
   var el = document.getElementById('pasteRestore');
@@ -2394,6 +2431,19 @@ function boot() {
   });
   renderAll();
   routeFromHash();
+  try {
+    var jmp = JSON.parse(sessionStorage.getItem('mp_jump_hall_row') || 'null');
+    if (jmp && jmp.hall) {
+      sessionStorage.removeItem('mp_jump_hall_row');
+      if (state.halls[jmp.hall]) {
+        Hall.switchTo(jmp.hall);
+      }
+      switchTab('walk');
+      if (jmp.row) {
+        setTimeout(function () { scrollToRow(jmp.row); }, 120);
+      }
+    }
+  } catch (e) {}
   try { window.__SYNC_NAME = localStorage.getItem('mp_sync_name') || ''; } catch (e) {}
   try {
     if (Sync.restore()) {
@@ -2472,8 +2522,9 @@ function boot() {
     // When a new version finishes downloading, tell it to activate now and
     // reload once - so a single reopen with signal is enough to update.
     var refreshing = false;
+    var hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener('controllerchange', function () {
-      if (refreshing) return;
+      if (!hadController || refreshing) return;
       refreshing = true;
       location.reload();
     });

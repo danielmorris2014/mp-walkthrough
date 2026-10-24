@@ -1,6 +1,6 @@
 // MP Walkthrough — minimal offline-first service worker.
 // Bump CACHE_VERSION whenever index.html/icons change so every phone picks up the update.
-var CACHE_VERSION = 'mp-walk-v77';
+var CACHE_VERSION = 'mp-walk-v78';
 
 self.addEventListener('message', function (event) {
   if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
@@ -86,7 +86,22 @@ self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (keys) {
       return Promise.all(keys.map(function (k) { return k === CACHE_VERSION ? null : caches.delete(k); }));
-    }).then(function () { return self.clients.claim(); })
+    }).then(function () { return self.clients.claim(); }).then(function () {
+      // Background-cache remaining training course files (40+) in small chunks so 100% of lessons work offline
+      return Promise.all([
+        caches.open(CACHE_VERSION),
+        fetch('./training/manifest.json').then(function (r) { return r.json(); })
+      ]).then(function (res) {
+        var cache = res[0], rest = (res[1] || []).slice(40);
+        return rest.reduce(function (p, url) {
+          return p.then(function () {
+            return cache.match(url).then(function (hit) {
+              return hit ? null : cache.add(url).catch(function () {});
+            });
+          });
+        }, Promise.resolve());
+      }).catch(function () {});
+    })
   );
 });
 

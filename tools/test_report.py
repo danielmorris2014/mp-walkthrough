@@ -97,4 +97,13 @@ with sync_playwright() as p:
     if not plain_ok:
         print("  plain report still renders short-style tokens")
         sys.exit(1)
+    all_styles_ok = pg.evaluate("""() => {
+      return ['formal', 'mine', 'crew', 'boss'].every(st => {
+        const out = ReportEngine.buildReport(st, { state, numStyle: 'short', halls: state.halls });
+        return typeof out === 'string' && out.length > 80;
+      });
+    }""")
+    print("ALL REPORT TEMPLATES:", "PASS" if all_styles_ok else "FAIL")
+    if not all_styles_ok:
+        sys.exit(1)
     b.close()

@@ -1,25 +1,31 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Flag Label Maker</title>
+<link rel="stylesheet" href="./chrome.css">
 <style>
-:root{--bg:#111418;--card:#1a1f26;--b:#2d3540;--t:#e8edf2;--m:#93a0ae;--y:#f5c542;--r:#ff6b6b;--g:#4ade80}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--t);font:16px/1.4 -apple-system,system-ui,Segoe UI,sans-serif;padding:calc(12px + env(safe-area-inset-top)) 14px calc(80px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto}
-h1{font-size:20px;margin:8px 0 2px}.sub{color:var(--m);font-size:13px;margin-bottom:12px}
-.card{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:12px;margin-bottom:12px}
-label{display:block;font-size:13px;color:var(--m);margin:8px 0 3px}
-input,textarea,select{width:100%;font-size:16px;padding:11px;border-radius:10px;border:1px solid var(--b);background:#0e1115;color:var(--t);font-family:inherit}
-textarea{min-height:90px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.45 -apple-system,"SF Pro Text",system-ui,sans-serif;padding:calc(var(--top-chrome,70px) + 12px) 14px calc(80px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto;touch-action:manipulation}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(11,12,14,.96);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:calc(6px + env(safe-area-inset-top)) 10px 8px}
+.topbar .row1{display:flex;align-items:center;gap:8px;max-width:720px;margin:0 auto}
+.h1{font:800 17px/1.1 -apple-system,sans-serif;letter-spacing:-.2px}
+.h1 small{display:block;font:600 10.5px -apple-system,sans-serif;color:var(--dim);margin-top:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+label{display:block;font:700 12px -apple-system,sans-serif;color:var(--muted);margin:8px 0 4px}
+input,textarea,select{width:100%;font-size:16px;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-family:inherit}
+textarea{min-height:96px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
-button{font-size:16px;font-weight:600;padding:13px 14px;border-radius:12px;border:1px solid var(--b);background:#232a33;color:var(--t);min-height:48px}
-button.p{background:var(--y);color:#111;border-color:var(--y)}
-.warn{color:var(--r);font-size:13px;margin-top:6px}.ok{color:var(--g);font-size:13px}
-.lab{background:#fff;color:#000;border:1px dashed #888;border-radius:4px;padding:5px 7px;margin:8px 0;font-family:Calibri,Carlito,Arial,sans-serif;font-weight:700;line-height:1.15;overflow:hidden}
-.lab .t{font-size:13px;white-space:nowrap}.lab svg{display:block;width:100%;height:34px;margin-top:3px}
+button{font:800 15px -apple-system,sans-serif;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text);min-height:48px;cursor:pointer}
+button:active{transform:scale(.97)}
+button.p{background:#fff;color:#111;border-color:#fff}
+.warn{color:var(--red);font-size:13px;margin-top:8px;font-weight:600}.ok{color:var(--green);font-size:13px;margin-top:8px;font-weight:600}
+.lab{background:#fff;color:#000;border:1px dashed #888;border-radius:6px;padding:6px 8px;margin:8px 0;font-family:Calibri,Carlito,Arial,sans-serif;font-weight:700;line-height:1.15;overflow:hidden}
+.lab .t{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lab svg{display:block;width:100%;height:34px;margin-top:3px}
 .lab .sn{font:700 10px Calibri,Carlito,Arial,sans-serif;text-align:center}
-a.back{color:var(--y);text-decoration:none;font-weight:600;display:inline-block;padding:10px 0}
-.hist div{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--b);font-size:13px}
+.hist div{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);font:600 12px ui-monospace,monospace}
 #sheet{display:none}
 @media print{
  body{background:#fff;padding:0;max-width:none}
@@ -30,17 +36,20 @@ a.back{color:var(--y);text-decoration:none;font-weight:600;display:inline-block;
  @page{margin:0.25in}
 }
 </style></head><body>
-<a class="back" href="./index.html#/home">&#8249; Back</a>
-<h1>Flag Label Maker</h1>
-<div class="sub">Line 1 = A end, line 2 = Z end. Barcode (Code 128) = serial. Made on this phone, works offline.</div>
+<div class="topbar" id="topbar">
+  <div class="row1">
+    <a class="mp-back-pill" style="position:static" href="./index.html#/home">&#8249; MP Kit</a>
+    <div class="h1">Flag Label Maker<small>Line 1 = A end &#183; Line 2 = Z end &#183; Code 128 barcode</small></div>
+  </div>
+</div>
 
 <div class="card">
- <div class="row"><div><label>Site code</label><input id="site" value="BUF102" autocapitalize="characters"></div>
- <div><label>Next serial #</label><input id="next" inputmode="numeric" value="9000001"></div></div>
- <label>Cables: one per line, "A end | Z end" (each gets the next serial)</label>
- <textarea id="in" placeholder="BUF102-DH4-R12-SW01-E1/1 | BUF102-DH4-R40-PP02-A14&#10;BUF102-DH4-R12-SW01-E1/2 | BUF102-DH4-R40-PP02-A15" autocapitalize="characters"></textarea>
- <div class="row"><div><label>Label width</label><select id="w"><option value="2">2 in (min)</option><option value="3" selected>3 in</option><option value="4">4 in</option></select></div>
- <div><label>Copies per cable</label><select id="cp"><option>1</option><option selected>2</option><option>4</option></select></div></div>
+ <div class="row"><div><label for="site">Site code</label><input id="site" value="BUF103" autocapitalize="characters"></div>
+ <div><label for="next">Next serial #</label><input id="next" inputmode="numeric" value="9000001"></div></div>
+ <label for="in">Cables: one per line, "A end | Z end" (each gets the next serial)</label>
+ <textarea id="in" placeholder="BUF103-DH1-R0411 tor1 Et1 | BUF103-DH1-R0111 PP1 A1&#10;BUF103-DH1-R0411 tor1 Et2 | BUF103-DH1-R0111 PP1 A2" autocapitalize="characters"></textarea>
+ <div class="row"><div><label for="w">Label width</label><select id="w"><option value="2">2 in (min)</option><option value="3" selected>3 in</option><option value="4">4 in</option></select></div>
+ <div><label for="cp">Copies per cable</label><select id="cp"><option>1</option><option selected>2</option><option>4</option></select></div></div>
  <div id="msg"></div>
  <div class="row" style="margin-top:10px"><button class="p" id="mk">Make labels</button><button id="pr">Print</button></div>
 </div>
@@ -49,8 +58,11 @@ a.back{color:var(--y);text-decoration:none;font-weight:600;display:inline-block;
 <div class="hist" id="hist"></div></div>
 <div id="sheet"></div>
 
+<script src="./kit-data.js"></script>
+<script src="./vendor/localforage/localforage.min.js"></script>
 <script>
 (function(){
+'use strict';
 // ---- Code 128 (set B) ----
 var P=["212222","222122","222221","121223","121322","131222","122213","122312","132212","221213","221312","231212","112232","122132","122231","113222","123122","123221","223211","221132","221231","213212","223112","312131","311222","321122","321221","312212","322112","322211","212123","212321","232121","111323","131123","131321","112313","132113","132311","211313","231113","231311","112133","112331","132131","113123","113321","133121","313121","211331","231131","213113","213311","213131","311123","311321","331121","312113","312311","332111","314111","221411","431111","111224","111422","121124","121421","141122","141221","112214","112412","122114","122411","142112","142211","241211","221114","413111","241112","134111","111242","121142","121241","114212","124112","124211","411212","421112","421211","212141","214121","412121","111143","111341","131141","114113","114311","411113","411311","113141","114131","311141","411131","211412","211214","211232","2331112"];
 function enc(s){var v=[104],i,sum=104;for(i=0;i<s.length;i++){var c=s.charCodeAt(i)-32;if(c<0||c>95)c=0;v.push(c);sum+=c*(i+1)}v.push(sum%103);v.push(106);
@@ -58,25 +70,34 @@ function enc(s){var v=[104],i,sum=104;for(i=0;i<s.length;i++){var c=s.charCodeAt
  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+(x+20)+' 40" preserveAspectRatio="none"><g transform="translate(10,0)" fill="#000">'+r+'</g></svg>'}
 // ---- helpers ----
 var $=function(i){return document.getElementById(i)};
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function ld(){try{return JSON.parse(localStorage.getItem('mp_labels')||'{}')}catch(e){return {}}}
-function sv(o){try{localStorage.setItem('mp_labels',JSON.stringify(o))}catch(e){}}
-var st=ld();st.list=st.list||[];if(st.site)$('site').value=st.site;if(st.next)$('next').value=st.next;
+var KEY='mp_labels';
+function esc(s){return KitData.esc(s)}
+function ldSync(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}}
+function sv(o){
+ try{if(typeof localforage!=='undefined'&&localforage)localforage.setItem(KEY,o);}catch(e){}
+ try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}
+}
+var st=ldSync();st.list=st.list||[];
+function applySt(){
+ if(st.site)$('site').value=st.site;
+ if(st.next)$('next').value=st.next;
+ hist();
+}
+applySt();
 function serial(site,n){return site+'#'+('0000000'+n).slice(-7)}
 function check(t,site){var w=[];
  if(/[a-z]/.test(t))w.push('lowercase letters');
  if(/_/.test(t))w.push('underscore (use dash)');
- if(/\s/.test(t.trim()))w.push('spaces (use dash)');
- if(/BUF101/.test(t))w.push('BUF101 (site is BUF102)');
+ if(/BUF101/.test(t))w.push('BUF101 (check site code)');
  var m=t.match(/(DH\d)-\1/);if(m)w.push('hall written twice ('+m[0]+')');
  return w}
 var cur=[];
 function labelHtml(l){return '<div class="lab"><div class="t">'+esc(l.a)+'</div><div class="t">'+esc(l.z)+'</div>'+enc(l.s)+'<div class="sn">'+esc(l.s)+'</div></div>'}
 $('mk').onclick=function(){
- var site=$('site').value.trim().toUpperCase()||'BUF102',n=parseInt($('next').value,10),warns=[];cur=[];
- if(!/^[A-Z0-9]{3,10}$/.test(site)){$('msg').innerHTML='<div class="warn">Site code should be letters/numbers only, like BUF102.</div>';return}
+ var site=$('site').value.trim().toUpperCase()||'BUF103',n=parseInt($('next').value,10),warns=[];cur=[];
+ if(!/^[A-Z0-9]{3,10}$/.test(site)){$('msg').innerHTML='<div class="warn">Site code should be letters/numbers only, like BUF103 or BUF102.</div>';return}
  if(!(n>=1)){$('msg').innerHTML='<div class="warn">Next serial # must be 1 or higher.</div>';return}
- if(n<=29335)warns.push('serial '+n+' is inside the database range (BUF102#0000001-0029335) and may duplicate a real cable label; use 9000001 or higher');
+ if(site==='BUF102'&&n<=29335)warns.push('serial '+n+' is inside the BUF102 database range (0000001-0029335); use 9000001 or higher');
  var lines=$('in').value.split('\n').filter(function(x){return x.trim()}).length;
  if(n+lines-1>9999999){$('msg').innerHTML='<div class="warn">Serial would pass 9,999,999. Lower the starting number.</div>';return}
  $('in').value.split('\n').forEach(function(ln){ln=ln.trim();if(!ln)return;var p=ln.split('|');var a=(p[0]||'').trim(),z=(p[1]||'').trim();
@@ -84,7 +105,7 @@ $('mk').onclick=function(){
   [a,z].forEach(function(t){check(t,site).forEach(function(w){warns.push(esc(t)+': '+w)})});
   cur.push({s:serial(site,n++),a:a,z:z})});
  if(!cur.length){$('msg').innerHTML='<div class="warn">Type at least one cable.</div>';return}
- $('msg').innerHTML=warns.length?'<div class="warn">Check: '+warns.slice(0,6).join('; ')+'</div>':'<div class="ok">Label text looks right.</div>';
+ $('msg').innerHTML=warns.length?'<div class="warn">Check: '+warns.slice(0,6).join('; ')+'</div>':'<div class="ok">Generated '+cur.length+' flag label'+(cur.length===1?'':'s')+' \u2713</div>';
  $('out').innerHTML=cur.map(labelHtml).join('');
  st.site=site;st.next=n;$('next').value=n;
  cur.forEach(function(l){st.list.unshift({s:l.s,a:l.a,z:l.z,d:new Date().toISOString().slice(0,16).replace('T',' ')})});
@@ -99,6 +120,25 @@ function hist(){$('hist').innerHTML=st.list.slice(0,30).map(function(l){return '
 $('csv').onclick=function(){var r=['serial,line1_A_end,line2_Z_end,made'].concat(st.list.map(function(l){return [l.s,l.a,l.z,l.d].map(function(x){return '"'+String(x).replace(/"/g,'""')+'"'}).join(',')}));
  var b=new Blob([r.join('\n')],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='flag-labels.csv';document.body.appendChild(a);a.click();a.remove()};
 $('clr').onclick=function(){if(confirm('Clear label history? Serial counter stays.')){st.list=[];sv(st);hist()}};
-hist();
+
+// Load IndexedDB state via localForage + check for pre-filled draft from BUF103 cutsheet
+var pLoad=(typeof localforage!=='undefined'&&localforage)?localforage.getItem(KEY):Promise.resolve(null);
+pLoad.then(function(saved){
+ if(saved&&typeof saved==='object'){
+  st=saved;st.list=st.list||[];applySt();
+ }else if(st.list&&st.list.length&&typeof localforage!=='undefined'&&localforage){
+  localforage.setItem(KEY,st);
+ }
+ try{
+  var draft=JSON.parse(sessionStorage.getItem('mp.label_draft')||'null');
+  if(draft&&draft.lines){
+   sessionStorage.removeItem('mp.label_draft');
+   if(draft.site)$('site').value=draft.site;
+   $('in').value=draft.lines;
+   $('mk').click();
+  }
+ }catch(e){}
+}).catch(function(){});
+KitData.watchFixedTop('.topbar');
 })();
 </script></body></html>

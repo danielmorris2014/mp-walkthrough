@@ -15,6 +15,7 @@ var STATUS_META = {
   hung:   { short: 'Hung',   badge: 'Ran & Hung',  report: 'Ran and hung', cardCls: 'sc-hung',   pillCls: 'mp-hung' },
   remed:  { short: 'Remed',  badge: 'Remediation', report: 'Remediation',  cardCls: 'sc-remed',  pillCls: 'mp-remed' }
 };
+var CABLE_SHORT = { F144: '144F', OCS: 'OCS', CAT6: 'CAT6' };
 var ReportEngine = (function () {
 function runsOf(arr) {
   var runs = [];
@@ -271,6 +272,19 @@ function blockersFormal(state) {
     lines.push('\u2022 ' + (b.hall ? b.hall + ': ' : '') + polishSentence(b.text).replace(/\.$/, ''));
   });
   return lines.join('\n');
+}
+
+function activeHallNames(halls) {
+  return Object.values(halls || {})
+    .filter(function (h) {
+      if (!h || !h.rows) return false;
+      var any = false;
+      Object.keys(h.rows).forEach(function (r) {
+        Side.sides().forEach(function (s) { if (h.rows[r][s] && Side.hasProgress(h.rows[r][s])) any = true; });
+      });
+      return any || (h.notes && h.notes.length);
+    })
+    .map(function (h) { return h.name; });
 }
 
 function buildReport(style, ctx) {

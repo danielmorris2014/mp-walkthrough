@@ -76,12 +76,27 @@ input[type=text] { flex: 1; min-width: 0; min-height: 44px; font-size: 16px; bor
 .err .ct { color: var(--red); }
 button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border-radius: 10px; background: #fff; color: #111; font: 700 14px -apple-system, sans-serif; }
 .loadstate { color: var(--dim); font-size: 12.5px; margin-top: 12px; }
-/* rack browser */
-.rackgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+/* rack browser & CB -> Hall -> Row -> Rack hierarchy (v78) */
+.rackgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
 .rackcell { min-height: 48px; border: 1px solid var(--line); border-radius: 10px; background: var(--card2);
-  color: var(--text); font: 800 12px ui-monospace, monospace; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; }
+  color: var(--text); font: 800 12px/1.15 ui-monospace, monospace; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px 2px; }
+.rackcell small { font: 600 9.5px/1 -apple-system, sans-serif; color: var(--dim); }
 .rackcell:active { transform: scale(.96); background: rgba(255,255,255,.08); }
+.hierbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 8px;
+  padding: 8px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+.hierstep { border: 1px solid var(--line); background: var(--card2); color: var(--muted);
+  border-radius: 8px; padding: 5px 9px; font: 800 11.5px -apple-system, sans-serif; cursor: pointer; }
+.hierstep.on { background: #fff; color: #111; border-color: #fff; }
+.hiersep { color: var(--dim); font: 800 12px -apple-system, sans-serif; }
+.rowgrp-hdr { display: flex; justify-content: space-between; align-items: center;
+  font: 800 11px -apple-system, sans-serif; letter-spacing: .5px; text-transform: uppercase;
+  color: var(--amber-t); margin-top: 14px; padding: 0 2px; }
+.actrow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.actbtn { min-height: 36px; padding: 0 11px; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--card2); color: var(--text); font: 800 11.5px -apple-system, sans-serif; cursor: pointer; }
+.actbtn.pri { background: rgba(48,164,108,.16); border-color: rgba(48,164,108,.45); color: var(--green); }
+.actbtn:active { transform: scale(.96); }
 /* visual hall map: rack-density mini-grid on each hall card */
 .hallmap { display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px; margin-top: 10px; }
 .hallmap .hm-cell { height: 14px; border-radius: 2px; background: rgba(255,255,255,.06); }
@@ -186,7 +201,7 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
    with copy buttons. Data bundled via the pipeline (ADR-0003) or updated
    in the field via SheetJS on-device .xlsx parser (v77). */
 var D = null, FAMS = [], RACKS = {};   // RACKS = {DH1: [{rack, n}...]}
-var MODE = 'browse', HALL = null, RACK = null, FAMFILTER = null, SHOWN = [];
+var MODE = 'browse', HALL = null, RACK = null, ROWFILTER = null, FAMFILTER = null, SHOWN = [];
 var _jtkInstances = [];
 var CUTSHEET_LF_KEY = 'mp_buf103_cutsheet';
 var HALLS_LF_KEY = 'mp_buf103_halls';
@@ -205,6 +220,19 @@ function loadDone(d) {
 }
 function checkOcrQuery() {
   try {
+    var nav = JSON.parse(sessionStorage.getItem('mp.buf103_nav') || 'null');
+    if (nav) {
+      sessionStorage.removeItem('mp.buf103_nav');
+      if (nav.hall) HALL = nav.hall;
+      if (nav.row) ROWFILTER = String(nav.row).padStart(2, '0');
+      if (nav.rack) RACK = nav.rack;
+      if (nav.mode) {
+        MODE = nav.mode;
+        document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-v') === MODE); });
+      }
+      render();
+      return;
+    }
     var q = sessionStorage.getItem('mp.ocrq');
     if (q) { sessionStorage.removeItem('mp.ocrq'); document.getElementById('q').value = q; run(); }
   } catch (e) {}
@@ -377,7 +405,31 @@ function buildRacks() {
   });
   Object.keys(RACKS).forEach(function (h) { RACKS[h].sort(function (x, y) { return x.rack < y.rack ? -1 : 1; }); });
 }
-/* ---------- navigation ---------- */
+/* ---------- navigation: CB (Building) -> Hall -> Row -> Rack (v78) ---------- */
+function parseRackMeta(rack) {
+  var m = /^BUF103-(DH\d+)-R(\d{2})(\d{2})$/.exec(rack || '');
+  if (!m) return { hall: HALL || 'DH1', row: '01', spot: '01' };
+  return { hall: m[1], row: m[2], spot: m[3] };
+}
+function sendHitsToLabels(hits) {
+  if (!hits || !hits.length) return;
+  var lines = hits.slice(0, 60).map(function (h) {
+    var r = h[1];
+    var a = (D.d[r[0]] || '') + (D.d[r[1]] ? '-' + D.d[r[1]].replace(/\s+/g, '-') : '');
+    var z = (D.d[r[2]] || '') + (D.d[r[3]] ? '-' + D.d[r[3]].replace(/\s+/g, '-') : '');
+    return a.toUpperCase() + ' | ' + z.toUpperCase();
+  }).join('\n');
+  try {
+    sessionStorage.setItem('mp.label_draft', JSON.stringify({ site: 'BUF103', lines: lines }));
+  } catch (e) {}
+  location.href = './labels.html';
+}
+function jumpToWalkthroughRow(hallCode, rowNum) {
+  try {
+    sessionStorage.setItem('mp_jump_hall_row', JSON.stringify({ hall: 'BUF103_' + hallCode, row: parseInt(rowNum, 10) || 1 }));
+  } catch (e) {}
+  location.href = './index.html#/walk';
+}
 document.getElementById('seg').addEventListener('click', function (e) {
   var b = e.target.closest('button'); if (!b) return;
   MODE = b.getAttribute('data-v');
@@ -387,12 +439,65 @@ document.getElementById('seg').addEventListener('click', function (e) {
 document.getElementById('go').addEventListener('click', run);
 document.getElementById('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.target.blur(); run(); } });
 document.getElementById('view').addEventListener('click', function (e) {
+  var cbSwitch = e.target.closest('[data-goto-cb4]');
+  if (cbSwitch) {
+    try { sessionStorage.setItem('mp_embed', '1'); } catch (err) {}
+    location.href = './guide.html#/find';
+    return;
+  }
+  var resetCb = e.target.closest('[data-reset-cb]');
+  if (resetCb) {
+    HALL = null; RACK = null; ROWFILTER = null; FAMFILTER = null;
+    document.getElementById('q').value = '';
+    render();
+    return;
+  }
   var hall = e.target.closest('[data-hall]');
-  if (hall) { HALL = hall.getAttribute('data-hall'); RACK = null; render(); return; }
+  if (hall) {
+    HALL = hall.getAttribute('data-hall') || null;
+    RACK = null; ROWFILTER = null; FAMFILTER = null;
+    document.getElementById('q').value = '';
+    render();
+    return;
+  }
+  var rf = e.target.closest('[data-rowfilter]');
+  if (rf) {
+    var v = rf.getAttribute('data-rowfilter');
+    ROWFILTER = (ROWFILTER === v || !v) ? null : v;
+    render();
+    return;
+  }
   var rk = e.target.closest('[data-rack]');
-  if (rk) { RACK = rk.getAttribute('data-rack'); MODE = 'browse'; FAMFILTER = null;
-    document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-v') === 'browse'); });
-    render(); return; }
+  if (rk) {
+    RACK = rk.getAttribute('data-rack');
+    var rm = parseRackMeta(RACK);
+    HALL = rm.hall;
+    if (MODE !== 'trace') MODE = 'browse';
+    FAMFILTER = null;
+    document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-v') === MODE); });
+    render();
+    return;
+  }
+  var swMode = e.target.closest('[data-switch-mode]');
+  if (swMode) {
+    MODE = swMode.getAttribute('data-switch-mode');
+    document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-v') === MODE); });
+    render();
+    return;
+  }
+  var mkRackLbl = e.target.closest('[data-make-rack-labels]');
+  if (mkRackLbl && RACK) {
+    var allHits = connectionsFor(RACK);
+    var filt = FAMFILTER ? allHits.filter(function (h) { return h[0] === FAMFILTER; }) : allHits;
+    sendHitsToLabels(filt);
+    return;
+  }
+  var jmpWalk = e.target.closest('[data-jump-walk]');
+  if (jmpWalk && RACK) {
+    var meta = parseRackMeta(RACK);
+    jumpToWalkthroughRow(meta.hall, meta.row);
+    return;
+  }
   var fam = e.target.closest('[data-fam]');
   if (fam) { FAMFILTER = FAMFILTER === fam.getAttribute('data-fam') ? null : fam.getAttribute('data-fam'); render(); return; }
   var row = e.target.closest('[data-ri]');
@@ -404,14 +509,23 @@ function render() {
   if (MODE === 'trace') return showTrace();
   return showBrowse();
 }
-/* ---------- browse: halls -> racks ---------- */
-function showBrowse() {
-  var out = document.getElementById('results');
-  out.innerHTML = '';
-  if (RACK) { return rackView(); }
+/* ---------- shared CB (Building) -> Hall -> Row -> Rack picker ---------- */
+function renderHierarchyPicker(out, isTrace) {
+  // Top Building (CB) selector bar
+  var cbBar = document.createElement('div');
+  cbBar.className = 'hierbar';
   if (!HALL) {
+    cbBar.innerHTML =
+      '<span style="font:800 10.5px -apple-system,sans-serif;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;">Building:</span>' +
+      '<button type="button" class="hierstep on" data-reset-cb="1">CB3 (BUF103)</button>' +
+      '<button type="button" class="hierstep" data-goto-cb4="1">CB4 / BUF102 Dir \u2197</button>';
+    out.appendChild(cbBar);
+
     var h = document.createElement('div');
-    h.className = 'count'; h.textContent = 'Pick a hall \u2014 then a rack \u2014 then a connection';
+    h.className = 'count';
+    h.textContent = isTrace
+      ? 'CB3 (BUF103) \u2014 Pick a Data Hall \u2192 Row \u2192 Rack to trace cable paths'
+      : 'CB3 (BUF103) \u2014 Pick a Data Hall \u2192 Row \u2192 Rack to browse connections';
     out.appendChild(h);
     var g = document.createElement('div');
     g.className = 'card';
@@ -419,7 +533,6 @@ function showBrowse() {
       var racks = RACKS[hall] || [];
       var n = racks.length;
       var conns = racks.reduce(function (a, r) { return a + r.n; }, 0);
-      // rack density mini-map: 16 cells, each = ~n/16 racks, colored by density
       var maxConns = Math.max.apply(null, racks.map(function (r) { return r.n; }).concat([1]));
       var cells = '';
       var cellCount = Math.min(16, Math.max(8, Math.ceil(n / 40)));
@@ -440,18 +553,128 @@ function showBrowse() {
     out.appendChild(g);
     return;
   }
-  // hall chosen: rack grid
+
+  // Hall chosen: show CB3 > Hall breadcrumb + Hall quick-switch pills + Row filter + Row-grouped racks
   var back = document.createElement('button');
-  back.className = 'chip'; back.textContent = '\u2039 All halls'; back.setAttribute('data-hall', '');
-  back.addEventListener('click', function (e) { e.stopPropagation(); HALL = null; render(); });
+  back.className = 'chip';
+  back.textContent = '\u2039 All halls';
+  back.setAttribute('data-hall', '');
+  out.appendChild(back);
+
+  cbBar.innerHTML =
+    '<button type="button" class="hierstep" data-reset-cb="1">CB3</button>' +
+    '<span class="hiersep">\u203a</span>' +
+    D.halls.map(function (hName) {
+      return '<button type="button" class="hierstep' + (hName === HALL ? ' on' : '') + '" data-hall="' + esc(hName) + '">' + esc(hName) + '</button>';
+    }).join('');
+  out.appendChild(cbBar);
+
+  var hallRacks = RACKS[HALL] || [];
+  var byRow = {};
+  var rowOrder = [];
+  hallRacks.forEach(function (r) {
+    var rm = parseRackMeta(r.rack);
+    if (!byRow[rm.row]) { byRow[rm.row] = []; rowOrder.push(rm.row); }
+    byRow[rm.row].push(r);
+  });
+  rowOrder.sort();
+
+  // Row filter chip bar
+  var rowChips = document.createElement('div');
+  rowChips.className = 'chiprow';
+  rowChips.innerHTML = '<button type="button" class="chip' + (!ROWFILTER ? ' on' : '') + '" data-rowfilter="">All rows<small>' + hallRacks.length + '</small></button>' +
+    rowOrder.map(function (rn) {
+      var on = ROWFILTER === rn ? ' on' : '';
+      return '<button type="button" class="chip' + on + '" data-rowfilter="' + esc(rn) + '">Row ' + parseInt(rn, 10) + '<small>' + byRow[rn].length + '</small></button>';
+    }).join('');
+  out.appendChild(rowChips);
+
   var h2 = document.createElement('div');
-  h2.className = 'count'; h2.textContent = HALL + ' \u2014 tap a rack';
-  var grid = document.createElement('div');
-  grid.className = 'rackgrid';
-  grid.innerHTML = (RACKS[HALL] || []).map(function (r) {
-    return '<button class="rackcell" data-rack="' + esc(r.rack) + '" title="' + r.n + ' connections">R' + esc(r.rack.split('-R')[1] || '') + '</button>';
-  }).join('');
-  out.appendChild(back); out.appendChild(h2); out.appendChild(grid);
+  h2.className = 'count';
+  h2.textContent = 'CB3 \u203a ' + HALL + (ROWFILTER ? ' \u203a Row ' + parseInt(ROWFILTER, 10) : '') +
+    (isTrace ? ' \u2014 tap a rack to trace its cable paths' : ' \u2014 tap a rack to view connections');
+  out.appendChild(h2);
+
+  var rowsToShow = ROWFILTER ? rowOrder.filter(function (rn) { return rn === ROWFILTER; }) : rowOrder;
+  rowsToShow.forEach(function (rn) {
+    var rList = byRow[rn] || [];
+    var rowNumInt = parseInt(rn, 10);
+    var hdr = document.createElement('div');
+    hdr.className = 'rowgrp-hdr';
+    hdr.innerHTML = '<span>Row ' + rowNumInt + (rowNumInt <= 2 ? ' (Network)' : '') + '</span><span>' + rList.length + ' racks</span>';
+    out.appendChild(hdr);
+    var grid = document.createElement('div');
+    grid.className = 'rackgrid';
+    grid.innerHTML = rList.map(function (r) {
+      var shortCode = r.rack.split('-R')[1] || '';
+      return '<button class="rackcell" data-rack="' + esc(r.rack) + '" title="' + r.n + ' connections">' +
+        '<span>R' + esc(shortCode) + '</span><small>' + r.n + 'c</small></button>';
+    }).join('');
+    out.appendChild(grid);
+  });
+}
+
+function renderRackHeaderBar(out, rack, allHitsCount, isTrace) {
+  var rm = parseRackMeta(rack);
+  HALL = rm.hall;
+  var backBtn = document.createElement('button');
+  backBtn.className = 'chip';
+  backBtn.textContent = '\u2039 All racks';
+  backBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    RACK = null;
+    document.getElementById('q').value = '';
+    render();
+  });
+  out.appendChild(backBtn);
+
+  // Interactive CB3 > Hall > Row > Rack breadcrumb
+  var cbBar = document.createElement('div');
+  cbBar.className = 'hierbar';
+  cbBar.innerHTML =
+    '<button type="button" class="hierstep" data-reset-cb="1">CB3</button>' +
+    '<span class="hiersep">\u203a</span>' +
+    '<button type="button" class="hierstep" data-hall="' + esc(rm.hall) + '">' + esc(rm.hall) + '</button>' +
+    '<span class="hiersep">\u203a</span>' +
+    '<button type="button" class="hierstep" data-hall="' + esc(rm.hall) + '">Row ' + parseInt(rm.row, 10) + '</button>' +
+    '<span class="hiersep">\u203a</span>' +
+    '<span class="hierstep on">R' + esc(rm.row + rm.spot) + '</span>';
+  out.appendChild(cbBar);
+
+  // Sibling racks in the same Row for 1-tap horizontal rack hopping
+  var siblings = (RACKS[rm.hall] || []).filter(function (x) {
+    return parseRackMeta(x.rack).row === rm.row;
+  });
+  if (siblings.length > 1) {
+    var sibRow = document.createElement('div');
+    sibRow.className = 'chiprow';
+    sibRow.innerHTML = siblings.map(function (s) {
+      var sc = s.rack.split('-R')[1] || '';
+      var on = s.rack === rack ? ' on' : '';
+      return '<button type="button" class="chip' + on + '" data-rack="' + esc(s.rack) + '">R' + esc(sc) + '<small>' + s.n + '</small></button>';
+    }).join('');
+    out.appendChild(sibRow);
+  }
+
+  // Cross-tool action bar: Switch Browse/Trace, Make Flag Labels, Jump to Walkthrough Row
+  var act = document.createElement('div');
+  act.className = 'actrow';
+  act.innerHTML =
+    (isTrace
+      ? '<button type="button" class="actbtn pri" data-switch-mode="browse">Browse list (' + allHitsCount + ')</button>'
+      : '<button type="button" class="actbtn pri" data-switch-mode="trace">Trace diagram \u2197</button>') +
+    '<button type="button" class="actbtn" data-make-rack-labels="1">Make Flag Labels</button>' +
+    '<button type="button" class="actbtn" data-jump-walk="1">Walkthrough Row ' + parseInt(rm.row, 10) + ' \u2197</button>';
+  out.appendChild(act);
+}
+
+/* ---------- browse: CB -> Hall -> Row -> Rack ---------- */
+function showBrowse() {
+  cleanupJsPlumb();
+  var out = document.getElementById('results');
+  out.innerHTML = '';
+  if (RACK) { return rackView(); }
+  renderHierarchyPicker(out, false);
 }
 /* ---------- rack view ---------- */
 function connectionsFor(rack) {
@@ -473,12 +696,8 @@ function rackView() {
   var out = document.getElementById('results');
   out.innerHTML = '';
   if (!RACK) { return showBrowse(); } // rack tab with no rack = the picker (no dead ends)
-  var backBtn = document.createElement('button');
-  backBtn.className = 'chip';
-  backBtn.textContent = '‹ All racks';
-  backBtn.addEventListener('click', function (e) { e.stopPropagation(); RACK = null; HALL = null; render(); });
-  out.appendChild(backBtn);
   var all = connectionsFor(RACK);
+  renderRackHeaderBar(out, RACK, all.length, false);
   var groups = [];
   FAMS.forEach(function (fam) {
     var hits = all.filter(function (h) { return h[0] === fam; });
@@ -683,21 +902,40 @@ function showTrace() {
   cleanupJsPlumb();
   var out = document.getElementById('results');
   out.innerHTML = '';
-  var q = document.getElementById('q').value.trim() || RACK || '';
-  var head = document.createElement('div');
-  head.className = 'count';
-  head.textContent = q ? 'Tracing: ' + q : 'Type a rack (like dh1-r0411) to see its cable paths visually';
-  out.appendChild(head);
-  if (!q) {
-    out.innerHTML += '<div class="trace-instruction">The Trace view draws interactive jsPlumb cable paths across racks (including multi-hop EOR/DCN patch panels). Tap any cable or rack node to highlight its full path, or open its detail sheet.</div>';
+  var q = document.getElementById('q').value.trim();
+  if (q) {
+    var parsed = rackNorm(q);
+    if (parsed) {
+      RACK = parsed;
+    } else if (!RACK) {
+      var errEl = document.createElement('div');
+      errEl.className = 'trace-instruction';
+      errEl.style.marginBottom = '10px';
+      errEl.textContent = 'Could not parse \u201c' + q + '\u201d as a rack. Choose Building \u2192 Data Hall \u2192 Row \u2192 Rack below.';
+      out.appendChild(errEl);
+      renderHierarchyPicker(out, true);
+      return;
+    }
+  }
+  if (!RACK) {
+    var intro = document.createElement('div');
+    intro.className = 'trace-instruction';
+    intro.style.marginBottom = '10px';
+    intro.textContent = 'Interactive jsPlumb cable paths across racks (including multi-hop EOR/DCN patch panels). Choose Building \u2192 Data Hall \u2192 Row \u2192 Rack below to trace.';
+    out.appendChild(intro);
+    renderHierarchyPicker(out, true);
     return;
   }
-  var rack = rackNorm(q) || RACK;
-  if (!rack) { out.innerHTML += '<div class="trace-instruction">Could not parse \u201c' + esc(q) + '\u201d as a rack. Try dh1-r0411.</div>'; return; }
-  RACK = rack;
-  var hits = connectionsFor(rack);
-  if (!hits.length) { out.innerHTML += '<div class="trace-instruction">No connections found for ' + esc(rack) + '</div>'; return; }
-  renderTraceDiagram(rack, hits, out);
+  var hits = connectionsFor(RACK);
+  renderRackHeaderBar(out, RACK, hits.length, true);
+  if (!hits.length) {
+    var emptyEl = document.createElement('div');
+    emptyEl.className = 'trace-instruction';
+    emptyEl.textContent = 'No connections found for ' + RACK;
+    out.appendChild(emptyEl);
+    return;
+  }
+  renderTraceDiagram(RACK, hits, out);
 }
 
 function renderTraceDiagram(rack, hits, out) {
@@ -914,8 +1152,10 @@ function buildTraceCard(rack, group, out) {
 }
 
 /* ---------- detail sheet ---------- */
+var _currentSheetHit = null;
 function openSheet(hit) {
   if (!hit) return;
+  _currentSheetHit = hit;
   var fam = hit[0], row = hit[1];
   var a = D.d[row[0]], aDev = D.d[row[1]], z = D.d[row[2]], zDev = D.d[row[3]];
   var spec = D.d[row[4]] || '\u2014', panel = D.d[row[5]] || '';
@@ -943,6 +1183,7 @@ function openSheet(hit) {
     '<button data-copy="' + esc(a) + '">Copy A</button>' +
     '<button data-copy="' + esc(z) + '" class="sec">Copy Z</button>' +
     '<button data-copy="' + esc(spec) + '" class="sec">Copy spec</button></div>' +
+    '<button type="button" data-make-one-label="1" style="margin-top:10px;width:100%;padding:12px;border-radius:10px;background:rgba(48,164,108,.16);color:#65d49e;border:1px solid rgba(48,164,108,.45);font:700 13px -apple-system,sans-serif;cursor:pointer;">Make Flag Label for this Cable \u2197</button>' +
     '<button class="closex">Close</button>';
   sh.classList.add('ov-open');
   document.getElementById('sheetbg').classList.add('ov-open');
@@ -953,6 +1194,11 @@ function closeSheet() {
 }
 document.getElementById('sheetbg').addEventListener('click', closeSheet);
 document.getElementById('sheet').addEventListener('click', function (e) {
+  var mkOne = e.target.closest('[data-make-one-label]');
+  if (mkOne && _currentSheetHit) {
+    sendHitsToLabels([_currentSheetHit]);
+    return;
+  }
   if (e.target.classList.contains('closex')) return closeSheet();
   var b = e.target.closest('button[data-copy]');
   if (b) {

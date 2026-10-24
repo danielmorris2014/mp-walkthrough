@@ -182,6 +182,12 @@ with sync_playwright() as p:
         crdtMerged.halls.CB5_DH1.rows[17]['11'].F144 === 'hung' &&
         crdtMerged.halls.CB5_DH1.rows[22]['13'].OCS === 'ran' &&
         !!Sync.getYDoc();
+      // Tombstone clear vs older remote stamp: intentional clear on Phone B at t=3000 beats Phone A's 'hung' at t=1000
+      const phoneClear = JSON.parse(JSON.stringify(state));
+      phoneClear.halls.CB5_DH1.rows[17]['11'].F144 = 'none';
+      phoneClear._meta = { halls_at: 3000, _cleared: { 'CB5_DH1:17:11:F144': 3000 } };
+      const clearMerged = Sync.merge(phoneA, phoneClear);
+      out.clearTombstoneWins = clearMerged.halls.CB5_DH1.rows[17]['11'].F144 === 'none';
       return out;
     }""")
     for k, ok in res7.items():
@@ -308,6 +314,20 @@ with sync_playwright() as p:
             check("page[buf103].traceMultiHop", tr["multihop"] > 0, str(tr))
             check("page[buf103].traceHighlight", tr["hlNodes"] >= 2 and tr["hlConns"] >= 1, str(tr))
             check("page[buf103].traceNoScrollX", tr["scrollX"] <= 1, f"scrollX={tr['scrollX']}")
+            trPicker = sp.evaluate("""() => {
+              document.getElementById('q').value = '';
+              RACK = null; HALL = null; ROWFILTER = null;
+              document.querySelector('#seg button[data-v="trace"]').click();
+              const hallsInTrace = document.querySelectorAll('[data-hall]').length;
+              const cbBar = !!document.querySelector('.hierbar');
+              document.querySelector('[data-hall="DH1"]').click();
+              const rowGroups = document.querySelectorAll('.rowgrp-hdr').length;
+              const firstRack = document.querySelector('.rackcell');
+              if (firstRack) firstRack.click();
+              const tracedStages = document.querySelectorAll('.jtk-stage').length;
+              return { hallsInTrace, cbBar, rowGroups, tracedStages };
+            }""")
+            check("page[buf103].traceHierarchyPicker", trPicker["hallsInTrace"] == 4 and trPicker["cbBar"] and trPicker["rowGroups"] > 0 and trPicker["tracedStages"] > 0, str(trPicker))
             sjs = sp.evaluate("""async () => {
               const hasBtn = !!document.getElementById('updateXlsxBtn') && !!document.getElementById('xlsxInput');
               await lazyLoadScript('./vendor/xlsx/xlsx.full.min.js');

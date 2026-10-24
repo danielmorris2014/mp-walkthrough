@@ -80,7 +80,17 @@ var Sync = (function () {
               var ySide = ensureYMap(yRow, sd);
               CABLES.forEach(function (c) {
                 var val = seg[c] || 'none';
-                if (ySide.get(c) !== val) ySide.set(c, val);
+                var prevVal = ySide.get(c);
+                var tKey = hid + ':' + r + ':' + sd + ':' + c;
+                if (doc === ydoc && s._meta) {
+                  if (!s._meta._cleared) s._meta._cleared = {};
+                  if (prevVal && prevVal !== 'none' && val === 'none') {
+                    s._meta._cleared[tKey] = Date.now();
+                  } else if (val !== 'none' && s._meta._cleared[tKey]) {
+                    delete s._meta._cleared[tKey];
+                  }
+                }
+                if (prevVal !== val) ySide.set(c, val);
                 var stObj = (seg._st && seg._st[c]) ? { by: seg._st[c].by, at: seg._st[c].at } : null;
                 var curSt = ySide.get('_st_' + c) || null;
                 if (JSON.stringify(curSt) !== JSON.stringify(stObj)) {
@@ -227,9 +237,13 @@ var Sync = (function () {
   }
 
   // Merge two halls maps at the individual (hall, row, side, cable) granularity
-  // using Yjs Y.Doc + per-cable _st[c].at wall-clock timestamps (ADR-0002).
-  function mergeHallsFieldLevel(rHalls, lHalls, rHallsAt, lHallsAt, rYjsB64) {
+  // using Yjs Y.Doc + per-cable _st[c].at wall-clock timestamps (ADR-0002) and
+  // _meta._cleared tombstones so intentional clears/undos win over older stamps.
+  function mergeHallsFieldLevel(rHalls, lHalls, rHallsAt, lHallsAt, rYjsB64, rCleared, lCleared, outCleared) {
     var localPreferred = lHallsAt >= rHallsAt;
+    rCleared = rCleared || {};
+    lCleared = lCleared || {};
+    outCleared = outCleared || {};
     // Start from Yjs CRDT merge if Y is available
     var yMergedHalls = null;
     if (typeof Y !== 'undefined' && Y.Doc) {
@@ -289,27 +303,36 @@ var Sync = (function () {
           var hasSt = false;
 
           CABLES.forEach(function (c) {
+            var tKey = hid + ':' + r + ':' + sd + ':' + c;
             var rVal = rSeg[c] || 'none';
             var lVal = lSeg[c] || 'none';
             var rSt = (rSeg._st && rSeg._st[c]) || null;
             var lSt = (lSeg._st && lSeg._st[c]) || null;
-            var rAt = (rSt && rSt.at) || 0;
-            var lAt = (lSt && lSt.at) || 0;
+            var rAt = (rVal === 'none') ? (rCleared[tKey] || 0) : ((rSt && rSt.at) || 0);
+            var lAt = (lVal === 'none') ? (lCleared[tKey] || 0) : ((lSt && lSt.at) || 0);
 
             var winVal, winSt;
             if (rVal === lVal) {
               winVal = lVal;
               winSt = (lAt >= rAt) ? (lSt || rSt) : (rSt || lSt);
+              if (winVal === 'none' && (lAt > 0 || rAt > 0)) outCleared[tKey] = Math.max(lAt, rAt);
             } else if (rAt > 0 && lAt > 0) {
-              // Both phones stamped this exact cable with attribution -> latest timestamp wins (ADR-0002)
-              if (lAt >= rAt) { winVal = lVal; winSt = lSt; }
-              else { winVal = rVal; winSt = rSt; }
+              // Both phones touched this exact cable (stamp or tombstone clear) -> latest timestamp wins (ADR-0002)
+              if (lAt >= rAt) {
+                winVal = lVal; winSt = lSt;
+                if (winVal === 'none') outCleared[tKey] = lAt;
+              } else {
+                winVal = rVal; winSt = rSt;
+                if (winVal === 'none') outCleared[tKey] = rAt;
+              }
             } else if (lAt > 0 && rVal === 'none') {
-              // Local stamped this cable, remote has 'none' -> keep local stamp
+              // Local stamped (or cleared) this cable, remote has untouched 'none' -> keep local
               winVal = lVal; winSt = lSt;
+              if (winVal === 'none') outCleared[tKey] = lAt;
             } else if (rAt > 0 && lVal === 'none') {
-              // Remote stamped this cable, local has 'none' -> keep remote stamp
+              // Remote stamped (or cleared) this cable, local has untouched 'none' -> keep remote
               winVal = rVal; winSt = rSt;
+              if (winVal === 'none') outCleared[tKey] = rAt;
             } else if (ySeg && ySeg[c] && ySeg[c] !== 'none') {
               winVal = ySeg[c];
               winSt = (ySeg._st && ySeg._st[c]) || lSt || rSt;
@@ -349,7 +372,11 @@ var Sync = (function () {
 
       if (k === 'halls' && isRealHallsMap(remote.halls) && isRealHallsMap(local.halls)) {
         // Yjs CRDT field-level merge across halls -> rows -> sides -> cables
-        merged.halls = mergeHallsFieldLevel(remote.halls, local.halls, rAt, lAt, remote._yjs);
+        var rCleared = (remote._meta && remote._meta._cleared) || {};
+        var lCleared = (local._meta && local._meta._cleared) || {};
+        var mergedCleared = {};
+        merged.halls = mergeHallsFieldLevel(remote.halls, local.halls, rAt, lAt, remote._yjs, rCleared, lCleared, mergedCleared);
+        if (Object.keys(mergedCleared).length) meta._cleared = mergedCleared;
       } else {
         merged[k] = localWins ? local[k] : remote[k];
       }
@@ -363,6 +390,7 @@ var Sync = (function () {
 
   function markChanged(s, silent) {
     if (!s) return;
+    if (!s._meta) s._meta = {};
     if (ydoc) syncToYDoc(s, ydoc);
     if (lastMarked && !silent) {
       SHARED_KEYS.forEach(function (k) {

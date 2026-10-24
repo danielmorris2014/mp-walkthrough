@@ -227,13 +227,21 @@ function decodeCanvas(cv, quiet) {
 }
 function barcodeHit(code) {
   setStatus('Barcode found \u2713');
+  var is103 = /BUF103/i.test(code);
   var box = document.getElementById('results');
-  box.innerHTML = '<div class="hit"><span class="code">' + KitData.esc(code) + '</span>' +
-    '<button class="go" id="goDir">Look up</button></div>';
+  box.innerHTML = '<div class="hit" style="flex-wrap:wrap;"><span class="code" style="width:100%;margin-bottom:6px;">' + KitData.esc(code) + '</span>' +
+    '<div style="display:flex;gap:8px;width:100%;">' +
+    '<button class="go" id="goBuf103" style="flex:1;' + (is103 ? '' : 'background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--line);') + '">Search CB3 (BUF103)</button>' +
+    '<button class="go" id="goDir" style="flex:1;' + (!is103 ? '' : 'background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--line);') + '">Search CB4/5 Dir</button>' +
+    '</div></div>';
+  document.getElementById('goBuf103').onclick = function () {
+    try { sessionStorage.setItem('mp.ocrq', code); } catch (e) {}
+    location.href = './buf103.html';
+  };
   document.getElementById('goDir').onclick = function () {
     try { sessionStorage.setItem('mp.ocrq', code); } catch (e) {}
     try { sessionStorage.setItem('mp_embed', '1'); } catch (e) {}
-    location.href = './guide.html';
+    location.href = './guide.html#/find';
   };
 }
 
@@ -297,7 +305,12 @@ function renderTextResults(text) {
 }
 function goQ(q) {
   try { sessionStorage.setItem('mp.ocrq', q); } catch (e) {}
-  location.href = './buf103.html';
+  if (/^BUF102/i.test(q)) {
+    try { sessionStorage.setItem('mp_embed', '1'); } catch (e) {}
+    location.href = './guide.html#/find';
+  } else {
+    location.href = './buf103.html';
+  }
 }
 function setStatus(t) {
   var el = document.getElementById('status');

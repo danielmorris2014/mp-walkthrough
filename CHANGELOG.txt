@@ -1,6 +1,20 @@
 MP Kit Changelog
 ================
 
+v78 (2026-10-24) — Hierarchical CB -> Hall -> Row -> Rack navigation & 9 audit upgrades
+- Interactive CB (Building) -> Hall -> Row -> Rack selector in buf103.html
+  across BOTH Browse and Trace modes (no more typing a rack in Trace mode),
+  plus row-grouped rack grids, row filter chips, and sibling-rack strip
+- Sync tombstone tracking (_meta._cleared) so cleared/undone stamps never
+  resurrect on sync merge
+- Self-contained ReportEngine (CABLE_SHORT & activeHallNames defined in-module)
+- Full 100% offline training course precache in sw.js background activation
+- Upgraded Flag Label Maker (labels.html): Graphite chrome.css theme,
+  localForage IndexedDB persistence, and 1-tap cutsheet -> label generation
+- Smart building routing (CB3/BUF103 vs CB4/5/BUF102) in scan.html
+- Bidirectional Walkthrough <-> Cutsheet deep-linking & live stamp attribution
+  tags on walkthrough cards, plus direct .json file download on backup
+
 v77 (2026-10-24) — SheetJS on-device cutsheet self-serve
 - Vendored SheetJS (vendor/xlsx/xlsx.full.min.js) + tools/cutsheet-parser.js
 - Drop any newer BUF103 .xlsx cutsheet directly on a phone in buf103.html:
