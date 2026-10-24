@@ -48,9 +48,11 @@ for name in wb.sheetnames:
                     if h and h not in hmap:
                         hmap[h] = j
                 col_a_loc = pick(hmap, "A_loc")
+                col_a_elev = pick(hmap, "A_elev")
                 col_a_name = pick(hmap, "A_name")
                 col_a_port = pick(hmap, "A_port")
                 col_z_loc = pick(hmap, "Z_loc", "eor_loc")
+                col_z_elev = pick(hmap, "Z_elev")
                 col_z_name = pick(hmap, "Z_name", "eor_name")
                 col_z_port = pick(hmap, "Z_port", "eor_front_port")
                 spec_cols = [
@@ -66,6 +68,11 @@ for name in wb.sheetnames:
                     )
                     if c in hmap
                 ]
+                col_a_cord = pick(hmap, "A_patch_cord")
+                col_z_cord = pick(hmap, "Z_patch_cord")
+                col_trunk = pick(hmap, "A_Z_trunk_assembly")
+                col_trunk_a_id = pick(hmap, "A_trunk_connector_id")
+                col_trunk_z_id = pick(hmap, "Z_trunk_connector_id")
                 col_pan_a = pick(hmap, "A_patch_panel")
                 col_pan_a_ru = pick(hmap, "A_pp_ru")
                 col_pan_a_port_f = pick(hmap, "A_pp_port_front")
@@ -96,21 +103,33 @@ for name in wb.sheetnames:
             return str(v).strip() if v is not None else ""
         a_loc_s = gs(col_a_loc)
         z_loc_s = gs(col_z_loc)
+        pan_a_s = gs(col_pan_a)
+        pan_z_s = gs(col_pan_z)
+        def fmt_pan_ru(p_s, r_s):
+            if not r_s:
+                return p_s
+            if p_s.lower().endswith("ru" + r_s.lower()):
+                return p_s
+            return p_s + " ru" + r_s
         pan = ""
-        if col_pan_a is not None and gs(col_pan_a):
-            pan = gs(col_pan_a) + ((" ru" + gs(col_pan_a_ru)) if gs(col_pan_a_ru) else "")
-        elif col_pan_z is not None and gs(col_pan_z):
-            pan = gs(col_pan_z) + ((" ru" + gs(col_pan_z_ru)) if gs(col_pan_z_ru) else "")
+        if pan_a_s and pan_z_s and pan_a_s != pan_z_s:
+            pan = fmt_pan_ru(pan_a_s, gs(col_pan_a_ru)) + " \u2192 " + fmt_pan_ru(pan_z_s, gs(col_pan_z_ru))
+        elif pan_a_s:
+            pan = fmt_pan_ru(pan_a_s, gs(col_pan_a_ru))
+        elif pan_z_s:
+            pan = fmt_pan_ru(pan_z_s, gs(col_pan_z_ru))
         a_full = gs(col_a_name)
         if gs(col_a_port):
             a_full = (a_full + " " + gs(col_a_port)).strip()
-        if not a_full and gs(col_pan_a):
-            a_full = gs(col_pan_a) + ((" p" + gs(col_pan_a_port_f)) if gs(col_pan_a_port_f) else "")
+        elif gs(col_pan_a_port_f) and pan_a_s == gs(col_a_name):
+            a_full = (a_full + " p" + gs(col_pan_a_port_f)).strip()
+        if not a_full and pan_a_s:
+            a_full = pan_a_s + ((" p" + gs(col_pan_a_port_f)) if gs(col_pan_a_port_f) else "")
         z_full = gs(col_z_name)
         if gs(col_z_port):
             z_full = (z_full + " " + gs(col_z_port)).strip()
-        if not z_full and gs(col_pan_z):
-            z_full = gs(col_pan_z) + ((" p" + gs(col_pan_z_port_f)) if gs(col_pan_z_port_f) else "")
+        if not z_full and pan_z_s:
+            z_full = pan_z_s + ((" p" + gs(col_pan_z_port_f)) if gs(col_pan_z_port_f) else "")
         spec_val = ""
         for sc in spec_cols:
             sv = gs(sc)
@@ -125,38 +144,48 @@ for name in wb.sheetnames:
             intern(spec_val),
             intern(pan),
         ]
-        # Multi-hop intermediate points (EOR / DCN / cross-rack patch panels)
+        # Multi-hop intermediate points (AIO/EOR panels, DCN-PP panels, in-rack & cross-rack patch panels)
         hops = []
         eor_loc_s = gs(col_eor_loc)
-        if eor_loc_s and eor_loc_s != a_loc_s and eor_loc_s != z_loc_s:
-            eor_lbl = (
-                gs(col_eor_pan)
-                + ((" ru" + gs(col_eor_ru)) if gs(col_eor_ru) else "")
-                + ((" " + gs(col_eor_port_f)) if gs(col_eor_port_f) else "")
-            ).strip()
-            hops.extend([intern(eor_loc_s), intern(eor_lbl), intern(gs(col_eor_dcn_cable))])
-        else:
-            a_pp_loc_s = gs(col_a_pp_loc)
-            if a_pp_loc_s and a_pp_loc_s != a_loc_s and a_pp_loc_s != z_loc_s:
-                a_pp_lbl = (gs(col_pan_a) + ((" ru" + gs(col_pan_a_ru)) if gs(col_pan_a_ru) else "")).strip()
-                hops.extend([intern(a_pp_loc_s), intern(a_pp_lbl), -1])
         dcn_loc_s = gs(col_dcn_loc)
-        if dcn_loc_s and dcn_loc_s != a_loc_s and dcn_loc_s != z_loc_s:
-            dcn_lbl = (
-                gs(col_dcn_pan)
-                + ((" ru" + gs(col_dcn_ru)) if gs(col_dcn_ru) else "")
-                + ((" " + gs(col_dcn_port_f)) if gs(col_dcn_port_f) else "")
-            ).strip()
-            hops.extend([intern(dcn_loc_s), intern(dcn_lbl), intern(gs(col_dcn_spn_cable))])
+        a_pp_loc_s = gs(col_a_pp_loc)
+        z_pp_loc_s = gs(col_z_pp_loc)
+        if eor_loc_s or dcn_loc_s:
+            if eor_loc_s and eor_loc_s != a_loc_s and eor_loc_s != z_loc_s:
+                eor_lbl = (
+                    fmt_pan_ru(gs(col_eor_pan), gs(col_eor_ru))
+                    + ((" " + gs(col_eor_port_f)) if gs(col_eor_port_f) else "")
+                ).strip()
+                hops.extend([intern(eor_loc_s), intern(eor_lbl), intern(gs(col_eor_dcn_cable))])
+            if dcn_loc_s and dcn_loc_s != a_loc_s and dcn_loc_s != z_loc_s:
+                dcn_lbl = (
+                    fmt_pan_ru(gs(col_dcn_pan), gs(col_dcn_ru))
+                    + ((" " + gs(col_dcn_port_f)) if gs(col_dcn_port_f) else "")
+                ).strip()
+                hops.extend([intern(dcn_loc_s), intern(dcn_lbl), intern(gs(col_dcn_spn_cable))])
         else:
-            z_pp_loc_s = gs(col_z_pp_loc)
-            if z_pp_loc_s and z_pp_loc_s != a_loc_s and z_pp_loc_s != z_loc_s:
-                z_pp_lbl = (gs(col_pan_z) + ((" ru" + gs(col_pan_z_ru)) if gs(col_pan_z_ru) else "")).strip()
-                hops.extend([intern(z_pp_loc_s), intern(z_pp_lbl), -1])
+            if pan_a_s and pan_a_s != gs(col_a_name):
+                eff_a_pp_loc = a_pp_loc_s or a_loc_s
+                a_pp_lbl = (
+                    fmt_pan_ru(pan_a_s, gs(col_pan_a_ru))
+                    + ((" p" + gs(col_pan_a_port_f)) if gs(col_pan_a_port_f) else "")
+                    + ((" [" + gs(col_trunk_a_id) + "]") if gs(col_trunk_a_id) else "")
+                ).strip()
+                a_pp_cab = gs(col_trunk) or gs(col_a_cord)
+                hops.extend([intern(eff_a_pp_loc), intern(a_pp_lbl), intern(a_pp_cab)])
+            if pan_z_s and pan_z_s != gs(col_z_name):
+                eff_z_pp_loc = z_pp_loc_s or z_loc_s
+                z_pp_lbl = (
+                    fmt_pan_ru(pan_z_s, gs(col_pan_z_ru))
+                    + ((" p" + gs(col_pan_z_port_f)) if gs(col_pan_z_port_f) else "")
+                    + ((" [" + gs(col_trunk_z_id) + "]") if gs(col_trunk_z_id) else "")
+                ).strip()
+                z_pp_cab = gs(col_z_cord) or gs(col_trunk)
+                hops.extend([intern(eff_z_pp_loc), intern(z_pp_lbl), intern(z_pp_cab)])
         if hops:
             entry.append(hops)
         buf.append(entry)
-        for loc in (a_loc_s, z_loc_s, eor_loc_s, dcn_loc_s):
+        for loc in (a_loc_s, z_loc_s, eor_loc_s, dcn_loc_s, a_pp_loc_s, z_pp_loc_s):
             if not loc:
                 continue
             m = hall_re.match(loc + "-")

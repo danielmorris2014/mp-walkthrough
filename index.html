@@ -797,7 +797,13 @@
         </div>
         <div class="form-field">
           <label for="shiftTime">Shift time</label>
-          <input type="text" id="shiftTime" oninput="saveMeta()">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <select id="shiftTime" onchange="saveMeta()" style="flex:1; min-width:0;">
+              <option value="2:00 PM – 2:00 AM">2:00 PM – 2:00 AM (Night)</option>
+              <option value="6:00 AM – 6:00 PM">6:00 AM – 6:00 PM (Day)</option>
+            </select>
+            <button type="button" class="btn btn-secondary" id="addShiftTimeBtn" onclick="addCustomShiftTime()" style="min-width:42px; min-height:40px; padding:0 10px; font-weight:900;" aria-label="Add custom shift time" title="Add custom shift time">+</button>
+          </div>
         </div>
         <div class="form-field">
           <label for="mpCount">Midpoint (MP) count</label>
@@ -902,11 +908,15 @@
           </select>
         </div>
       </div>
-      <div class="batch-row" style="margin-bottom:10px;">
+      <div class="batch-row" style="margin-bottom:8px;">
         <button class="btn" onclick="endOfNight()">End of night</button>
         <button class="btn btn-secondary" onclick="copyReport()">Copy</button>
         <button class="btn btn-secondary" onclick="shareReport()">Share</button>
         <button class="btn btn-secondary" onclick="saveReportToHistory()">Save to history</button>
+      </div>
+      <div class="batch-row" style="margin-bottom:10px;">
+        <button class="btn btn-secondary" id="emailReportBtn" onclick="emailReport()" style="background:rgba(0,144,255,.16);border-color:rgba(0,144,255,.45);color:#7cc4fa;">&#9993; Email (Outlook)</button>
+        <button class="btn btn-secondary" id="sendPcReportBtn" onclick="sendReportToPc()" style="background:rgba(48,164,108,.16);border-color:rgba(48,164,108,.45);color:#65d49e;">&#128187; Send to PC (.eml)</button>
       </div>
       <pre class="report-pre" id="reportOutput"></pre>
     </div>
@@ -965,6 +975,8 @@
     <ul id="nightChecklist"></ul>
     <div class="batch-row" style="margin-top:12px;">
       <button class="btn" onclick="copyReport()">Copy report</button>
+      <button class="btn btn-secondary" onclick="emailReport()">Email (Outlook)</button>
+      <button class="btn btn-secondary" onclick="sendReportToPc()">Send to PC</button>
       <button class="btn btn-secondary" onclick="doBackup()">Backup file</button>
     </div>
     <button class="btn btn-ghost" style="width:100%; margin-top:8px;" onclick="closeNightOverlay()">Done</button>
@@ -1027,7 +1039,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v79';
+var APP_VERSION = 'v80';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1784,10 +1796,55 @@ function addHallPrompt() {
 }
 
 /* ---------------- crew / meta / blockers ---------------- */
+var DEFAULT_SHIFT_TIMES = [
+  { value: '2:00 PM \u2013 2:00 AM', label: '2:00 PM \u2013 2:00 AM (Night)' },
+  { value: '6:00 AM \u2013 6:00 PM', label: '6:00 AM \u2013 6:00 PM (Day)' }
+];
+function populateShiftSelect(currentVal) {
+  var sel = document.getElementById('shiftTime');
+  if (!sel) return;
+  var val = currentVal != null ? String(currentVal).trim() : (state.meta.shiftTime || '2:00 PM \u2013 2:00 AM');
+  var custom = (state.settings && Array.isArray(state.settings.customShifts)) ? state.settings.customShifts : [];
+  var seen = {};
+  var opts = [];
+  DEFAULT_SHIFT_TIMES.forEach(function (d) {
+    seen[d.value] = true;
+    opts.push('<option value="' + escapeAttr(d.value) + '">' + escapeHtml(d.label) + '</option>');
+  });
+  custom.forEach(function (c) {
+    c = String(c || '').trim();
+    if (c && !seen[c]) {
+      seen[c] = true;
+      opts.push('<option value="' + escapeAttr(c) + '">' + escapeHtml(c) + '</option>');
+    }
+  });
+  if (val && !seen[val]) {
+    seen[val] = true;
+    opts.push('<option value="' + escapeAttr(val) + '">' + escapeHtml(val) + '</option>');
+  }
+  sel.innerHTML = opts.join('');
+  sel.value = val || DEFAULT_SHIFT_TIMES[0].value;
+}
+function addCustomShiftTime() {
+  var s = prompt('Add shift time (e.g. 6:00 PM \u2013 6:00 AM):');
+  if (!s || !s.trim()) return;
+  var clean = s.trim();
+  pushUndo();
+  if (!Array.isArray(state.settings.customShifts)) state.settings.customShifts = [];
+  if (state.settings.customShifts.indexOf(clean) < 0 &&
+      clean !== '2:00 PM \u2013 2:00 AM' && clean !== '6:00 AM \u2013 6:00 PM') {
+    state.settings.customShifts.push(clean);
+  }
+  state.meta.shiftTime = clean;
+  populateShiftSelect(clean);
+  saveState();
+  renderHome();
+  showToast('Shift time set to ' + clean);
+}
 function renderCrewTab() {
   var m = state.meta;
   document.getElementById('supers').value = m.supers || '';
-  document.getElementById('shiftTime').value = m.shiftTime || '';
+  populateShiftSelect(m.shiftTime);
   document.getElementById('mpCount').value = m.mpCount;
   document.getElementById('spCount').value = m.spCount;
   document.getElementById('spWorkNotes').value = m.spWorkNotes || '';
@@ -2142,13 +2199,73 @@ function copySomething(text, successMsg) {
   } else fb();
 }
 function currentReportText() {
-  var t = document.getElementById('reportOutput').textContent;
+  var el = document.getElementById('reportOutput');
+  var t = el && el.textContent ? el.textContent : buildReport((document.getElementById('reportStyle') || {}).value || 'formal');
   return t.replace(/\r\n/g, '\n');
-}function copyReport() { copySomething(currentReportText(), 'Report copied'); }
+}
+function copyReport() { copySomething(currentReportText(), 'Report copied'); }
 function shareReport() {
   var txt = currentReportText();
   if (navigator.share) navigator.share({ text: txt }).catch(function () {});
   else copyReport();
+}
+function parseReportEmailParts() {
+  var txt = currentReportText();
+  var m = /^Subject:\s*(.+)\n(?:\n)?([\s\S]*)$/.exec(txt);
+  if (m) {
+    return { subject: m[1].trim(), body: m[2], fullText: txt };
+  }
+  var subj = 'Shift Update \u2013 ' + new Date().toLocaleDateString('en-US') +
+    (state.meta && state.meta.shiftTime ? ' (' + state.meta.shiftTime + ')' : '');
+  return { subject: subj, body: txt, fullText: txt };
+}
+function emailReport() {
+  var parts = parseReportEmailParts();
+  var bodyCrlf = parts.body.replace(/\r?\n/g, '\r\n');
+  var mailto = 'mailto:?subject=' + encodeURIComponent(parts.subject) + '&body=' + encodeURIComponent(bodyCrlf);
+  try { copyTextFallback(parts.fullText); } catch (e) {}
+  showToast('Opening email app (report also copied)');
+  try { window.location.href = mailto; } catch (e) {}
+}
+function sendReportToPc() {
+  var parts = parseReportEmailParts();
+  var bodyCrlf = parts.body.replace(/\r?\n/g, '\r\n');
+  var eml = [
+    'X-Unsent: 1',
+    'Subject: ' + parts.subject,
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset=utf-8',
+    'Content-Transfer-Encoding: 8bit',
+    '',
+    bodyCrlf
+  ].join('\r\n');
+  var fname = 'Shift-Update-' + dateStamp() + '.eml';
+  try {
+    if (typeof Sync !== 'undefined' && Sync.isConfigured && Sync.isConfigured()) {
+      Sync.sync(state);
+    }
+  } catch (e) {}
+  try {
+    var file = new File([eml], fname, { type: 'message/rfc822' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: parts.subject, text: parts.fullText }).then(function () {
+        showToast('Sent to PC (.eml opens in Desktop Outlook)');
+      }, function () {});
+      return;
+    }
+  } catch (e) {}
+  try {
+    var blob = new Blob([eml], { type: 'message/rfc822;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+  } catch (e) {}
+  copySomething(parts.fullText, 'Outlook draft (' + fname + ') downloaded & report copied');
 }
 function saveReportToHistory() {
   pushUndo();

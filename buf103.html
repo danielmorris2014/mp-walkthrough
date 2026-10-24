@@ -137,9 +137,12 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 .jtk-col-hdr { font: 800 9px -apple-system, sans-serif; letter-spacing: .5px; text-transform: uppercase;
   color: var(--dim); text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .jtk-node { position: relative; z-index: 2; background: var(--card2); border: 1.5px solid var(--line);
-  border-radius: 9px; padding: 5px 7px; cursor: pointer; text-align: left;
+  border-radius: 9px; padding: 5px 6px; cursor: pointer; text-align: left;
   transition: opacity .16s ease, border-color .16s ease, box-shadow .16s ease; }
 .jtk-node:active { transform: scale(.97); }
+.jtk-node .role-tag { display: inline-block; font: 800 8px/1 -apple-system, sans-serif; letter-spacing: .4px;
+  text-transform: uppercase; padding: 2px 4px; border-radius: 4px; margin-bottom: 2px; max-width: 100%;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .jtk-node .rk { font: 800 10.5px/1.2 ui-monospace, monospace; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .jtk-node .pt { font: 600 9px/1.2 ui-monospace, monospace; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
 .jtk-node.hl-active { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.22); background: rgba(255,255,255,.09); }
@@ -147,6 +150,30 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 .jtk-stage svg.jtk-connector { z-index: 1; pointer-events: stroke; cursor: pointer; transition: opacity .16s ease; }
 .jtk-stage svg.jtk-connector.hl-dim { opacity: .14; }
 .jtk-stage svg.jtk-connector.hl-active path { stroke-width: 3.5px; }
+.trace-active-strip { margin-top: 8px; padding: 8px 10px; border-radius: 10px;
+  background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.09); }
+.trace-active-hdr { display: flex; justify-content: space-between; align-items: center; gap: 6px;
+  font: 800 9.5px -apple-system, sans-serif; letter-spacing: .5px; text-transform: uppercase; color: var(--amber-t); margin-bottom: 6px; }
+.trace-step-flow { display: flex; flex-direction: column; gap: 4px; }
+.trace-step-node { display: flex; align-items: center; gap: 6px; font: 700 11px/1.25 ui-monospace, monospace; color: var(--text); min-width: 0; }
+.trace-step-badge { flex: none; font: 800 8.5px/1 -apple-system, sans-serif; padding: 3px 5px; border-radius: 5px; text-transform: uppercase; letter-spacing: .3px; }
+.trace-step-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trace-step-cab { margin-left: 14px; padding-left: 8px; border-left: 2px dashed rgba(255,255,255,.18);
+  font: 600 10px/1.25 ui-monospace, monospace; color: var(--green); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topo-card { background: linear-gradient(165deg, rgba(25,28,34,.98), rgba(16,18,22,.98));
+  border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 12px 14px; margin-top: 10px; }
+.topo-hdr { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.topo-role-pill { font: 800 10px/1 -apple-system, sans-serif; text-transform: uppercase; letter-spacing: .5px;
+  padding: 4px 8px; border-radius: 999px; }
+.topo-fam-row { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.06); }
+.topo-fam-lbl { font: 800 10.5px -apple-system, sans-serif; color: var(--muted); display: flex; justify-content: space-between; margin-bottom: 4px; }
+.topo-chain { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.topo-box { font: 700 10px/1.2 ui-monospace, monospace; padding: 3px 6px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); }
+.topo-arrow { font: 700 9.5px ui-monospace, monospace; color: var(--dim); }
+.hop-pill { display: inline-block; font: 700 10px/1.3 ui-monospace, monospace; color: var(--amber-t);
+  background: rgba(245,165,36,.1); border: 1px solid rgba(245,165,36,.32); border-radius: 6px;
+  padding: 2px 6px; margin-top: 4px; word-break: break-word; }
 .trace-cables { margin-top: 8px; border-top: 1px solid rgba(255,255,255,.06); padding-top: 6px; }
 .trace-cables-hdr { display: flex; justify-content: space-between; align-items: center;
   font: 700 10px -apple-system, sans-serif; color: var(--dim); margin-bottom: 4px; }
@@ -747,11 +774,21 @@ function rackView() {
 function rowHtml(row, ri) {
   var a = D.d[row[0]] || '?', aDev = D.d[row[1]] || '', z = D.d[row[2]] || '?', zDev = D.d[row[3]] || '';
   var spec = D.d[row[4]] || '', panel = D.d[row[5]] || '';
+  var hopHtml = '';
+  if (row[6] && row[6].length >= 3) {
+    var viaParts = [];
+    for (var hi = 0; hi < row[6].length; hi += 3) {
+      var hLoc = shortRack(D.d[row[6][hi]] || '');
+      var hLbl = row[6][hi + 1] >= 0 ? shortDev(D.d[row[6][hi + 1]] || '') : '';
+      viaParts.push(hLoc + (hLbl ? ' (' + hLbl + ')' : ''));
+    }
+    hopHtml = '<div class="hop-pill">Via ' + esc(viaParts.join(' \u2192 ')) + '</div>';
+  }
   return '<button class="rowbtn" data-ri="' + ri + '"><div class="ends">' +
     '<div class="end"><div class="loc">' + esc(a) + '</div><div class="dev">' + esc(aDev) + '</div></div>' +
     '<div class="arrow">\u2192</div>' +
     '<div class="end"><div class="loc">' + esc(z) + '</div><div class="dev">' + esc(zDev) + '</div></div>' +
-    '</div>' + (spec ? '<div class="spec">' + esc(spec) + '</div>' : '') +
+    '</div>' + hopHtml + (spec ? '<div class="spec">' + esc(spec) + '</div>' : '') +
     (panel ? '<div class="panel">' + esc(panel) + '</div>' : '') + '</button>';
 }
 /* ---------- search ---------- */
@@ -782,7 +819,13 @@ function run() {
     var fam = FAMS[f], rows = D.rows[fam];
     for (var r = 0; r < rows.length && matches.length < LIMIT; r++) {
       var row = rows[r];
-      if (hit.has(row[0]) || hit.has(row[1]) || hit.has(row[2]) || hit.has(row[3]) || hit.has(row[4])) matches.push([fam, row]);
+      var mRow = hit.has(row[0]) || hit.has(row[1]) || hit.has(row[2]) || hit.has(row[3]) || hit.has(row[4]) || hit.has(row[5]);
+      if (!mRow && row[6]) {
+        for (var hi = 0; hi < row[6].length; hi++) {
+          if (hit.has(row[6][hi])) { mRow = true; break; }
+        }
+      }
+      if (mRow) matches.push([fam, row]);
     }
   }
   var ms = Math.round(performance.now() - t0);
@@ -865,7 +908,7 @@ function showMats() {
   });
 }
 
-/* ---------- trace: interactive jsPlumb cable paths (v76) ---------- */
+/* ---------- trace: interactive jsPlumb cable paths & physical channel diagrams (v76/v80) ---------- */
 function shortRack(loc) {
   if (!loc) return '?';
   var p = loc.split('-R');
@@ -873,23 +916,98 @@ function shortRack(loc) {
 }
 function shortDev(dev) {
   if (!dev) return '';
-  var parts = dev.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(-12);
-  return parts[0].slice(-8) + ' ' + parts[parts.length - 1].slice(0, 8);
+  var s = dev.trim()
+    .replace(/^buf103-pod\d+-rack\d+-/i, '')
+    .replace(/^buf103-pod\d+-/i, '')
+    .replace(/^buf103-/i, '')
+    .replace(/^(fpp|cpp)-[a-z0-9]+-r\d{4}-/i, '$1-')
+    .replace(/\bEthernet/gi, 'Et')
+    .replace(/\bconsole\b/gi, 'con')
+    .replace(/\s*\[[^\]]*\]/g, '');
+  var parts = s.trim().split(/\s+/);
+  if (parts.length <= 2) return parts.join(' ').slice(0, 18);
+  return (parts[0] + ' ' + parts.slice(1).join(' ')).slice(0, 20);
+}
+function shortCableSpec(spec) {
+  if (!spec) return '';
+  var lenM = /\b(\d+\s*M)\b/i.exec(spec) || /\((\d+M)\)/i.exec(spec);
+  var len = lenM ? lenM[1].toUpperCase().replace(/\s+/g, '') : '';
+  var trkM = /\b(Trunk\s*#\d+|H\d+(?:\s*\(Leg\s*\d+\))?)\b/i.exec(spec);
+  var trk = trkM ? trkM[1] : '';
+  var kind = '';
+  if (/192F/i.test(spec)) kind = '192F MPO8 Trunk';
+  else if (/144F/i.test(spec)) kind = '144F MPO8 Trunk';
+  else if (/72F/i.test(spec)) kind = '72F MPO12 Trunk';
+  else if (/48F/i.test(spec)) kind = '48F LC-MPO8';
+  else if (/24F/i.test(spec)) kind = '24F LC-MPO8';
+  else if (/18F/i.test(spec)) kind = '18F MPO12';
+  else if (/12F/i.test(spec)) kind = '12F LC-MPO12';
+  else if (/4xLC.*Harness|Harness/i.test(spec)) kind = 'MPO8\u21924xLC Harness';
+  else if (/8F.*MPO8/i.test(spec)) kind = '8F MPO8 Cord';
+  else if (/2F.*LC/i.test(spec)) kind = '2F LC Cord';
+  else if (/VisiPatch/i.test(spec)) kind = 'VisiPatch Cat6';
+  else if (/Standard Patch Cord/i.test(spec)) {
+    var colM = /\((Blue|Yellow|Green|Gray|Red|White|Orange|Black)\)/i.exec(spec);
+    kind = 'Patch Cord' + (colM ? ' (' + colM[1] + ')' : '');
+  } else if (/Cat6|RJ45/i.test(spec)) kind = 'Cat6 Cord';
+  else kind = spec.slice(0, 22);
+  var bits = [];
+  if (len) bits.push(len);
+  if (kind) bits.push(kind);
+  if (trk && kind.indexOf(trk) < 0) bits.push(trk);
+  return bits.join(' \u00b7 ');
+}
+function classifyRackRole(loc, dev) {
+  var devL = (dev || '').toLowerCase();
+  var locU = (loc || '').toUpperCase();
+  var m = /-R(\d{2})(\d{2})$/.exec(locU);
+  var rowNum = m ? parseInt(m[1], 10) : 0;
+  var spot = m ? m[2] : '';
+  if (devL.indexOf('fpp-dcn') >= 0 || devL.indexOf('dcnpp') >= 0) {
+    return { code: 'DCN-PP', label: 'DCN Patch Panel', color: '#55d0d6', bg: 'rgba(85,208,214,.16)' };
+  }
+  if ((spot === '11' || spot === '13' || devL.indexOf('eor') >= 0) && (devL.indexOf('fpp-') >= 0 || devL.indexOf('cpp-') >= 0 || devL.indexOf('pp') === 0)) {
+    return { code: 'AIO PANEL', label: 'AIO / EOR Patch Panel (Spot ' + (spot || '11/13') + ')', color: '#ffca16', bg: 'rgba(255,202,22,.16)' };
+  }
+  if ((rowNum <= 2 || rowNum >= 24) && (devL.indexOf('fpp-') >= 0 || devL.indexOf('cpp-') >= 0)) {
+    return { code: 'SPINE PP', label: 'Network Row Patch Panel', color: '#c084fc', bg: 'rgba(192,132,252,.16)' };
+  }
+  if (devL.indexOf('spn') >= 0 || devL.indexOf('ocslf') >= 0 || devL.indexOf('sal') >= 0 || devL.indexOf('ant-cr') >= 0 || devL.indexOf('fs-edg') >= 0 || devL.indexOf('mgmt-cr') >= 0 || devL.indexOf('oxide') >= 0) {
+    return { code: 'SPINE / CORE', label: 'Spine / Core Switch', color: '#a855f7', bg: 'rgba(168,85,247,.16)' };
+  }
+  if (spot === '12' || devL.indexOf('spocs') >= 0) {
+    return { code: 'SPOCS', label: 'SPOCS Optical Switch Rack (Spot 12)', color: '#30a46c', bg: 'rgba(48,164,108,.16)' };
+  }
+  if (spot === '11' || spot === '13' || devL.indexOf('mgmt-lf') >= 0 || devL.indexOf('tr-lf') >= 0 || devL.indexOf('mgmt-con') >= 0 || devL.indexOf('bms-fb') >= 0) {
+    return { code: 'AIO / EOR', label: 'All-In-One EOR Rack (Spot ' + (spot || '11/13') + ')', color: '#f5a524', bg: 'rgba(245,165,36,.16)' };
+  }
+  if (devL.indexOf('pp1') === 0 || devL.indexOf('fpp-') >= 0 || devL.indexOf('cpp-') >= 0) {
+    return { code: 'RACK PP', label: 'Rack Patch Panel', color: '#30a46c', bg: 'rgba(48,164,108,.16)' };
+  }
+  if (rowNum <= 2 || rowNum >= 24) {
+    return { code: 'NET RACK', label: 'Network Row Rack (Row ' + rowNum + ')', color: '#a855f7', bg: 'rgba(168,85,247,.16)' };
+  }
+  return { code: 'TPU / RACK', label: 'Compute / TPU Rack' + (spot ? ' (Spot ' + spot + ')' : ''), color: '#6aa9e8', bg: 'rgba(106,169,232,.16)' };
 }
 function cableChain(row) {
   var aLoc = D.d[row[0]] || '?', aDev = D.d[row[1]] || '';
   var zLoc = D.d[row[2]] || '?', zDev = D.d[row[3]] || '';
-  var steps = [{ loc: aLoc, dev: aDev, role: 'A End' }];
+  var mainSpec = D.d[row[4]] || '';
+  var rA = classifyRackRole(aLoc, aDev);
+  var steps = [{ loc: aLoc, dev: aDev, cable: mainSpec, role: rA.code, roleLabel: rA.label, roleColor: rA.color, roleBg: rA.bg }];
   if (row[6] && row[6].length >= 3) {
     for (var hi = 0; hi < row[6].length; hi += 3) {
       var hLoc = D.d[row[6][hi]] || '';
       var hLbl = row[6][hi + 1] >= 0 ? (D.d[row[6][hi + 1]] || '') : '';
       var hCab = row[6][hi + 2] >= 0 ? (D.d[row[6][hi + 2]] || '') : '';
-      if (hLoc) steps.push({ loc: hLoc, dev: hLbl, cable: hCab, role: hi === 0 ? 'EOR Hop' : 'DCN Hop' });
+      if (hLoc) {
+        var rH = classifyRackRole(hLoc, hLbl);
+        steps.push({ loc: hLoc, dev: hLbl, cable: hCab || mainSpec, role: rH.code, roleLabel: rH.label, roleColor: rH.color, roleBg: rH.bg });
+      }
     }
   }
-  steps.push({ loc: zLoc, dev: zDev, role: 'Z End' });
+  var rZ = classifyRackRole(zLoc, zDev);
+  steps.push({ loc: zLoc, dev: zDev, cable: '', role: rZ.code, roleLabel: rZ.label, roleColor: rZ.color, roleBg: rZ.bg });
   return steps;
 }
 function cleanupJsPlumb() {
@@ -921,7 +1039,7 @@ function showTrace() {
     var intro = document.createElement('div');
     intro.className = 'trace-instruction';
     intro.style.marginBottom = '10px';
-    intro.textContent = 'Interactive jsPlumb cable paths across racks (including multi-hop EOR/DCN patch panels). Choose Building \u2192 Data Hall \u2192 Row \u2192 Rack below to trace.';
+    intro.textContent = 'Interactive jsPlumb cable paths across racks (including AIO/EOR patch panels, trunks, DCN-PP, and Spine hops). Choose Building \u2192 Data Hall \u2192 Row \u2192 Rack below to trace.';
     out.appendChild(intro);
     renderHierarchyPicker(out, true);
     return;
@@ -938,10 +1056,47 @@ function showTrace() {
   renderTraceDiagram(RACK, hits, out);
 }
 
+function renderRackTopologyCard(rack, groups, out) {
+  var rackRole = classifyRackRole(rack, '');
+  var card = document.createElement('div');
+  card.className = 'topo-card';
+  var crossHopGroups = groups.filter(function (g) {
+    return g.fam.indexOf('INTRA RACK') < 0 && g.fam.indexOf('Intra Rack') < 0;
+  });
+  var showGroups = crossHopGroups.length ? crossHopGroups : groups;
+  var rowsHtml = showGroups.map(function (g) {
+    var ch = cableChain(g.hits[0][1]);
+    var boxes = [];
+    for (var i = 0; i < ch.length; i++) {
+      var st = ch[i];
+      var isSelf = st.loc === rack;
+      boxes.push('<span class="topo-box" style="' + (isSelf ? 'border-color:' + st.roleColor + ';background:' + st.roleBg : '') + '">' +
+        '<strong style="color:' + st.roleColor + '">' + esc(st.role) + '</strong> ' + esc(shortRack(st.loc)) + '</span>');
+      if (i < ch.length - 1) {
+        var cShort = shortCableSpec(st.cable);
+        boxes.push('<span class="topo-arrow">' + (cShort ? '\u2500[' + esc(cShort.split(' \u00b7 ')[1] || cShort) + ']\u2192' : '\u2192') + '</span>');
+      }
+    }
+    return '<div class="topo-fam-row">' +
+      '<div class="topo-fam-lbl"><span style="color:' + g.color + '">' + esc(g.fam) + '</span><span>' + g.hits.length + ' cables \u00b7 ' + ch.length + ' stages</span></div>' +
+      '<div class="topo-chain">' + boxes.join('') + '</div></div>';
+  }).join('');
+
+  card.innerHTML =
+    '<div class="topo-hdr">' +
+      '<div><div class="ct" style="margin-bottom:2px;">Physical Channel Blueprint</div>' +
+      '<div style="font:800 13.5px ui-monospace,monospace;color:var(--text);">' + esc(rack) + '</div></div>' +
+      '<span class="topo-role-pill" style="color:' + rackRole.color + ';background:' + rackRole.bg + ';border:1px solid ' + rackRole.color + ';">' + esc(rackRole.label) + '</span>' +
+    '</div>' +
+    rowsHtml;
+  out.appendChild(card);
+}
+
 function renderTraceDiagram(rack, hits, out) {
   var famColors = { 'TPU RACK PP <> OCS': '#30a46c', 'TOR <> DCN-SPN': '#55d0d6', 'RMU + TOR <> EOR': '#ffca16',
     'MACHINE <> TOR (INTRA RACK)': '#e5484d', 'MACHINE <> TPU (INTRA RACK)': '#6aa9e8', 'MACHINE BMC <> RMU (INTRA RACK)': '#ff7ab8',
-    'RMU <> BAT + RECT (INTRA RACK)': '#46a758', 'BMS <> FB0 <> FB1': '#f5a524' };
+    'RMU <> BAT + RECT (INTRA RACK)': '#46a758', 'BMS <> FB0 <> FB1': '#f5a524', 'MGMT-LF <> MGMT-SPN': '#a855f7',
+    'TR-LF <> TR-SPN': '#38bdf8', 'SPOCS MGMT (UPLINK)': '#34d399', 'DCN-SAL <> DC-SPN': '#f472b6' };
   var defaultColor = '#b0b4ba';
   var groups = [];
   FAMS.forEach(function (fam) {
@@ -964,9 +1119,30 @@ function renderTraceDiagram(rack, hits, out) {
     out.appendChild(bar);
   }
 
+  // Rack Role & Multi-Hop Physical Channel Blueprint overview card (v80)
+  renderRackTopologyCard(rack, groups, out);
+
   groups.forEach(function (g) {
     buildTraceCard(rack, g, out);
   });
+}
+
+function buildStepFlowHtml(ch, hitIdx) {
+  var html = '<div class="trace-active-hdr"><span>Physical Channel Stages (Cable #' + (hitIdx + 1) + ')</span>' +
+    '<button type="button" class="inspect-pill" data-open-sheet="' + hitIdx + '" style="border:0;cursor:pointer;">Schematic \u2197</button></div>' +
+    '<div class="trace-step-flow">';
+  for (var i = 0; i < ch.length; i++) {
+    var st = ch[i];
+    html += '<div class="trace-step-node">' +
+      '<span class="trace-step-badge" style="color:' + st.roleColor + ';background:' + st.roleBg + ';">' + (i + 1) + '. ' + esc(st.role) + '</span>' +
+      '<span class="trace-step-txt"><strong>' + esc(shortRack(st.loc)) + '</strong>' + (st.dev ? ' \u00b7 ' + esc(st.dev) : '') + '</span>' +
+    '</div>';
+    if (i < ch.length - 1 && st.cable) {
+      html += '<div class="trace-step-cab">\u21b3 ' + esc(shortCableSpec(st.cable) || st.cable) + '</div>';
+    }
+  }
+  html += '</div>';
+  return html;
 }
 
 function buildTraceCard(rack, group, out) {
@@ -982,7 +1158,7 @@ function buildTraceCard(rack, group, out) {
   hdr.className = 'trace-hdr';
   hdr.innerHTML = '<div class="trace-title"><span class="fam" style="color:' + group.color + '">' + esc(group.fam) +
     '</span> \u00b7 ' + group.hits.length + '</div>' +
-    '<span class="trace-badge">' + (numCols > 2 ? (numCols + '-hop path') : 'direct') + '</span>';
+    '<span class="trace-badge">' + (numCols > 2 ? (numCols + '-stage channel') : '2-stage direct') + '</span>';
   card.appendChild(hdr);
 
   var stage = document.createElement('div');
@@ -991,24 +1167,26 @@ function buildTraceCard(rack, group, out) {
   stage.setAttribute('aria-label', 'Interactive cable trace for ' + group.fam);
   card.appendChild(stage);
 
-  // Build columns & deduplicated rack/device nodes per column
+  // Build columns & deduplicated rack/device nodes per column with role-aware headers
   var cols = [];
   var colNodeMap = [];
   var allNodes = [];
+  var firstChain = chains[0] || [];
   for (var c = 0; c < numCols; c++) {
     var colEl = document.createElement('div');
     colEl.className = 'jtk-col';
     var colHdr = document.createElement('div');
     colHdr.className = 'jtk-col-hdr';
-    colHdr.textContent = c === 0 ? 'A End' : (c === numCols - 1 ? 'Z End' : ('Hop ' + c));
+    var sampleStep = firstChain[Math.min(c, firstChain.length - 1)];
+    colHdr.textContent = sampleStep && sampleStep.role
+      ? ((c + 1) + '. ' + sampleStep.role)
+      : (c === 0 ? 'A End' : (c === numCols - 1 ? 'Z End' : ('Hop ' + c)));
     colEl.appendChild(colHdr);
     stage.appendChild(colEl);
     cols.push(colEl);
     colNodeMap.push({});
   }
 
-  // Decide per-column grouping: if a column has >1 unique rack across sampleHits, group by rack+port cluster;
-  // otherwise group by individual device/port so intra-rack and single-source fans are distinct.
   var colUniqueRacks = [];
   for (var c2 = 0; c2 < numCols; c2++) {
     var rset = {};
@@ -1033,7 +1211,9 @@ function buildTraceCard(rack, group, out) {
         nodeEl.type = 'button';
         nodeEl.className = 'jtk-node';
         nodeEl.setAttribute('data-cable-idx', String(cableIdx));
-        nodeEl.innerHTML = '<div class="rk">' + esc(shortRack(st.loc)) + '</div>' +
+        nodeEl.innerHTML =
+          '<span class="role-tag" style="color:' + st.roleColor + ';background:' + st.roleBg + ';">' + esc(st.role) + '</span>' +
+          '<div class="rk">' + esc(shortRack(st.loc)) + '</div>' +
           (st.dev ? '<div class="pt">' + esc(shortDev(st.dev)) + '</div>' : '');
         cols[colIdx].appendChild(nodeEl);
         colNodeMap[colIdx][key] = nodeEl;
@@ -1043,6 +1223,14 @@ function buildTraceCard(rack, group, out) {
     }
     cableNodeLists.push(nList);
   });
+
+  // Live step-by-step physical channel breakdown strip (defaults to Cable #1, updates when any cable is tapped)
+  var activeStrip = document.createElement('div');
+  activeStrip.className = 'trace-active-strip';
+  if (chains.length) {
+    activeStrip.innerHTML = buildStepFlowHtml(chains[0], 0);
+  }
+  card.appendChild(activeStrip);
 
   // Interactive cable list below the diagram for tap-to-highlight & tap-to-inspect
   var listWrap = document.createElement('div');
@@ -1114,6 +1302,10 @@ function buildTraceCard(rack, group, out) {
     cableBtns.forEach(function (b, bi) {
       b.classList.toggle('hl-active', bi === activeIdx);
     });
+    var showIdx = activeIdx >= 0 ? activeIdx : 0;
+    if (chains[showIdx]) {
+      activeStrip.innerHTML = buildStepFlowHtml(chains[showIdx], showIdx);
+    }
     if (activeIdx >= 0) {
       (cableNodeLists[activeIdx] || []).forEach(function (nd) {
         nd.classList.remove('hl-dim');
@@ -1136,6 +1328,13 @@ function buildTraceCard(rack, group, out) {
       if (activeIdx === ci) { openSheet(sampleHits[ci]); } else { highlightCable(ci); }
     }
   });
+  activeStrip.addEventListener('click', function (e) {
+    var pill = e.target.closest('[data-open-sheet]');
+    if (pill) {
+      e.stopPropagation();
+      openSheet(sampleHits[+pill.getAttribute('data-open-sheet')]);
+    }
+  });
   listWrap.addEventListener('click', function (e) {
     var pill = e.target.closest('[data-open-sheet]');
     if (pill) {
@@ -1151,7 +1350,38 @@ function buildTraceCard(rack, group, out) {
   });
 }
 
-/* ---------- detail sheet ---------- */
+/* ---------- detail sheet with End-to-End Physical Channel Schematic SVG ---------- */
+function buildChannelSvg(chain) {
+  var boxH = 44, gapH = 26, padY = 8;
+  var totalH = padY * 2 + chain.length * boxH + (chain.length - 1) * gapH;
+  var parts = ['<svg class="channel-svg" viewBox="0 0 340 ' + totalH + '" style="width:100%;height:auto;display:block;margin-top:6px;" xmlns="http://www.w3.org/2000/svg">'];
+  for (var i = 0; i < chain.length; i++) {
+    var st = chain[i];
+    var y = padY + i * (boxH + gapH);
+    var col = st.roleColor || '#6aa9e8';
+    parts.push(
+      '<rect x="4" y="' + y + '" width="332" height="' + boxH + '" rx="8" fill="#1b1e24" stroke="' + col + '" stroke-width="1.5"/>' +
+      '<rect x="12" y="' + (y + 7) + '" width="82" height="14" rx="4" fill="' + col + '" fill-opacity="0.2"/>' +
+      '<text x="53" y="' + (y + 17) + '" text-anchor="middle" fill="' + col + '" font-family="-apple-system,sans-serif" font-weight="800" font-size="8.5">' + esc((i + 1) + '. ' + st.role) + '</text>' +
+      '<text x="102" y="' + (y + 18) + '" fill="#f3f5f8" font-family="ui-monospace,monospace" font-weight="800" font-size="11.5">' + esc(st.loc) + '</text>' +
+      '<text x="12" y="' + (y + 35) + '" fill="#a3abb8" font-family="ui-monospace,monospace" font-weight="600" font-size="10">' + esc((st.dev || 'Direct port').slice(0, 46)) + '</text>'
+    );
+    if (i < chain.length - 1) {
+      var lineY1 = y + boxH;
+      var lineY2 = lineY1 + gapH;
+      var midY = (lineY1 + lineY2) / 2 + 3;
+      var cTxt = shortCableSpec(st.cable) || st.cable || 'Patch / Trunk';
+      parts.push(
+        '<line x1="28" y1="' + lineY1 + '" x2="28" y2="' + (lineY2 - 3) + '" stroke="#46a758" stroke-width="2" stroke-dasharray="3,2"/>' +
+        '<polygon points="24,' + (lineY2 - 6) + ' 32,' + (lineY2 - 6) + ' 28,' + lineY2 + '" fill="#46a758"/>' +
+        '<text x="40" y="' + midY + '" fill="#65d49e" font-family="ui-monospace,monospace" font-weight="700" font-size="9.5">' + esc(cTxt.slice(0, 44)) + '</text>'
+      );
+    }
+  }
+  parts.push('</svg>');
+  return parts.join('');
+}
+
 var _currentSheetHit = null;
 function openSheet(hit) {
   if (!hit) return;
@@ -1159,23 +1389,16 @@ function openSheet(hit) {
   var fam = hit[0], row = hit[1];
   var a = D.d[row[0]], aDev = D.d[row[1]], z = D.d[row[2]], zDev = D.d[row[3]];
   var spec = D.d[row[4]] || '\u2014', panel = D.d[row[5]] || '';
-  var hopsHtml = '';
-  if (row[6] && row[6].length >= 3) {
-    var chain = cableChain(row);
-    hopsHtml = '<div class="kv"><div class="k">Full multi-hop path (' + chain.length + ' racks)</div>' +
-      chain.map(function (st, idx) {
-        return '<div class="v" style="font-size:11.5px;margin-top:3px">' +
-          '<span style="color:var(--amber-t)">' + (idx + 1) + '. ' + esc(st.role) + ':</span> ' +
-          esc(st.loc) + (st.dev ? ' \u00b7 <span style="color:var(--muted)">' + esc(st.dev) + '</span>' : '') + '</div>';
-      }).join('') + '</div>';
-  }
+  var chain = cableChain(row);
+  var hopsHtml = '<div class="kv"><div class="k">Physical Channel Schematic (' + chain.length + ' stages)</div>' +
+    buildChannelSvg(chain) + '</div>';
   var sh = document.getElementById('sheet');
   sh.innerHTML = '<div class="grab"></div>' +
     '<div class="ct"><span class="fam">' + esc(fam) + '</span></div>' +
-    '<div class="kv"><div class="k">A end</div><div class="v">' + esc(a) + '</div>' +
-    (aDev ? '<div class="v" style="font-weight:600;color:var(--muted)">' + esc(aDev) + '</div>' : '') + '</div>' +
     hopsHtml +
-    '<div class="kv"><div class="k">Z end</div><div class="v">' + esc(z) + '</div>' +
+    '<div class="kv"><div class="k">A end (' + esc(chain[0].role) + ')</div><div class="v">' + esc(a) + '</div>' +
+    (aDev ? '<div class="v" style="font-weight:600;color:var(--muted)">' + esc(aDev) + '</div>' : '') + '</div>' +
+    '<div class="kv"><div class="k">Z end (' + esc(chain[chain.length - 1].role) + ')</div><div class="v">' + esc(z) + '</div>' +
     (zDev ? '<div class="v" style="font-weight:600;color:var(--muted)">' + esc(zDev) + '</div>' : '') + '</div>' +
     '<div class="kv"><div class="k">Cable / spec</div><div class="v">' + esc(spec) + '</div>' +
     (panel ? '<div class="v" style="font-weight:600;color:var(--green);font-size:11px">' + esc(panel) + '</div>' : '') + '</div>' +

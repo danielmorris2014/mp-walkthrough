@@ -250,12 +250,19 @@ with sync_playwright() as p:
       const out = {};
       switchTab('crew');
       out.crewChips = document.getElementById('crewChips').children.length > 0;
-      out.crewInputs = !!(document.getElementById('supers') && document.getElementById('shiftTime'));
+      const shiftEl = document.getElementById('shiftTime');
+      const shiftOpts = shiftEl ? Array.from(shiftEl.options || []).map(o => o.value) : [];
+      out.crewInputs = !!(document.getElementById('supers') && shiftEl && shiftEl.tagName === 'SELECT'
+        && shiftOpts.includes('2:00 PM \u2013 2:00 AM') && shiftOpts.includes('6:00 AM \u2013 6:00 PM')
+        && document.getElementById('addShiftTimeBtn'));
       switchTab('blockers');
       out.blockersList = !!document.getElementById('blockerList');
       out.hallNotesHome = !!document.getElementById('notesWrap');   // lives on this panel
       switchTab('report');
-      out.reportOutput = !!(document.getElementById('reportOutput') || document.getElementById('reportStyle'));
+      const parts = typeof parseReportEmailParts === 'function' ? parseReportEmailParts() : null;
+      out.reportOutput = !!(document.getElementById('reportOutput') && document.getElementById('reportStyle')
+        && document.getElementById('emailReportBtn') && document.getElementById('sendPcReportBtn')
+        && parts && parts.subject && parts.body);
       return out;
     }""")
     for k, ok in res9.items():
@@ -322,15 +329,21 @@ with sync_playwright() as p:
               const multihop = document.querySelectorAll('.jtk-stage.multihop').length;
               const nodes = document.querySelectorAll('.jtk-node').length;
               const conns = document.querySelectorAll('svg.jtk-connector').length;
+              const topoCard = !!document.querySelector('.topo-card');
+              const activeStrip = !!document.querySelector('.trace-active-strip');
               const firstCable = document.querySelector('.trace-cable-btn');
               if (firstCable) firstCable.click();
               const hlNodes = document.querySelectorAll('.jtk-node.hl-active').length;
               const hlConns = document.querySelectorAll('svg.jtk-connector.hl-active').length;
+              const inspectPill = document.querySelector('.inspect-pill[data-open-sheet]');
+              if (inspectPill) inspectPill.click();
+              const channelSvg = !!document.querySelector('#sheet .channel-svg');
+              closeSheet();
               const scrollX = document.documentElement.scrollWidth - document.documentElement.clientWidth;
-              return { stages, multihop, nodes, conns, hlNodes, hlConns, scrollX };
+              return { stages, multihop, nodes, conns, topoCard, activeStrip, hlNodes, hlConns, channelSvg, scrollX };
             }""")
             check("page[buf103].traceJsPlumbRenders", tr["stages"] > 0 and tr["nodes"] > 0 and tr["conns"] > 0, str(tr))
-            check("page[buf103].traceMultiHop", tr["multihop"] > 0, str(tr))
+            check("page[buf103].traceMultiHop", tr["multihop"] >= 2 and tr["topoCard"] and tr["activeStrip"] and tr["channelSvg"], str(tr))
             check("page[buf103].traceHighlight", tr["hlNodes"] >= 2 and tr["hlConns"] >= 1, str(tr))
             check("page[buf103].traceNoScrollX", tr["scrollX"] <= 1, f"scrollX={tr['scrollX']}")
             trPicker = sp.evaluate("""() => {

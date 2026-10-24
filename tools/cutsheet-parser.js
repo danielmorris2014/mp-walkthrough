@@ -66,9 +66,10 @@
   function parseSheetRows(ctx, name, rows) {
     if (name === 'Intro') return 0;
     var hdrIdx = null, hmap = {};
-    var colALoc = null, colAName = null, colAPort = null;
-    var colZLoc = null, colZName = null, colZPort = null;
+    var colALoc = null, colAElev = null, colAName = null, colAPort = null;
+    var colZLoc = null, colZElev = null, colZName = null, colZPort = null;
     var specCols = [];
+    var colACord = null, colZCord = null, colTrunk = null, colTrunkAId = null, colTrunkZId = null;
     var colPanA = null, colPanARu = null, colPanAPortF = null, colAPpLoc = null;
     var colPanZ = null, colPanZRu = null, colPanZPortF = null, colZPpLoc = null;
     var colEorLoc = null, colEorPan = null, colEorRu = null, colEorPortF = null, colEorDcnCable = null;
@@ -90,9 +91,11 @@
             if (h && !(h in hmap)) hmap[h] = j;
           }
           colALoc = pick(hmap, 'A_loc');
+          colAElev = pick(hmap, 'A_elev');
           colAName = pick(hmap, 'A_name');
           colAPort = pick(hmap, 'A_port');
           colZLoc = pick(hmap, 'Z_loc', 'eor_loc');
+          colZElev = pick(hmap, 'Z_elev');
           colZName = pick(hmap, 'Z_name', 'eor_name');
           colZPort = pick(hmap, 'Z_port', 'eor_front_port');
           var candSpecs = ['cable', 'A_Z_trunk_assembly', 'tor_eor_cable', 'A_patch_cord', 'Z_patch_cord', 'eor_dcn_cable', 'dcn_spn_cable'];
@@ -100,6 +103,11 @@
           for (var sc = 0; sc < candSpecs.length; sc++) {
             if (candSpecs[sc] in hmap) specCols.push(hmap[candSpecs[sc]]);
           }
+          colACord = pick(hmap, 'A_patch_cord');
+          colZCord = pick(hmap, 'Z_patch_cord');
+          colTrunk = pick(hmap, 'A_Z_trunk_assembly');
+          colTrunkAId = pick(hmap, 'A_trunk_connector_id');
+          colTrunkZId = pick(hmap, 'Z_trunk_connector_id');
           colPanA = pick(hmap, 'A_patch_panel');
           colPanARu = pick(hmap, 'A_pp_ru');
           colPanAPortF = pick(hmap, 'A_pp_port_front');
@@ -128,23 +136,36 @@
         return (col !== null && col < row.length && row[col] != null) ? cleanStr(row[col]) : '';
       }
       var zLoc = g(colZLoc);
+      var panAS = g(colPanA);
+      var panZS = g(colPanZ);
+      function fmtPanRu(pS, rS) {
+        if (!rS) return pS;
+        if (pS.toLowerCase().slice(-('ru' + rS).length) === ('ru' + rS).toLowerCase()) return pS;
+        return pS + ' ru' + rS;
+      }
       var pan = '';
-      if (colPanA !== null && g(colPanA)) {
-        pan = g(colPanA) + (g(colPanARu) ? (' ru' + g(colPanARu)) : '');
-      } else if (colPanZ !== null && g(colPanZ)) {
-        pan = g(colPanZ) + (g(colPanZRu) ? (' ru' + g(colPanZRu)) : '');
+      if (panAS && panZS && panAS !== panZS) {
+        pan = fmtPanRu(panAS, g(colPanARu)) + ' \u2192 ' + fmtPanRu(panZS, g(colPanZRu));
+      } else if (panAS) {
+        pan = fmtPanRu(panAS, g(colPanARu));
+      } else if (panZS) {
+        pan = fmtPanRu(panZS, g(colPanZRu));
       }
 
       var aFull = g(colAName);
-      if (g(colAPort)) aFull = (aFull + ' ' + g(colAPort)).trim();
-      if (!aFull && g(colPanA)) {
-        aFull = g(colPanA) + (g(colPanAPortF) ? (' p' + g(colPanAPortF)) : '');
+      if (g(colAPort)) {
+        aFull = (aFull + ' ' + g(colAPort)).trim();
+      } else if (g(colPanAPortF) && panAS === g(colAName)) {
+        aFull = (aFull + ' p' + g(colPanAPortF)).trim();
+      }
+      if (!aFull && panAS) {
+        aFull = panAS + (g(colPanAPortF) ? (' p' + g(colPanAPortF)) : '');
       }
 
       var zFull = g(colZName);
       if (g(colZPort)) zFull = (zFull + ' ' + g(colZPort)).trim();
-      if (!zFull && g(colPanZ)) {
-        zFull = g(colPanZ) + (g(colPanZPortF) ? (' p' + g(colPanZPortF)) : '');
+      if (!zFull && panZS) {
+        zFull = panZS + (g(colPanZPortF) ? (' p' + g(colPanZPortF)) : '');
       }
 
       var specVal = '';
@@ -162,35 +183,48 @@
         ctx.intern(pan)
       ];
 
-      // Multi-hop intermediate points (EOR / DCN / cross-rack patch panels)
+      // Multi-hop intermediate points (AIO/EOR panels, DCN-PP panels, in-rack & cross-rack patch panels)
       var hops = [];
       var eorLoc = g(colEorLoc);
-      if (eorLoc && eorLoc !== aLoc && eorLoc !== zLoc) {
-        var eorLbl = (g(colEorPan) + (g(colEorRu) ? ' ru' + g(colEorRu) : '') + (g(colEorPortF) ? ' ' + g(colEorPortF) : '')).trim();
-        hops.push(ctx.intern(eorLoc), ctx.intern(eorLbl), ctx.intern(g(colEorDcnCable)));
-      } else {
-        var aPpLoc = g(colAPpLoc);
-        if (aPpLoc && aPpLoc !== aLoc && aPpLoc !== zLoc) {
-          var aPpLbl = (g(colPanA) + (g(colPanARu) ? ' ru' + g(colPanARu) : '')).trim();
-          hops.push(ctx.intern(aPpLoc), ctx.intern(aPpLbl), -1);
-        }
-      }
       var dcnLoc = g(colDcnLoc);
-      if (dcnLoc && dcnLoc !== aLoc && dcnLoc !== zLoc) {
-        var dcnLbl = (g(colDcnPan) + (g(colDcnRu) ? ' ru' + g(colDcnRu) : '') + (g(colDcnPortF) ? ' ' + g(colDcnPortF) : '')).trim();
-        hops.push(ctx.intern(dcnLoc), ctx.intern(dcnLbl), ctx.intern(g(colDcnSpnCable)));
+      var aPpLoc = g(colAPpLoc);
+      var zPpLoc = g(colZPpLoc);
+      if (eorLoc || dcnLoc) {
+        if (eorLoc && eorLoc !== aLoc && eorLoc !== zLoc) {
+          var eorLbl = (fmtPanRu(g(colEorPan), g(colEorRu)) + (g(colEorPortF) ? ' ' + g(colEorPortF) : '')).trim();
+          hops.push(ctx.intern(eorLoc), ctx.intern(eorLbl), ctx.intern(g(colEorDcnCable)));
+        }
+        if (dcnLoc && dcnLoc !== aLoc && dcnLoc !== zLoc) {
+          var dcnLbl = (fmtPanRu(g(colDcnPan), g(colDcnRu)) + (g(colDcnPortF) ? ' ' + g(colDcnPortF) : '')).trim();
+          hops.push(ctx.intern(dcnLoc), ctx.intern(dcnLbl), ctx.intern(g(colDcnSpnCable)));
+        }
       } else {
-        var zPpLoc = g(colZPpLoc);
-        if (zPpLoc && zPpLoc !== aLoc && zPpLoc !== zLoc) {
-          var zPpLbl = (g(colPanZ) + (g(colPanZRu) ? ' ru' + g(colPanZRu) : '')).trim();
-          hops.push(ctx.intern(zPpLoc), ctx.intern(zPpLbl), -1);
+        if (panAS && panAS !== g(colAName)) {
+          var effAPpLoc = aPpLoc || aLoc;
+          var aPpLbl = (
+            fmtPanRu(panAS, g(colPanARu)) +
+            (g(colPanAPortF) ? ' p' + g(colPanAPortF) : '') +
+            (g(colTrunkAId) ? ' [' + g(colTrunkAId) + ']' : '')
+          ).trim();
+          var aPpCab = g(colTrunk) || g(colACord);
+          hops.push(ctx.intern(effAPpLoc), ctx.intern(aPpLbl), ctx.intern(aPpCab));
+        }
+        if (panZS && panZS !== g(colZName)) {
+          var effZPpLoc = zPpLoc || zLoc;
+          var zPpLbl = (
+            fmtPanRu(panZS, g(colPanZRu)) +
+            (g(colPanZPortF) ? ' p' + g(colPanZPortF) : '') +
+            (g(colTrunkZId) ? ' [' + g(colTrunkZId) + ']' : '')
+          ).trim();
+          var zPpCab = g(colZCord) || g(colTrunk);
+          hops.push(ctx.intern(effZPpLoc), ctx.intern(zPpLbl), ctx.intern(zPpCab));
         }
       }
       if (hops.length) entry.push(hops);
 
       buf.push(entry);
 
-      var locsToCheck = [aLoc, zLoc, eorLoc, dcnLoc];
+      var locsToCheck = [aLoc, zLoc, eorLoc, dcnLoc, aPpLoc, zPpLoc];
       for (var li = 0; li < locsToCheck.length; li++) {
         var lc = locsToCheck[li];
         if (!lc) continue;
