@@ -21,8 +21,17 @@ body { margin: 0; background: var(--bg); color: var(--text);
 .back { min-height: 40px; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,.055);
   border: 1px solid var(--line); color: var(--muted); font: 800 12.5px -apple-system, sans-serif; cursor: pointer; }
 .back:active { transform: scale(.96); }
-.h1 { font: 800 17px/1.1 -apple-system, sans-serif; letter-spacing: -.2px; }
-.h1 small { display: block; font: 600 10.5px -apple-system, sans-serif; color: var(--dim); letter-spacing: .4px; margin-top: 2px; }
+.h1 { flex: 1; min-width: 0; font: 800 17px/1.1 -apple-system, sans-serif; letter-spacing: -.2px; }
+.h1 small { display: block; font: 600 10.5px -apple-system, sans-serif; color: var(--dim); letter-spacing: .4px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.upbtn { min-height: 36px; padding: 0 10px; border-radius: 999px; background: rgba(48,164,108,.16);
+  border: 1px solid rgba(48,164,108,.45); color: var(--green); font: 800 11.5px -apple-system, sans-serif; cursor: pointer; white-space: nowrap; flex: none; }
+.upbtn:active { transform: scale(.96); }
+.rstbtn { min-height: 36px; padding: 0 10px; border-radius: 999px; background: rgba(255,255,255,.06);
+  border: 1px solid var(--line); color: var(--muted); font: 800 11.5px -apple-system, sans-serif; cursor: pointer; white-space: nowrap; flex: none; display: none; }
+.rstbtn:active { transform: scale(.96); }
+.progcard { background: var(--card); border: 1px solid var(--amber); border-radius: 14px; padding: 12px 14px; margin-top: 10px; display: none; }
+.progbar-wrap { height: 8px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; margin-top: 8px; }
+.progbar-fill { height: 100%; width: 0%; background: var(--green); transition: width .2s ease; }
 .searchwrap { display: flex; gap: 8px; margin-top: 8px; }
 input[type=text] { flex: 1; min-width: 0; min-height: 44px; font-size: 16px; border-radius: 12px;
   border: 1px solid var(--line); background: var(--card2); color: var(--text); padding: 0 12px; }
@@ -142,6 +151,9 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
   <div class="row1">
     <button class="back" onclick="location.href='./index.html#/home'">&#8249; MP Kit</button>
     <div class="h1">CB3 Cutsheet<small id="meta">DH1&#8211;DH4 &#183; pre-build data</small></div>
+    <button class="rstbtn" id="resetXlsxBtn" type="button" title="Revert to bundled cutsheet">Reset</button>
+    <button class="upbtn" id="updateXlsxBtn" type="button" title="Drop a newer BUF103 .xlsx cutsheet to parse on-device">Update .xlsx</button>
+    <input type="file" id="xlsxInput" accept=".xlsx" style="display:none;font-size:16px;">
   </div>
   <div class="searchwrap">
     <input type="text" id="q" aria-label="Search the cutsheet" placeholder="Rack (dh1-r0411), device, port or spec" enterkeyhint="search" autocapitalize="off" autocomplete="off" spellcheck="false">
@@ -155,6 +167,11 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 </div>
 <div id="view">
   <div class="loadstate" id="loadstate">Loading the BUF103 cutsheet&#8230;</div>
+  <div class="progcard" id="cutsheetProgress">
+    <div class="ct" id="cutsheetProgTitle">Parsing .xlsx on device&#8230;</div>
+    <div id="cutsheetProgSub" style="font:600 12px ui-monospace,monospace;color:var(--muted);">Reading workbook&#8230;</div>
+    <div class="progbar-wrap"><div class="progbar-fill" id="cutsheetProgFill"></div></div>
+  </div>
   <div id="results"></div>
 </div>
 <div class="sheetbg" id="sheetbg"></div>
@@ -166,28 +183,174 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 'use strict';
 /* BUF103 Cutsheet viewer v2 - interactive drill-down: hall -> racks ->
    connections; search; materials; every connection opens a detail sheet
-   with copy buttons. Data bundled via the pipeline (ADR-0003). */
+   with copy buttons. Data bundled via the pipeline (ADR-0003) or updated
+   in the field via SheetJS on-device .xlsx parser (v77). */
 var D = null, FAMS = [], RACKS = {};   // RACKS = {DH1: [{rack, n}...]}
 var MODE = 'browse', HALL = null, RACK = null, FAMFILTER = null, SHOWN = [];
 var _jtkInstances = [];
+var CUTSHEET_LF_KEY = 'mp_buf103_cutsheet';
+var HALLS_LF_KEY = 'mp_buf103_halls';
+var _isCustomCutsheet = false;
 function esc(t) { return KitData.esc(t); }
 function loadDone(d) {
   D = d; FAMS = d.fams;
   buildRacks();
-  document.getElementById('meta').textContent = d.src.replace(/_/g, ' ') + ' \u00b7 ' +
+  var prefix = _isCustomCutsheet ? '[Field .xlsx] ' : '';
+  document.getElementById('meta').textContent = prefix + d.src.replace(/_/g, ' ') + ' \u00b7 ' +
     d.halls.join('\u2013') + ' \u00b7 ' + totalRows().toLocaleString() + ' cables';
+  var rst = document.getElementById('resetXlsxBtn');
+  if (rst) rst.style.display = _isCustomCutsheet ? 'inline-block' : 'none';
   document.getElementById('loadstate').style.display = 'none';
-  showBrowse();
+  render();
 }
-function load() {
-  KitData.load('./data/buf103.json.gz', 'cutsheet', 'loadstate').then(function (d) {
+function checkOcrQuery() {
+  try {
+    var q = sessionStorage.getItem('mp.ocrq');
+    if (q) { sessionStorage.removeItem('mp.ocrq'); document.getElementById('q').value = q; run(); }
+  } catch (e) {}
+}
+function loadBundled() {
+  _isCustomCutsheet = false;
+  return KitData.load('./data/buf103.json.gz', 'cutsheet', 'loadstate').then(function (d) {
     loadDone(d);
-    try {
-      var q = sessionStorage.getItem('mp.ocrq');
-      if (q) { sessionStorage.removeItem('mp.ocrq'); document.getElementById('q').value = q; run(); }
-    } catch (e) {}
+    checkOcrQuery();
   });
 }
+function load() {
+  var lf = (typeof localforage !== 'undefined' && localforage && localforage.getItem)
+    ? localforage.getItem(CUTSHEET_LF_KEY)
+    : Promise.resolve(null);
+  lf.then(function (custom) {
+    if (custom && custom.d && custom.rows && custom.fams) {
+      _isCustomCutsheet = true;
+      loadDone(custom);
+      checkOcrQuery();
+      return;
+    }
+    return loadBundled();
+  }).catch(function () {
+    loadBundled();
+  });
+}
+/* ---------- on-device SheetJS cutsheet self-serve (v77) ---------- */
+function lazyLoadScript(src) {
+  return new Promise(function (resolve, reject) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = function () { reject(new Error('Failed to load ' + src)); };
+    document.head.appendChild(s);
+  });
+}
+function updateProgUI(title, sub, pct, isErr) {
+  var card = document.getElementById('cutsheetProgress');
+  var tEl = document.getElementById('cutsheetProgTitle');
+  var sEl = document.getElementById('cutsheetProgSub');
+  var fEl = document.getElementById('cutsheetProgFill');
+  if (!card) return;
+  card.style.display = 'block';
+  card.style.borderColor = isErr ? 'var(--red)' : 'var(--amber)';
+  if (tEl) { tEl.textContent = title; tEl.style.color = isErr ? 'var(--red)' : 'var(--dim)'; }
+  if (sEl) sEl.textContent = sub;
+  if (fEl) fEl.style.width = Math.max(0, Math.min(100, pct || 0)) + '%';
+}
+function handleXlsxFile(file) {
+  if (!file) return;
+  updateProgUI('Parsing ' + file.name + ' on device\u2026', 'Reading file into memory\u2026', 4, false);
+  var reader = new FileReader();
+  reader.onerror = function () {
+    updateProgUI('Cutsheet update failed', 'Could not read selected file.', 0, true);
+  };
+  reader.onload = function () {
+    var buf = reader.result;
+    function finishParse(resData, resHallsCfg) {
+      updateProgUI('Saving to device IndexedDB\u2026', resData.fams.length + ' families \u00b7 storing offline override\u2026', 98, false);
+      var pSave = (typeof localforage !== 'undefined' && localforage)
+        ? Promise.all([
+            localforage.setItem(CUTSHEET_LF_KEY, resData),
+            localforage.setItem(HALLS_LF_KEY, resHallsCfg)
+          ])
+        : Promise.resolve();
+      pSave.then(function () {
+        document.getElementById('cutsheetProgress').style.display = 'none';
+        _isCustomCutsheet = true;
+        HALL = null; RACK = null; FAMFILTER = null;
+        loadDone(resData);
+      }).catch(function (err) {
+        updateProgUI('Storage error', (err && err.message) ? err.message : String(err), 0, true);
+      });
+    }
+    function fallbackMainThread(arrayBuf) {
+      var pScripts = Promise.resolve();
+      if (typeof XLSX === 'undefined') pScripts = pScripts.then(function () { return lazyLoadScript('./vendor/xlsx/xlsx.full.min.js'); });
+      if (typeof CutsheetParser === 'undefined') pScripts = pScripts.then(function () { return lazyLoadScript('./tools/cutsheet-parser.js'); });
+      pScripts.then(function () {
+        var res = CutsheetParser.parseArrayBuffer(arrayBuf, { fileName: file.name }, function (prog) {
+          updateProgUI(
+            'Parsing ' + file.name + ' (' + prog.current + '/' + prog.total + ')',
+            prog.sheet + ' \u00b7 ' + prog.rows.toLocaleString() + ' cables',
+            prog.pct,
+            false
+          );
+        });
+        finishParse(res.data, res.hallsCfg);
+      }).catch(function (err) {
+        updateProgUI('Cutsheet verification failed', (err && err.message) ? err.message : String(err), 0, true);
+      });
+    }
+    if (typeof Worker !== 'undefined') {
+      try {
+        var worker = new Worker('./tools/cutsheet-parser.js');
+        var xlsxAbsUrl = new URL('./vendor/xlsx/xlsx.full.min.js', location.href).href;
+        worker.onmessage = function (ev) {
+          var msg = ev.data || {};
+          if (msg.type === 'progress') {
+            var p = msg.progress;
+            updateProgUI(
+              'Parsing ' + file.name + ' (' + p.current + '/' + p.total + ')',
+              p.sheet + ' \u00b7 ' + p.rows.toLocaleString() + ' cables',
+              p.pct,
+              false
+            );
+          } else if (msg.type === 'done') {
+            worker.terminate();
+            finishParse(msg.data, msg.hallsCfg);
+          } else if (msg.type === 'error') {
+            worker.terminate();
+            updateProgUI('Cutsheet verification failed', msg.error || 'Invalid workbook', 0, true);
+          }
+        };
+        worker.onerror = function () {
+          worker.terminate();
+          fallbackMainThread(buf);
+        };
+        worker.postMessage({ type: 'parse', buffer: buf, fileName: file.name, xlsxUrl: xlsxAbsUrl });
+        return;
+      } catch (e) {}
+    }
+    fallbackMainThread(buf);
+  };
+  reader.readAsArrayBuffer(file);
+}
+document.getElementById('updateXlsxBtn').addEventListener('click', function () {
+  var inp = document.getElementById('xlsxInput');
+  inp.value = '';
+  inp.click();
+});
+document.getElementById('xlsxInput').addEventListener('change', function (e) {
+  var f = e.target.files && e.target.files[0];
+  if (f) handleXlsxFile(f);
+});
+document.getElementById('resetXlsxBtn').addEventListener('click', function () {
+  var pClear = (typeof localforage !== 'undefined' && localforage)
+    ? Promise.all([localforage.removeItem(CUTSHEET_LF_KEY), localforage.removeItem(HALLS_LF_KEY)])
+    : Promise.resolve();
+  pClear.then(function () {
+    HALL = null; RACK = null; FAMFILTER = null;
+    document.getElementById('loadstate').style.display = 'block';
+    loadBundled();
+  });
+});
 function totalRows() { var n = 0; FAMS.forEach(function (f) { n += D.rows[f].length; }); return n; }
 function buildRacks() {
   // one pass over rows: per-rack connection counts (including intermediate hop racks), bucketed by hall

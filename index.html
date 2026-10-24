@@ -899,7 +899,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v76';
+var APP_VERSION = 'v77';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1033,7 +1033,13 @@ var Hall = (function () {
     showToast('Hall deleted');
   }
   function addBuf103Halls() {
-    fetch('./data/halls-buf103.json').then(function (r) { return r.json(); }).then(function (cfg) {
+    var lfHalls = (typeof localforage !== 'undefined' && localforage && localforage.getItem)
+      ? localforage.getItem('mp_buf103_halls')
+      : Promise.resolve(null);
+    lfHalls.catch(function () { return null; }).then(function (customCfg) {
+      if (customCfg && typeof customCfg === 'object' && Object.keys(customCfg).length) return customCfg;
+      return fetch('./data/halls-buf103.json').then(function (r) { return r.json(); });
+    }).then(function (cfg) {
       var added = 0;
       Object.keys(cfg).forEach(function (h) {
         var id = 'BUF103_' + h;

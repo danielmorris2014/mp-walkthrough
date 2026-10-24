@@ -308,6 +308,32 @@ with sync_playwright() as p:
             check("page[buf103].traceMultiHop", tr["multihop"] > 0, str(tr))
             check("page[buf103].traceHighlight", tr["hlNodes"] >= 2 and tr["hlConns"] >= 1, str(tr))
             check("page[buf103].traceNoScrollX", tr["scrollX"] <= 1, f"scrollX={tr['scrollX']}")
+            sjs = sp.evaluate("""async () => {
+              const hasBtn = !!document.getElementById('updateXlsxBtn') && !!document.getElementById('xlsxInput');
+              await lazyLoadScript('./vendor/xlsx/xlsx.full.min.js');
+              await lazyLoadScript('./tools/cutsheet-parser.js');
+              const wb = XLSX.utils.book_new();
+              const aoa = [
+                [null, 'A_loc', 'A_name', 'A_port', 'tor_eor_cable', 'eor_loc', 'eor_panel', 'eor_ru', 'eor_front_port', 'eor_dcn_cable', 'dcn_loc', 'dcn_panel', 'dcn_ru', 'dcn_front_port', 'dcn_spn_cable', 'Z_loc', 'Z_name', 'Z_port'],
+                [null, 'BUF103-DH1-R0102', 'tor1', 'Et1', 'SMF-10M', 'BUF103-DH1-R0111', 'PP1', '42', 'A1', 'TRUNK-50M', 'BUF103-DH1-R2508', 'DCNPP', '40', 'B1', 'PATCH-3M', 'BUF103-DH1-R2501', 'spn1', 'Et1'],
+                [null, 'BUF103-DH1-R0102', 'tor1', 'Et2', 'SMF-10M', 'BUF103-DH1-R0111', 'PP1', '42', 'A2', 'TRUNK-50M', 'BUF103-DH1-R2508', 'DCNPP', '40', 'B2', 'PATCH-3M', 'BUF103-DH1-R2501', 'spn1', 'Et2'],
+                [null, 'BUF103-DH1-R0402', 'tor2', 'Et1', 'SMF-10M', 'BUF103-DH1-R0411', 'PP1', '42', 'A1', 'TRUNK-50M', 'BUF103-DH1-R2508', 'DCNPP', '40', 'B3', 'PATCH-3M', 'BUF103-DH1-R2502', 'spn2', 'Et1'],
+                [null, 'BUF103-DH2-R0302', 'tor3', 'Et1', 'SMF-10M', 'BUF103-DH2-R0311', 'PP1', '42', 'A1', 'TRUNK-50M', 'BUF103-DH2-R2408', 'DCNPP', '40', 'B1', 'PATCH-3M', 'BUF103-DH2-R2401', 'spn1', 'Et1'],
+              ];
+              const ws = XLSX.utils.aoa_to_sheet(aoa);
+              XLSX.utils.book_append_sheet(wb, ws, 'TOR <> DCN-SPN');
+              const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+              const parsed = CutsheetParser.parseArrayBuffer(buf, { fileName: 'Field_BUF103.xlsx', minRows: 4 });
+              const rows = parsed.data.rows['TOR <> DCN-SPN'] || [];
+              return {
+                hasBtn,
+                rowCount: rows.length,
+                hopsLen: rows[0] && rows[0][6] ? rows[0][6].length : 0,
+                halls: parsed.data.halls,
+                dh1MaxRow: parsed.hallsCfg.DH1 ? parsed.hallsCfg.DH1.maxRow : 0
+              };
+            }""")
+            check("page[buf103].sheetJsSelfServe", sjs["hasBtn"] and sjs["rowCount"] == 4 and sjs["hopsLen"] == 6 and sjs["dh1MaxRow"] == 25, str(sjs))
         sp.close()
 
     # --- 12. PAGES REGISTRY: home destinations are one declarative list;

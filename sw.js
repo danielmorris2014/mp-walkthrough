@@ -1,6 +1,6 @@
 // MP Walkthrough — minimal offline-first service worker.
 // Bump CACHE_VERSION whenever index.html/icons change so every phone picks up the update.
-var CACHE_VERSION = 'mp-walk-v76';
+var CACHE_VERSION = 'mp-walk-v77';
 
 self.addEventListener('message', function (event) {
   if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
@@ -40,6 +40,8 @@ var HEAVY = [
   './data/directory.json.gz',
   './data/buf103.json.gz',
   './vendor/jsplumb/jsplumb.min.js',
+  './vendor/xlsx/xlsx.full.min.js',
+  './tools/cutsheet-parser.js',
   './vendor/zxing/reader.js',
   './vendor/zxing/zxing_reader.wasm',
   './vendor/tesseract/tesseract.min.js',

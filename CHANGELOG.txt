@@ -1,6 +1,43 @@
 MP Kit Changelog
 ================
 
+v77 (2026-10-24) — SheetJS on-device cutsheet self-serve
+- Vendored SheetJS (vendor/xlsx/xlsx.full.min.js) + tools/cutsheet-parser.js
+- Drop any newer BUF103 .xlsx cutsheet directly on a phone in buf103.html:
+  parses sheet-by-sheet in a Web Worker with live progress bar, validates
+  row guards, and stores cutsheet + derived halls in IndexedDB (localForage)
+- "Reset" button reverts to the bundled cutsheet at any time
+- Hall.addBuf103Halls() in index.html reads on-device hall config first
+
+v76 (2026-10-24) — jsPlumb interactive multi-hop trace diagrams
+- Vendored @jsplumb/browser-ui (vendor/jsplumb/jsplumb.min.js)
+- Replaced flat SVG trace lines in buf103.html with interactive jsPlumb
+  Bezier diagrams across racks (including 4-stage multi-hop paths A -> EOR
+  -> DCN -> Z)
+- Tap any cable or rack node to highlight its full path across racks while
+  dimming others, or open the full multi-hop detail sheet
+- Upgraded tools/build_buf103.py to extract trunk cable specs
+  (A_Z_trunk_assembly) and intermediate hop racks
+
+v75 (2026-10-24) — Yjs CRDT field-level sync engine
+- Vendored self-contained Yjs + lib0 bundle (vendor/yjs/yjs.min.js)
+- Rewrote sync-engine.js merge layer: Y.Doc nested Y.Maps per hall/row/side/
+  cable with per-cable wall-clock timestamp tie-breaking (ADR-0002)
+- Concurrent stamps on different rows/cables merge with zero data loss
+- v73/v75 dual-format transition support, HTTP 409 conflict auto-retry, and
+  idle-poll PUT guard
+
+v74 (2026-10-24) — localForage IndexedDB storage upgrade
+- Vendored localForage (vendor/localforage/localforage.min.js)
+- Migrated walkthrough state (index.html), flashcards stats (flashcards.html),
+  and cutsheet build-progress reader (buf103.html) from localStorage to
+  IndexedDB with automatic one-time migration and synchronous fallback
+- Added paths-ignore: ['sync/**'] to CI workflow
+
+v70-v73 (2026-10-22) — Visual trace tab, Leaflet floor map,zxing/tesseract
+- Added Trace tab to buf103.html, Leaflet floor map to reference.html, and
+  offline barcode/OCR scanning
+
 v69 (2026-10-22) — PROJECT CLEANUP
 - Deleted 60MB of raw .json data files (only .gz versions used)
 - Deleted ocr.html (superseded by scan.html)
