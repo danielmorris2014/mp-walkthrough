@@ -897,7 +897,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v72';
+var APP_VERSION = 'v73';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1167,10 +1167,24 @@ function loadState() {
   } catch (e) {}
   var d = defaultState(); d.version = STATE_VERSION; return d;
 }
+var _syncTimer = null;
+function syncSoon() {
+  // debounced push: rapid stamps batch into one sync call after 2s of quiet
+  if (_syncTimer) clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(function () {
+    _syncTimer = null;
+    if (navigator.onLine && Sync.getStatus().connected) {
+      Sync.sync(state).then(function (m) {
+        if (m !== state) { state = m; renderAll(); updateSyncStatus(); }
+      }).catch(function () {});
+    }
+  }, 2000);
+}
 function saveState() {
   // markChanged diffs the shared keys and stamps only what moved — honest
   // per-key timestamps for the next latest-wins merge (ADR-0002).
   try { Sync.markChanged(state); } catch (e) {}
+  try { syncSoon(); } catch (e) {}
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     var t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -2373,16 +2387,19 @@ function renderAll() {
       }).catch(function () {});
     }
   });
-  // Periodic sync every 30s while the app is open and visible — catches
-  // wifi reconnects that don't fire the 'online' event (already online
-  // on cellular, then joins wifi: no event, but sync should happen)
+  // Poll for remote changes every 8s while visible — stamps push
+  // immediately via syncSoon() (debounced), so this poll is purely for
+  // pulling teammate changes. Rate limit: 5 phones x 450/hr = 2,250
+  // of 5,000/hr GitHub API budget. The _syncTimer check skips the poll
+  // when a push is imminent (would be redundant).
   setInterval(function () {
-    if (document.visibilityState === 'visible' && navigator.onLine && Sync.getStatus().connected) {
+    if (document.visibilityState === 'visible' && navigator.onLine &&
+        Sync.getStatus().connected && !_syncTimer) {
       Sync.sync(state).then(function (m) {
         if (m !== state) { state = m; renderAll(); updateSyncStatus(); }
       }).catch(function () {});
     }
-  }, 30000);
+  }, 8000);
     window.addEventListener('online', function () {
     try {
       if (Sync.getStatus().connected) {
