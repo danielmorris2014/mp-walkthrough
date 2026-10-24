@@ -261,7 +261,7 @@ with sync_playwright() as p:
       switchTab('report');
       const parts = typeof parseReportEmailParts === 'function' ? parseReportEmailParts() : null;
       out.reportOutput = !!(document.getElementById('reportOutput') && document.getElementById('reportStyle')
-        && document.getElementById('emailReportBtn') && document.getElementById('sendPcReportBtn')
+        && document.getElementById('emailReportBtn')
         && parts && parts.subject && parts.body);
       return out;
     }""")

@@ -908,15 +908,12 @@
           </select>
         </div>
       </div>
-      <div class="batch-row" style="margin-bottom:8px;">
+      <div class="batch-row" style="margin-bottom:10px;">
         <button class="btn" onclick="endOfNight()">End of night</button>
+        <button class="btn btn-secondary" id="emailReportBtn" onclick="emailReport()" style="background:rgba(0,144,255,.16);border-color:rgba(0,144,255,.45);color:#7cc4fa;">&#9993; Outlook</button>
         <button class="btn btn-secondary" onclick="copyReport()">Copy</button>
         <button class="btn btn-secondary" onclick="shareReport()">Share</button>
         <button class="btn btn-secondary" onclick="saveReportToHistory()">Save to history</button>
-      </div>
-      <div class="batch-row" style="margin-bottom:10px;">
-        <button class="btn btn-secondary" id="emailReportBtn" onclick="emailReport()" style="background:rgba(0,144,255,.16);border-color:rgba(0,144,255,.45);color:#7cc4fa;">&#9993; Email (Outlook)</button>
-        <button class="btn btn-secondary" id="sendPcReportBtn" onclick="sendReportToPc()" style="background:rgba(48,164,108,.16);border-color:rgba(48,164,108,.45);color:#65d49e;">&#128187; Send to PC (.eml)</button>
       </div>
       <pre class="report-pre" id="reportOutput"></pre>
     </div>
@@ -975,8 +972,7 @@
     <ul id="nightChecklist"></ul>
     <div class="batch-row" style="margin-top:12px;">
       <button class="btn" onclick="copyReport()">Copy report</button>
-      <button class="btn btn-secondary" onclick="emailReport()">Email (Outlook)</button>
-      <button class="btn btn-secondary" onclick="sendReportToPc()">Send to PC</button>
+      <button class="btn btn-secondary" onclick="emailReport()">Open in Outlook</button>
       <button class="btn btn-secondary" onclick="doBackup()">Backup file</button>
     </div>
     <button class="btn btn-ghost" style="width:100%; margin-top:8px;" onclick="closeNightOverlay()">Done</button>
@@ -1039,7 +1035,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v81';
+var APP_VERSION = 'v82';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2240,50 +2236,10 @@ function parseReportEmailParts() {
 function emailReport() {
   var parts = parseReportEmailParts();
   var bodyCrlf = parts.body.replace(/\r?\n/g, '\r\n');
-  var mailto = 'mailto:?subject=' + encodeURIComponent(parts.subject) + '&body=' + encodeURIComponent(bodyCrlf);
+  var outlookUrl = 'ms-outlook://compose?subject=' + encodeURIComponent(parts.subject) + '&body=' + encodeURIComponent(bodyCrlf);
   try { copyTextFallback(parts.fullText); } catch (e) {}
-  showToast('Opening email app (report also copied)');
-  try { window.location.href = mailto; } catch (e) {}
-}
-function sendReportToPc() {
-  var parts = parseReportEmailParts();
-  var bodyCrlf = parts.body.replace(/\r?\n/g, '\r\n');
-  var eml = [
-    'X-Unsent: 1',
-    'Subject: ' + parts.subject,
-    'MIME-Version: 1.0',
-    'Content-Type: text/plain; charset=utf-8',
-    'Content-Transfer-Encoding: 8bit',
-    '',
-    bodyCrlf
-  ].join('\r\n');
-  var fname = 'Shift-Update-' + dateStamp() + '.eml';
-  try {
-    if (typeof Sync !== 'undefined' && Sync.isConfigured && Sync.isConfigured()) {
-      Sync.sync(state);
-    }
-  } catch (e) {}
-  try {
-    var file = new File([eml], fname, { type: 'message/rfc822' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title: parts.subject, text: parts.fullText }).then(function () {
-        showToast('Sent to PC (.eml opens in Desktop Outlook)');
-      }, function () {});
-      return;
-    }
-  } catch (e) {}
-  try {
-    var blob = new Blob([eml], { type: 'message/rfc822;charset=utf-8' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = fname;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
-  } catch (e) {}
-  copySomething(parts.fullText, 'Outlook draft (' + fname + ') downloaded & report copied');
+  showToast('Opening Outlook (report also copied)');
+  try { window.location.href = outlookUrl; } catch (e) {}
 }
 function saveReportToHistory() {
   pushUndo();
@@ -2886,7 +2842,7 @@ initStorage();
       </div>
       <div id="syncSettingsInfo" class="muted" style="margin-top:6px;"></div>
       <div class="batch-row" style="justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
-        <span class="muted">App version: <strong style="color:var(--text);">v81</strong></span>
+        <span class="muted">App version: <strong style="color:var(--text);">v82</strong></span>
         <button class="btn btn-secondary" onclick="forceAppUpdate()">Force Update</button>
       </div>
       <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closeSettings()">Close</button>
