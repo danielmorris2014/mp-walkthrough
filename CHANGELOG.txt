@@ -1,6 +1,19 @@
 MP Kit Changelog
 ================
 
+v79 (2026-10-24) — Award-inspired Home Cockpit, Quick-Jump Bar & Bento Grid
+- Removed the passive "Tonight" box (and its caret deltas), duplicate
+  "Resume walkthrough" button, and full-width "Settings" button on Home
+- Moved live Sync status pill and Settings icon into the top header bar
+- Added universal Quick-Jump command bar at the top of Home: type a rack
+  (dh1-r0411), row number (17 / r17), barcode, or device to jump straight
+  to the BUF103 Cutsheet, Walkthrough row, or CB4/5 Directory
+- Unified Walkthrough & Shift Report into a single Flighty-inspired Cockpit
+  Hero Card with radial SVG % hung gauge, 1-tap Hall switcher pills, and
+  1-tap deep-entry buttons for Walk, Crew, Blockers, and Report
+- Upgraded Field data and Learn into an asymmetric Bento Grid with tinted
+  glass icon badges, rich subtitles, and full-width flagship card styling
+
 v78 (2026-10-24) — Hierarchical CB -> Hall -> Row -> Rack navigation & 9 audit upgrades
 - Interactive CB (Building) -> Hall -> Row -> Rack selector in buf103.html
   across BOTH Browse and Trace modes (no more typing a rack in Trace mode),

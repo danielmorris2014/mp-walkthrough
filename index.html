@@ -434,44 +434,146 @@
   .backup-status { font-size: 11px; margin-top: 7px; color: var(--muted); }
   .backup-status.stale { color: var(--amber-11); font-weight: 700; }
 
-  /* ---- Home / tool launcher ---- */
+  /* ---- Home / tool launcher (v79 Award-Inspired Cockpit & Bento Grid) ---- */
+  .hdr-sync-pill {
+    appearance: none; border: 1px solid var(--border); background: rgba(255,255,255,0.045);
+    color: var(--muted); border-radius: 999px; padding: 6px 11px; min-height: 36px;
+    font: 800 11px -apple-system, BlinkMacSystemFont, sans-serif; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; flex: none;
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.06);
+    transition: transform var(--dur-press) var(--ease-2), border-color var(--dur-press) var(--ease-2);
+  }
+  .hdr-sync-pill:active { transform: scale(0.96); }
+  .hdr-icon-btn {
+    appearance: none; width: 38px; height: 38px; border-radius: 11px; flex: none;
+    border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: var(--slate-11);
+    display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.07);
+    transition: transform var(--dur-press) var(--ease-2), color var(--dur-press) var(--ease-2);
+  }
+  .hdr-icon-btn:active { transform: scale(0.94); color: #fff; }
+  .hdr-icon-btn svg { width: 18px; height: 18px; display: block; }
+
+  .home-jump-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent), var(--slate-2);
+    border: 1px solid var(--border2); border-radius: 14px; padding: 5px 6px 5px 12px;
+    margin: 2px 0 12px 0;
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.07), 0 4px 14px rgba(0,0,0,0.28);
+  }
+  .home-jump-ico { width: 17px; height: 17px; color: var(--slate-9); flex: none; display: flex; }
+  .home-jump-ico svg { width: 100%; height: 100%; display: block; }
+  .home-jump-input {
+    flex: 1; min-width: 0; border: none !important; background: transparent !important;
+    color: var(--text); font-size: 16px !important; padding: 6px 2px !important; min-height: 36px !important;
+    outline: none !important;
+  }
+  .home-jump-btn {
+    appearance: none; border: 1px solid var(--slate-7); background: var(--slate-3);
+    color: var(--slate-12); font: 800 12px -apple-system, sans-serif; border-radius: 10px;
+    padding: 0 13px; min-height: 36px; cursor: pointer; flex: none;
+    transition: transform var(--dur-press) var(--ease-2);
+  }
+  .home-jump-btn:active { transform: scale(0.95); }
+
   .home-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; }
   .home-card {
-    width: 100%; text-align: left; display: flex; align-items: center; gap: 13px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.018), transparent 40%), var(--card);
-    border: 1px solid var(--border); border-radius: 16px; padding: 14px; min-height: 80px;
-    cursor: pointer; color: var(--text);
+    width: 100%; text-align: left; display: flex; flex-direction: column; gap: 12px;
+    background: radial-gradient(420px 160px at 15% 0%, rgba(61,214,140,0.08), transparent 70%),
+                linear-gradient(180deg, rgba(255,255,255,0.03), transparent 45%), var(--card);
+    border: 1px solid var(--border2); border-radius: 20px; padding: 15px;
+    color: var(--text);
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.09), 0 10px 28px -6px rgba(0,0,0,0.45);
+  }
+  .hc-top {
+    display: flex; align-items: center; gap: 13px; cursor: pointer;
     transition: transform var(--dur-press) var(--ease-2);
   }
-  .home-card:active { transform: scale(0.97); }
-  .home-tile {
-    flex: 0 0 auto; width: 46px; height: 46px; border-radius: 12px;
+  .hc-top:active { transform: scale(0.98); }
+  .hc-ring-wrap {
+    position: relative; width: 52px; height: 52px; flex: 0 0 auto;
     display: flex; align-items: center; justify-content: center;
-    background: var(--slate-3); border: 1px solid var(--slate-6); color: var(--slate-12);
   }
-  .home-tile svg { width: 22px; height: 22px; display: block; }
-  .home-name { font-weight: 800; font-size: 15.5px; color: var(--slate-12); letter-spacing: -0.2px; display: block; }
-  .home-sub { font-size: 11.5px; color: var(--muted); margin-top: 3px; display: block; }
-  .home-chev { margin-left: auto; color: var(--slate-7); flex: 0 0 auto; }
-  .home-chev svg { width: 20px; height: 20px; display: block; }
-  .home-card.soon { opacity: 0.55; border-style: dashed; cursor: default; }
-  .home-card.soon:active { transform: none; }
-  .home-card.soon .home-tile { background: transparent; border-style: dashed; }
-  /* v51: secondary tools live in a compact tile grid - 9 tall cards became
-     2 primary cards + 7 tiles; grouped with space, not more rows of cards */
+  .hc-ring-svg { display: block; }
+  #homeProgRing { transition: stroke-dashoffset var(--dur-ring) var(--ease-spring); }
+  .hc-ring-pct {
+    position: absolute; font: 900 11.5px ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--slate-12); letter-spacing: -0.4px;
+  }
+  .hc-body { flex: 1; min-width: 0; }
+  .home-name { font-weight: 800; font-size: 16px; color: var(--slate-12); letter-spacing: -0.3px; display: block; }
+  .home-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; display: block; }
+  .hc-status {
+    display: inline-block; margin-top: 4px; font: 700 11.5px ui-monospace, SFMono-Regular, monospace;
+    color: var(--green-11);
+  }
+  .hc-cta {
+    flex: 0 0 auto; background: #ffffff; color: #111113; font: 800 12.5px -apple-system, sans-serif;
+    padding: 8px 13px; border-radius: 999px; white-space: nowrap;
+    box-shadow: 0 2px 10px rgba(255,255,255,0.16);
+  }
+  .hc-halls {
+    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hc-halls::-webkit-scrollbar { display: none; }
+  .hc-hall-pill {
+    appearance: none; flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 11px; min-height: 34px; border-radius: 999px;
+    background: rgba(255,255,255,0.045); border: 1px solid var(--border);
+    color: var(--slate-11); font: 700 11.5px -apple-system, sans-serif; cursor: pointer;
+    transition: transform var(--dur-press) var(--ease-2), background-color var(--dur-press) var(--ease-2);
+  }
+  .hc-hall-pill:active { transform: scale(0.95); }
+  .hc-hall-pill small { font: 800 10.5px ui-monospace, monospace; color: var(--slate-9); }
+  .hc-hall-pill.active {
+    background: rgba(61,214,140,0.14); border-color: rgba(61,214,140,0.45); color: #ffffff;
+  }
+  .hc-hall-pill.active small { color: var(--green-11); }
+  .hc-hall-pill.manage { border-style: dashed; color: var(--muted); }
+  .hc-subnav {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px;
+    padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .hc-subbtn {
+    appearance: none; border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.035);
+    color: var(--slate-12); border-radius: 11px; padding: 8px 4px; min-height: 44px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    font: 700 11px -apple-system, sans-serif; cursor: pointer;
+    transition: transform var(--dur-press) var(--ease-2), background-color var(--dur-press) var(--ease-2);
+  }
+  .hc-subbtn:active { transform: scale(0.95); background: rgba(255,255,255,0.08); }
+  .hc-subbtn svg { width: 15px; height: 15px; color: var(--slate-11); display: block; }
+
+  /* Bento tool grid */
   .tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
   .tool-tile {
-    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-    min-height: 60px; padding: 10px 12px; cursor: pointer; color: var(--text);
-    display: flex; align-items: center; gap: 10px; text-align: left;
-    transition: transform var(--dur-press) var(--ease-2);
+    background: linear-gradient(180deg, rgba(255,255,255,0.024), transparent 55%), var(--card);
+    border: 1px solid var(--border); border-radius: 16px;
+    min-height: 74px; padding: 12px; cursor: pointer; color: var(--text);
+    display: flex; align-items: flex-start; gap: 11px; text-align: left;
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.06), 0 4px 12px -4px rgba(0,0,0,0.3);
+    transition: transform var(--dur-press) var(--ease-2), border-color var(--dur-press) var(--ease-2);
   }
-  .tool-tile:active { transform: scale(0.96); }
-  .tool-tile svg { width: 20px; height: 20px; flex: none; color: var(--muted); }
-  .tool-tile .tile-name { font: 800 12.5px var(--font-family, -apple-system, sans-serif); color: var(--slate-12); line-height: 1.2; }
-  .tool-group { margin-top: 24px; }
+  .tool-tile:active { transform: scale(0.97); }
+  .tool-tile.featured {
+    grid-column: span 2; align-items: center;
+    background: radial-gradient(320px 120px at 0% 0%, rgba(61,214,140,0.09), transparent 70%),
+                linear-gradient(180deg, rgba(255,255,255,0.03), transparent 60%), var(--card);
+    border-color: var(--border2);
+  }
+  .tile-ico {
+    width: 38px; height: 38px; border-radius: 11px; flex: 0 0 auto;
+    border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+  }
+  .tile-ico svg { width: 19px; height: 19px; display: block; }
+  .tile-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .tool-tile .tile-name { font: 800 13.5px -apple-system, BlinkMacSystemFont, sans-serif; color: var(--slate-12); line-height: 1.2; letter-spacing: -0.15px; }
+  .tool-tile .tile-sub { font: 600 11px -apple-system, BlinkMacSystemFont, sans-serif; color: var(--muted); line-height: 1.3; }
+  .tile-arrow { font: 800 20px -apple-system, sans-serif; color: var(--slate-8); flex: none; padding-left: 4px; }
+  .tool-group { margin-top: 22px; }
   .tool-group-h { font: 800 11px var(--font-family, -apple-system, sans-serif);
-    letter-spacing: 1px; text-transform: uppercase; color: var(--slate-8, #777b84); margin-bottom: 8px; }
+    letter-spacing: 1px; text-transform: uppercase; color: var(--slate-9, #696e77); margin-bottom: 9px; padding-left: 2px; }
   .tool-grid-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   /* Chrome is opt-in per screen via the SCREENS registry (has-* classes).
      A new screen with no chrome flags gets a clean layout by default. */
@@ -607,9 +709,13 @@
     <button class="kit-back" aria-label="Back to MP Kit home" onclick="switchTab('home')">&#8249;</button>
     <div style="flex:1; min-width:0;">
       <div class="app-title" id="appTitle">MP Kit</div>
+      <div class="app-sub" id="saveIndicator" style="font-size:10px;"></div>
     </div>
     <span id="undoLabel" style="display:none;"></span>
-    <div class="app-sub" id="saveIndicator" style="font-size:10px; flex:none;"></div>
+    <button type="button" class="hdr-sync-pill" id="syncStatus" onclick="openSettings()" title="Sync &amp; shared site status">&#9708; Standalone</button>
+    <button type="button" class="hdr-icon-btn" id="headerSettingsBtn" onclick="openSettings()" aria-label="Settings" title="Settings">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
   </div>
   <div class="hall-seg-wrap" style="align-items:center; gap:8px; padding:6px 12px;">
     <div class="hall-seg" id="hallTabs"></div>
@@ -621,28 +727,50 @@
 
   <!-- ===================== HOME / LAUNCHER ===================== -->
   <div id="panel-home" class="panel active">
-    <div class="card" style="margin-top:2px;">
-      <div class="card-title"><span>Tonight</span><span class="muted" id="homeMeta"></span></div>
-      <div id="syncStatus" style="font-size:11px;font-weight:700;margin-top:6px;color:var(--muted);"></div>
-      <div id="shiftLine" style="font-size:12px;font-weight:600;color:var(--muted);margin-top:4px;"></div>
-      <div id="homeWalkStatus" class="home-hero-line" style="font-size:13px; font-weight:700;"></div>
-      <div id="lastNightLine" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
+    <div class="home-jump-bar">
+      <span class="home-jump-ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+      <input type="search" id="homeJumpInput" class="home-jump-input" placeholder="Jump to rack (dh1-r0411), cable, or row&#8230;" autocomplete="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter'){event.target.blur();runHomeJump();}">
+      <button type="button" class="home-jump-btn" onclick="runHomeJump()">Go</button>
     </div>
-    <button class="btn" style="width:100%; min-height:56px; margin-bottom:10px;" onclick="resumeWalk()" id="resumeBtn">
-      <span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/></svg></span>
-      <span id="resumeText">Resume walkthrough</span>
-    </button>
-    <button class="btn btn-secondary" style="width:100%; min-height:48px; margin-bottom:10px;" onclick="openSettings()">Settings</button>
+
     <div class="home-cards">
-      <button class="home-card" onclick="switchTab('walk')">
-        <span class="home-tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/></svg></span>
-        <span style="min-width:0;">
-          <span class="home-name">Walkthrough &amp; Report</span>
-          <span class="home-sub" id="homeWalkSub">Nightly row stamping, crew, blockers, reports</span>
-        </span>
-        <span class="home-chev"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
-      </button>
-    <div id="toolGrid"></div>
+      <div class="home-card">
+        <div class="hc-top" onclick="resumeWalk()">
+          <div class="hc-ring-wrap">
+            <svg width="52" height="52" viewBox="0 0 44 44" class="hc-ring-svg">
+              <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3.5"/>
+              <circle id="homeProgRing" cx="22" cy="22" r="18" fill="none" stroke="var(--green-11)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="113.1" stroke-dashoffset="113.1" transform="rotate(-90 22 22)"/>
+            </svg>
+            <span class="hc-ring-pct" id="homeProgPct">0%</span>
+          </div>
+          <div class="hc-body">
+            <span class="home-name">Walkthrough &amp; Shift Report</span>
+            <span class="home-sub" id="homeWalkSub">Nightly row stamping, crew, blockers, reports</span>
+            <span class="hc-status" id="homeWalkStatus">Ready when you are</span>
+          </div>
+          <span class="hc-cta" id="resumeText">Walk &#8250;</span>
+        </div>
+        <div class="hc-halls" id="homeHallPills"></div>
+        <div class="hc-subnav">
+          <button type="button" class="hc-subbtn" onclick="switchTab('walk')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/></svg>
+            <span>Walk</span>
+          </button>
+          <button type="button" class="hc-subbtn" onclick="switchTab('crew')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span id="homeCrewBadge">Crew</span>
+          </button>
+          <button type="button" class="hc-subbtn" onclick="switchTab('blockers')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+            <span id="homeBlockerBadge">Blockers</span>
+          </button>
+          <button type="button" class="hc-subbtn" onclick="switchTab('report')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+            <span>Report</span>
+          </button>
+        </div>
+      </div>
+      <div id="toolGrid"></div>
     </div>
   </div>
 
@@ -652,11 +780,11 @@
     <div class="aisle-legend" id="aisleLegend"></div>
     <div class="hall-strip" id="hallStrip"></div>
     <div id="walkGrid"></div>
-  
+  </div>
+
   <div class="hall-menu" id="hallMenu">
     <div class="hall-menu-card" id="hallMenuBody"></div>
   </div>
-</div>
 
   <!-- ===================== CREW ===================== -->
   <div id="panel-crew" class="panel">
@@ -899,7 +1027,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v78';
+var APP_VERSION = 'v79';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2178,6 +2306,17 @@ var KIT_ICONS = {
   drop: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
   spark: '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>'
 };
+var KIT_ACCENTS = {
+  grid:   { bg: 'rgba(61,214,140,0.14)', border: 'rgba(61,214,140,0.32)', color: 'var(--green-11)' },
+  scan:   { bg: 'rgba(124,226,254,0.14)', border: 'rgba(124,226,254,0.32)', color: 'var(--sky-9)' },
+  search: { bg: 'rgba(112,184,255,0.14)', border: 'rgba(112,184,255,0.32)', color: 'var(--blue-11)' },
+  lines:  { bg: 'rgba(186,167,255,0.14)', border: 'rgba(186,167,255,0.32)', color: 'var(--violet-11)' },
+  flag:   { bg: 'rgba(255,202,22,0.14)',  border: 'rgba(255,202,22,0.32)',  color: 'var(--amber-11)' },
+  bars:   { bg: 'rgba(124,226,254,0.14)', border: 'rgba(124,226,254,0.32)', color: 'var(--sky-9)' },
+  book:   { bg: 'rgba(186,167,255,0.14)', border: 'rgba(186,167,255,0.32)', color: 'var(--violet-11)' },
+  spark:  { bg: 'rgba(61,214,140,0.14)',  border: 'rgba(61,214,140,0.32)',  color: 'var(--green-11)' },
+  drop:   { bg: 'rgba(112,184,255,0.14)', border: 'rgba(112,184,255,0.32)', color: 'var(--blue-11)' }
+};
 function renderKitTiles() {
   var wrap = document.getElementById('toolGrid');
   if (!wrap) return;
@@ -2186,11 +2325,17 @@ function renderKitTiles() {
     if (groups.indexOf(pg.group) < 0) groups.push(pg.group);
   });
   wrap.innerHTML = groups.map(function (g) {
-    var tiles = KIT_PAGES.filter(function (pg) { return pg.group === g; }).map(function (pg) {
+    var items = KIT_PAGES.filter(function (pg) { return pg.group === g; });
+    var tiles = items.map(function (pg, idx) {
       var act = pg.url ? "location.href='" + pg.url + "'" : "openGuide('" + pg.guide + "')";
-      return '<button class="tool-tile" onclick="' + act + '">' +
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + KIT_ICONS[pg.icon] + '</svg>' +
-        '<span class="tile-name">' + pg.name + '</span></button>';
+      var acc = KIT_ACCENTS[pg.icon] || KIT_ACCENTS.grid;
+      var spanCls = (items.length % 2 === 1 && idx === 0) ? ' featured' : '';
+      return '<button type="button" class="tool-tile' + spanCls + '" onclick="' + act + '">' +
+        '<span class="tile-ico" style="background:' + acc.bg + ';border-color:' + acc.border + ';color:' + acc.color + ';">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + KIT_ICONS[pg.icon] + '</svg></span>' +
+        '<span class="tile-txt"><span class="tile-name">' + escapeHtml(pg.name) + '</span>' +
+        (pg.sub ? '<span class="tile-sub">' + escapeHtml(pg.sub) + '</span>' : '') + '</span>' +
+        (spanCls ? '<span class="tile-arrow">\u203a</span>' : '') + '</button>';
     }).join('');
     return '<div class="tool-group"><div class="tool-group-h">' + g + '</div>' +
       '<div class="tool-grid-row">' + tiles + '</div></div>';
@@ -2282,76 +2427,100 @@ function closeSettings() {
   Overlay.close('settingsSheet');
 }
 function resumeWalk() { switchTab('walk'); }
+function openHallWalk(hallId, ev) {
+  if (ev) ev.stopPropagation();
+  if (hallId && state.halls[hallId]) {
+    state.activeHall = hallId;
+    saveState();
+    renderHallTabs();
+    renderWalk();
+  }
+  switchTab('walk');
+}
+function runHomeJump() {
+  var inp = document.getElementById('homeJumpInput');
+  var q = inp ? inp.value.trim() : '';
+  if (!q) { switchTab('walk'); return; }
+  var mRow = /^(?:row\s*|r)?(\d{1,2})(?:11|13)?$/i.exec(q);
+  if (mRow) {
+    var rn = parseInt(mRow[1], 10);
+    var activeH = state.halls[state.activeHall];
+    if (activeH && activeH.rows && activeH.rows[rn]) {
+      if (inp) inp.value = '';
+      switchTab('walk');
+      setTimeout(function () { scrollToRow(rn); }, 90);
+      return;
+    }
+  }
+  if (/^(buf102|cb4|cb5|#)/i.test(q)) {
+    try {
+      sessionStorage.setItem('mp.scan_query', q.replace(/^#/, ''));
+      sessionStorage.setItem('mp_embed', '1');
+    } catch (e) {}
+    location.href = './guide.html#/find';
+    return;
+  }
+  try { sessionStorage.setItem('mp.ocrq', q); } catch (e) {}
+  location.href = './buf103.html';
+}
 function renderHome() {
   var heroEl = document.getElementById('homeWalkStatus');
-  var metaEl = document.getElementById('homeMeta');
-  if (!heroEl && !metaEl) return;
   var h = state.halls[state.activeHall];
   if (!h) { var ks = Object.keys(state.halls); if (ks.length) h = state.halls[ks[0]]; }
-  var m = state.meta;
   var pct = hallPctHung(h);
-  var bl = (state.blockers || []).length;
-  var nights = state.settings.lastBackup ? Math.floor((Date.now() - state.settings.lastBackup) / 86400000) : -1;
-  var bk = nights < 0 ? 'no backup yet' : (nights < 1 ? 'backed up \u2713' : 'backup ' + nights + ' night' + (nights === 1 ? '' : 's') + ' ago');
-  var d = new Date();
-  var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  var mons = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  var hh = d.getHours(), mm = ('0' + d.getMinutes()).slice(-2);
-  var ampm = hh >= 12 ? 'PM' : 'AM';
-  var h12 = hh % 12 === 0 ? 12 : hh % 12;
-  if (heroEl) heroEl.textContent = h ? (h.name + ' \u00b7 ' + pct + '% ran & hung' + (bl ? ' \u00b7 ' + bl + ' blocker' + (bl === 1 ? '' : 's') : '')) : 'Ready when you are';
-  updateSyncStatus();
-  // shift line
-  var sl = document.getElementById('shiftLine');
-  if (sl && m.shiftTime) {
-    var mt = m.shiftTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*[–-]\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-    if (mt) {
-      var sh = parseInt(mt[1], 10) + (mt[3] && mt[3].toUpperCase() === 'PM' && parseInt(mt[1], 10) < 12 ? 12 : 0);
-      var sm = parseInt(mt[2], 10);
-      var eh = parseInt(mt[4], 10) + (mt[6] && mt[6].toUpperCase() === 'PM' && parseInt(mt[4], 10) < 12 ? 12 : 0);
-      var em = parseInt(mt[5], 10);
-      var now = new Date();
-      var nowMin = now.getHours() * 60 + now.getMinutes();
-      var startMin = sh * 60 + sm;
-      var endMin = eh * 60 + em;
-      if (endMin < startMin) endMin += 24 * 60; // overnight shift
-      if (nowMin < startMin) nowMin += 24 * 60;
-      var left = endMin - nowMin;
-      if (left > 0) {
-        var lh = Math.floor(left / 60), lm = left % 60;
-        sl.textContent = m.shiftTime + ' \u00b7 ' + lh + 'h ' + lm + 'm left';
-      } else { sl.textContent = m.shiftTime + ' \u00b7 shift over'; }
-    } else { sl.textContent = m.shiftTime; }
-  }
-  // last-night comparison
-  var ln = document.getElementById('lastNightLine');
-  if (ln) {
-    var tonight = 0;
-    var hh = state.halls[state.activeHall];
-    if (hh) { Object.keys(hh.rows).forEach(function (r) {
-      ['11','13'].forEach(function (sd) { if (sideOverall(hh.rows[r][sd], null) === 'hung') tonight++; });
-    }); }
-    if (state.baseline && state.baseline.halls && state.baseline.halls[state.activeHall]) {
-      var bh = state.baseline.halls[state.activeHall];
-      var lastNight = 0;
-      Object.keys(bh.rows || {}).forEach(function (r) {
-        ['11','13'].forEach(function (sd) {
-          var seg = bh.rows[r] && bh.rows[r][sd];
-          if (seg && Side.isHung(seg)) lastNight++;
-        });
+  var totSides = 0, hungSides = 0;
+  if (h && h.rows) {
+    Object.keys(h.rows).forEach(function (r) {
+      ['11', '13'].forEach(function (sd) {
+        totSides++;
+        if (sideOverall(h.rows[r][sd], null) === 'hung') hungSides++;
       });
-      var diff = tonight - lastNight;
-      ln.textContent = 'Tonight: ' + tonight + ' hung \u00b7 Last night: ' + lastNight +
-        (diff > 0 ? ' \u00b7 \u2191' + diff : diff < 0 ? ' \u00b7 \u2193' + Math.abs(diff) : ' \u00b7 =');
-    } else { ln.textContent = 'Tonight: ' + tonight + ' hung'; }
+    });
   }
-  // resume button
+  var bl = (state.blockers || []).length;
+  if (heroEl) {
+    heroEl.textContent = h
+      ? (h.name + ' \u00b7 ' + hungSides + '/' + totSides + ' sides hung' + (bl ? ' \u00b7 ' + bl + ' blocker' + (bl === 1 ? '' : 's') : ''))
+      : 'Ready when you are';
+  }
+  var ringEl = document.getElementById('homeProgRing');
+  if (ringEl) {
+    var circ = 113.1;
+    ringEl.style.strokeDashoffset = (circ * (1 - (pct / 100))).toFixed(1);
+  }
+  var pctEl = document.getElementById('homeProgPct');
+  if (pctEl) pctEl.textContent = pct + '%';
+
+  var hallsWrap = document.getElementById('homeHallPills');
+  if (hallsWrap) {
+    var allHalls = Object.values(state.halls || {});
+    hallsWrap.innerHTML = allHalls.map(function (hl) {
+      var hp = hallPctHung(hl);
+      var isAct = state.activeHall === hl.id;
+      return '<button type="button" class="hc-hall-pill' + (isAct ? ' active' : '') + '" onclick="openHallWalk(\'' + escapeHtml(hl.id) + '\', event)">' +
+        '<span>' + escapeHtml(hl.name) + '</span><small>' + hp + '%</small></button>';
+    }).join('') +
+      '<button type="button" class="hc-hall-pill manage" onclick="toggleHallMenu()">+ Halls</button>';
+  }
+
+  var crewBadge = document.getElementById('homeCrewBadge');
+  if (crewBadge) {
+    var mp = parseInt((state.meta || {}).mpCount, 10) || 0;
+    var sp = parseInt((state.meta || {}).spCount, 10) || 0;
+    var headTotal = mp + sp;
+    crewBadge.textContent = headTotal > 0 ? ('Crew (' + headTotal + ')') : 'Crew';
+  }
+  var blkBadge = document.getElementById('homeBlockerBadge');
+  if (blkBadge) {
+    blkBadge.textContent = bl > 0 ? ('Blockers (' + bl + ')') : 'Blockers';
+    blkBadge.style.color = bl > 0 ? 'var(--amber-11)' : '';
+  }
+
+  updateSyncStatus();
   var rb = document.getElementById('resumeText');
   if (rb) {
-    var lastHall = state.halls[state.activeHall];
-    rb.textContent = lastHall ? 'Resume ' + lastHall.name : 'Resume walkthrough';
+    rb.textContent = h ? 'Walk \u203a' : 'Start \u203a';
   }
-  if (metaEl) metaEl.textContent = days[d.getDay()] + ', ' + mons[d.getMonth()] + ' ' + d.getDate() + ' \u00b7 ' + h12 + ':' + mm + ' ' + ampm + ' \u00b7 ' + bk;
 }
 function showToast(msg) {
   var t = document.getElementById('toast');

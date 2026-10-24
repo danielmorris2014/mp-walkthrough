@@ -45,6 +45,25 @@ with sync_playwright() as p:
         for k, ok in r.items():
             check(f"nav[{t}].{k}", ok)
 
+    # --- 1b. HOME COCKPIT & BENTO GRID (v79): no Tonight card clutter, header
+    #     Sync/Settings pills, Quick-Jump bar, radial progress ring, 1-tap hall
+    #     pills, 4 sub-workflow buttons, and Bento tiles with subtitles. ---
+    res_home = pg.evaluate("""() => {
+      switchTab('home');
+      return {
+        noTonightBox: !document.getElementById('lastNightLine') && !document.getElementById('resumeBtn'),
+        headerUtilities: !!document.querySelector('header #syncStatus') && !!document.getElementById('headerSettingsBtn'),
+        quickJumpBar: !!document.getElementById('homeJumpInput'),
+        cockpitRing: !!document.getElementById('homeProgRing') && !!document.getElementById('homeProgPct'),
+        hallPills: document.querySelectorAll('#homeHallPills .hc-hall-pill').length >= 2,
+        subNavBtns: document.querySelectorAll('.hc-subnav .hc-subbtn').length === 4,
+        bentoFeatured: document.querySelectorAll('.tool-tile.featured').length === 1,
+        bentoSubs: document.querySelectorAll('.tool-tile .tile-sub').length === 9
+      };
+    }""")
+    for k, ok in res_home.items():
+        check(f"home.{k}", ok)
+
     # --- 2. FONT GATE: no focusable control below 16px (iOS zoom bug) ---
     pg.evaluate("() => Object.keys(SCREENS).forEach(switchTab)")
     bad = pg.evaluate("""() => {
