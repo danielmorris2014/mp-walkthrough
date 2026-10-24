@@ -1,12 +1,23 @@
 // MP Walkthrough — minimal offline-first service worker.
 // Bump CACHE_VERSION whenever index.html/icons change so every phone picks up the update.
-var CACHE_VERSION = 'mp-walk-v80';
+var CACHE_VERSION = 'mp-walk-v81';
 
 self.addEventListener('message', function (event) {
   if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
     self.skipWaiting();
   }
 });
+
+// Bypass GitHub Pages 10-minute HTTP max-age cache when installing a new version
+function addFresh(cache, url) {
+  var req = new Request(url, { cache: 'reload' });
+  return fetch(req).then(function (resp) {
+    if (!resp || !resp.ok) throw new Error('HTTP ' + (resp ? resp.status : 'err') + ' for ' + url);
+    return cache.put(url, resp);
+  }).catch(function () {
+    return cache.add(url);
+  });
+}
 
 // CORE = what the app needs to boot. Small (under 3MB), cached atomically.
 // If ANY of these fail, the install fails and retries - correct behavior.
@@ -61,23 +72,11 @@ var HEAVY = [
 self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_VERSION).then(function (cache) {
-      // 1) Core: atomic - if this fails, retry the whole install (correct)
-      return cache.addAll(CORE).then(function () {
-        // 2) Heavy: individual, tolerant - one failure doesn't block others
-        return Promise.all(HEAVY.map(function (url) {
-          return cache.add(url).catch(function (e) {
-            // file will be runtime-cached on first use instead
-          });
-        }));
-      }).then(function () {
-        // 3) Training manifest: 80 small course files, optional
-        return fetch('./training/manifest.json').then(function (r) { return r.json(); }).then(function (files) {
-          // cache at most 40 per install (spread the load); rest runtime-cache
-          return Promise.all(files.slice(0, 40).map(function (url) {
-            return cache.add(url).catch(function () {});
-          }));
-        }).catch(function () { /* training needs one online open */ });
-      });
+      // 1) Core + HTML pages: bypass HTTP cache so rapid pushes never cache stale HTML
+      var fastUrls = CORE.concat(['./guide.html', './buf103.html', './reference.html', './scan.html', './labels.html']);
+      return Promise.all(fastUrls.map(function (url) {
+        return addFresh(cache, url);
+      }));
     }).then(function () { return self.skipWaiting(); })
   );
 });
@@ -87,19 +86,23 @@ self.addEventListener('activate', function (event) {
     caches.keys().then(function (keys) {
       return Promise.all(keys.map(function (k) { return k === CACHE_VERSION ? null : caches.delete(k); }));
     }).then(function () { return self.clients.claim(); }).then(function () {
-      // Background-cache remaining training course files (40+) in small chunks so 100% of lessons work offline
-      return Promise.all([
-        caches.open(CACHE_VERSION),
-        fetch('./training/manifest.json').then(function (r) { return r.json(); })
-      ]).then(function (res) {
-        var cache = res[0], rest = (res[1] || []).slice(40);
-        return rest.reduce(function (p, url) {
-          return p.then(function () {
-            return cache.match(url).then(function (hit) {
-              return hit ? null : cache.add(url).catch(function () {});
-            });
+      // Warm HEAVY assets and training files in background after activating so updates finish in <1s
+      return caches.open(CACHE_VERSION).then(function (cache) {
+        return Promise.all(HEAVY.map(function (url) {
+          return cache.match(url).then(function (hit) {
+            return hit ? null : addFresh(cache, url).catch(function () {});
           });
-        }, Promise.resolve());
+        })).then(function () {
+          return fetch('./training/manifest.json').then(function (r) { return r.json(); }).then(function (files) {
+            return (files || []).reduce(function (p, url) {
+              return p.then(function () {
+                return cache.match(url).then(function (hit) {
+                  return hit ? null : cache.add(url).catch(function () {});
+                });
+              });
+            }, Promise.resolve());
+          }).catch(function () {});
+        });
       }).catch(function () {});
     })
   );

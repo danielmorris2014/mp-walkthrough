@@ -1039,7 +1039,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v80';
+var APP_VERSION = 'v81';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1053,6 +1053,24 @@ function showUpdateBanner(text, showBtn) {
 function applyUpdateNow() {
   try { if (swReg && swReg.waiting) swReg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
   setTimeout(function () { location.reload(); }, 400);
+}
+function forceAppUpdate() {
+  showToast('Checking for latest version\u2026');
+  var p = Promise.resolve();
+  if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+    p = navigator.serviceWorker.getRegistrations().then(function (regs) {
+      return Promise.all(regs.map(function (r) { return r.unregister(); }));
+    }).catch(function () {});
+  }
+  p.then(function () {
+    if ('caches' in window && caches.keys) {
+      return caches.keys().then(function (keys) {
+        return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+      }).catch(function () {});
+    }
+  }).then(function () {
+    location.replace(location.pathname + '?v=' + Date.now() + (location.hash || ''));
+  });
 }
 var BRUSH_LABEL = { hung: 'Ran & Hung', ran: 'Ran (Pulled)', prog: 'In Progress', staged: 'Staged', remed: 'Remediation', none: 'Clear' };
 var STATUS_COLOR = { none: '#5a6169', staged: '#0090ff', prog: '#ffc53d', ran: '#6e56cf', hung: '#30a46c', remed: '#e5484d' };
@@ -2814,8 +2832,9 @@ function boot() {
       refreshing = true;
       location.reload();
     });
-    navigator.serviceWorker.register('./sw.js').then(function (reg) {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(function (reg) {
       swReg = reg;
+      try { reg.update(); } catch (e) {}
       // If a downloaded update is already waiting when the app opens, banner it.
       if (reg.waiting && navigator.serviceWorker.controller) showUpdateBanner('Update ready', true);
       // iOS checks for updates lazily - nudge it every time the app is reopened.
@@ -2866,6 +2885,10 @@ initStorage();
         <button class="btn btn-ghost" onclick="disconnectSite()">Disconnect</button>
       </div>
       <div id="syncSettingsInfo" class="muted" style="margin-top:6px;"></div>
+      <div class="batch-row" style="justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
+        <span class="muted">App version: <strong style="color:var(--text);">v81</strong></span>
+        <button class="btn btn-secondary" onclick="forceAppUpdate()">Force Update</button>
+      </div>
       <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closeSettings()">Close</button>
     </div>
   </div>
