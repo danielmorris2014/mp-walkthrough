@@ -288,6 +288,26 @@ with sync_playwright() as p:
         check(f"page[{name}].inputs16px", r["smallInputs"] == 0, f"{r['smallInputs']} small")
         if name == "buf103":
             check("page[buf103].dataLoaded", "cables" in r["bodyText"], r["bodyText"][:60])
+            tr = sp.evaluate("""() => {
+              const q = document.getElementById('q');
+              q.value = 'dh1-r0102';
+              const traceBtn = document.querySelector('#seg button[data-v="trace"]');
+              traceBtn.click();
+              const stages = document.querySelectorAll('.jtk-stage').length;
+              const multihop = document.querySelectorAll('.jtk-stage.multihop').length;
+              const nodes = document.querySelectorAll('.jtk-node').length;
+              const conns = document.querySelectorAll('svg.jtk-connector').length;
+              const firstCable = document.querySelector('.trace-cable-btn');
+              if (firstCable) firstCable.click();
+              const hlNodes = document.querySelectorAll('.jtk-node.hl-active').length;
+              const hlConns = document.querySelectorAll('svg.jtk-connector.hl-active').length;
+              const scrollX = document.documentElement.scrollWidth - document.documentElement.clientWidth;
+              return { stages, multihop, nodes, conns, hlNodes, hlConns, scrollX };
+            }""")
+            check("page[buf103].traceJsPlumbRenders", tr["stages"] > 0 and tr["nodes"] > 0 and tr["conns"] > 0, str(tr))
+            check("page[buf103].traceMultiHop", tr["multihop"] > 0, str(tr))
+            check("page[buf103].traceHighlight", tr["hlNodes"] >= 2 and tr["hlConns"] >= 1, str(tr))
+            check("page[buf103].traceNoScrollX", tr["scrollX"] <= 1, f"scrollX={tr['scrollX']}")
         sp.close()
 
     # --- 12. PAGES REGISTRY: home destinations are one declarative list;

@@ -53,11 +53,37 @@ for name in wb.sheetnames:
                 col_z_loc = pick(hmap, "Z_loc", "eor_loc")
                 col_z_name = pick(hmap, "Z_name", "eor_name")
                 col_z_port = pick(hmap, "Z_port", "eor_front_port")
-                col_spec = pick(hmap, "cable", "A_patch_cord", "tor_eor_cable", "eor_dcn_cable")
+                spec_cols = [
+                    hmap[c]
+                    for c in (
+                        "cable",
+                        "A_Z_trunk_assembly",
+                        "tor_eor_cable",
+                        "A_patch_cord",
+                        "Z_patch_cord",
+                        "eor_dcn_cable",
+                        "dcn_spn_cable",
+                    )
+                    if c in hmap
+                ]
                 col_pan_a = pick(hmap, "A_patch_panel")
                 col_pan_a_ru = pick(hmap, "A_pp_ru")
+                col_pan_a_port_f = pick(hmap, "A_pp_port_front")
+                col_a_pp_loc = pick(hmap, "A_pp_loc")
                 col_pan_z = pick(hmap, "eor_panel", "Z_patch_panel")
                 col_pan_z_ru = pick(hmap, "eor_ru", "Z_pp_ru")
+                col_pan_z_port_f = pick(hmap, "Z_pp_port_front")
+                col_z_pp_loc = pick(hmap, "Z_pp_loc")
+                col_eor_loc = pick(hmap, "eor_loc")
+                col_eor_pan = pick(hmap, "eor_panel")
+                col_eor_ru = pick(hmap, "eor_ru")
+                col_eor_port_f = pick(hmap, "eor_front_port")
+                col_eor_dcn_cable = pick(hmap, "eor_dcn_cable")
+                col_dcn_loc = pick(hmap, "dcn_loc")
+                col_dcn_pan = pick(hmap, "dcn_panel")
+                col_dcn_ru = pick(hmap, "dcn_ru")
+                col_dcn_port_f = pick(hmap, "dcn_front_port")
+                col_dcn_spn_cable = pick(hmap, "dcn_spn_cable")
             continue
         # data row: must have an A_loc to count
         a_loc = row[col_a_loc] if col_a_loc is not None and col_a_loc < len(row) else None
@@ -65,20 +91,74 @@ for name in wb.sheetnames:
             continue
         def g(c):
             return row[c] if (c is not None and c < len(row)) else None
+        def gs(c):
+            v = g(c)
+            return str(v).strip() if v is not None else ""
+        a_loc_s = gs(col_a_loc)
+        z_loc_s = gs(col_z_loc)
         pan = ""
-        if col_pan_a is not None and g(col_pan_a):
-            pan = str(g(col_pan_a)) + ((" ru" + str(g(col_pan_a_ru))) if g(col_pan_a_ru) else "")
-        elif col_pan_z is not None and g(col_pan_z):
-            pan = str(g(col_pan_z)) + ((" ru" + str(g(col_pan_z_ru))) if g(col_pan_z_ru) else "")
-        a_full = str(g(col_a_name) or "")
-        if g(col_a_port):
-            a_full = (a_full + " " + str(g(col_a_port))).strip()
-        z_full = str(g(col_z_name) or "")
-        if g(col_z_port):
-            z_full = (z_full + " " + str(g(col_z_port))).strip()
-        buf.append([intern(g(col_a_loc)), intern(a_full), intern(g(col_z_loc)), intern(z_full),
-                    intern(g(col_spec)), intern(pan)])
-        for loc in (str(g(col_a_loc)), str(g(col_z_loc))):
+        if col_pan_a is not None and gs(col_pan_a):
+            pan = gs(col_pan_a) + ((" ru" + gs(col_pan_a_ru)) if gs(col_pan_a_ru) else "")
+        elif col_pan_z is not None and gs(col_pan_z):
+            pan = gs(col_pan_z) + ((" ru" + gs(col_pan_z_ru)) if gs(col_pan_z_ru) else "")
+        a_full = gs(col_a_name)
+        if gs(col_a_port):
+            a_full = (a_full + " " + gs(col_a_port)).strip()
+        if not a_full and gs(col_pan_a):
+            a_full = gs(col_pan_a) + ((" p" + gs(col_pan_a_port_f)) if gs(col_pan_a_port_f) else "")
+        z_full = gs(col_z_name)
+        if gs(col_z_port):
+            z_full = (z_full + " " + gs(col_z_port)).strip()
+        if not z_full and gs(col_pan_z):
+            z_full = gs(col_pan_z) + ((" p" + gs(col_pan_z_port_f)) if gs(col_pan_z_port_f) else "")
+        spec_val = ""
+        for sc in spec_cols:
+            sv = gs(sc)
+            if sv:
+                spec_val = sv
+                break
+        entry = [
+            intern(a_loc_s),
+            intern(a_full),
+            intern(z_loc_s),
+            intern(z_full),
+            intern(spec_val),
+            intern(pan),
+        ]
+        # Multi-hop intermediate points (EOR / DCN / cross-rack patch panels)
+        hops = []
+        eor_loc_s = gs(col_eor_loc)
+        if eor_loc_s and eor_loc_s != a_loc_s and eor_loc_s != z_loc_s:
+            eor_lbl = (
+                gs(col_eor_pan)
+                + ((" ru" + gs(col_eor_ru)) if gs(col_eor_ru) else "")
+                + ((" " + gs(col_eor_port_f)) if gs(col_eor_port_f) else "")
+            ).strip()
+            hops.extend([intern(eor_loc_s), intern(eor_lbl), intern(gs(col_eor_dcn_cable))])
+        else:
+            a_pp_loc_s = gs(col_a_pp_loc)
+            if a_pp_loc_s and a_pp_loc_s != a_loc_s and a_pp_loc_s != z_loc_s:
+                a_pp_lbl = (gs(col_pan_a) + ((" ru" + gs(col_pan_a_ru)) if gs(col_pan_a_ru) else "")).strip()
+                hops.extend([intern(a_pp_loc_s), intern(a_pp_lbl), -1])
+        dcn_loc_s = gs(col_dcn_loc)
+        if dcn_loc_s and dcn_loc_s != a_loc_s and dcn_loc_s != z_loc_s:
+            dcn_lbl = (
+                gs(col_dcn_pan)
+                + ((" ru" + gs(col_dcn_ru)) if gs(col_dcn_ru) else "")
+                + ((" " + gs(col_dcn_port_f)) if gs(col_dcn_port_f) else "")
+            ).strip()
+            hops.extend([intern(dcn_loc_s), intern(dcn_lbl), intern(gs(col_dcn_spn_cable))])
+        else:
+            z_pp_loc_s = gs(col_z_pp_loc)
+            if z_pp_loc_s and z_pp_loc_s != a_loc_s and z_pp_loc_s != z_loc_s:
+                z_pp_lbl = (gs(col_pan_z) + ((" ru" + gs(col_pan_z_ru)) if gs(col_pan_z_ru) else "")).strip()
+                hops.extend([intern(z_pp_loc_s), intern(z_pp_lbl), -1])
+        if hops:
+            entry.append(hops)
+        buf.append(entry)
+        for loc in (a_loc_s, z_loc_s, eor_loc_s, dcn_loc_s):
+            if not loc:
+                continue
             m = hall_re.match(loc + "-")
             if not m:
                 m = hall_re.search(loc)
@@ -121,8 +201,9 @@ out = {
 }
 raw = json.dumps(out, separators=(",", ":"))
 os.makedirs(os.path.join(APP, "data"), exist_ok=True)
-with open(os.path.join(APP, "data", "buf103.json"), "w", encoding="utf-8") as f:
-    f.write(raw)
+raw_path = os.path.join(APP, "data", "buf103.json")
+if os.path.exists(raw_path):
+    os.remove(raw_path)
 with open(os.path.join(APP, "data", "buf103.json.gz"), "wb") as f:
     f.write(gzip.compress(raw.encode("utf-8"), compresslevel=9, mtime=0))
 
@@ -132,7 +213,10 @@ for hall in out["halls"]:
     rows = set()
     for fam in fams:
         for r in rows_out[fam]:
-            for loci in (r[0], r[2]):
+            loc_idxs = [r[0], r[2]]
+            if len(r) > 6 and r[6]:
+                loc_idxs.extend(r[6][0::3])
+            for loci in loc_idxs:
                 loc = dct_rev(loci)
                 m2 = re.match(r"BUF103-(DH\d+)-R(\d{2})\d{2}$", loc or "")
                 if m2 and m2.group(1) == hall:

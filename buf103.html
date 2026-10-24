@@ -96,6 +96,44 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 .copyrow button { min-height: 44px; border-radius: 10px; border: 0; background: #fff; color: #111; font: 700 13px -apple-system, sans-serif; cursor: pointer; }
 .copyrow button.sec { background: rgba(255,255,255,.07); border: 1px solid var(--line); color: var(--text); }
 .closex { width: 100%; margin-top: 8px; min-height: 44px; border-radius: 10px; background: transparent; border: 1px dashed var(--line); color: var(--muted); font: 700 14px -apple-system, sans-serif; }
+/* jsPlumb interactive trace diagrams (v76) */
+.trace-instruction { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top: 10px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.tracecard { background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 12px; margin-top: 10px; overflow: hidden; }
+.trace-hdr { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.trace-title { font: 800 11px -apple-system, sans-serif; letter-spacing: .7px; text-transform: uppercase; color: var(--dim); }
+.trace-badge { font: 700 10px ui-monospace, monospace; padding: 2px 7px; border-radius: 999px;
+  background: rgba(255,255,255,.06); color: var(--muted); flex: none; }
+.jtk-stage { position: relative; display: flex; justify-content: space-between; align-items: stretch;
+  gap: 14px; min-height: 110px; padding: 8px 2px; width: 100%; overflow: hidden; }
+.jtk-col { display: flex; flex-direction: column; justify-content: space-around; gap: 6px;
+  z-index: 2; flex: 1; min-width: 0; max-width: 42%; }
+.jtk-stage.multihop .jtk-col { max-width: 23%; }
+.jtk-col-hdr { font: 800 9px -apple-system, sans-serif; letter-spacing: .5px; text-transform: uppercase;
+  color: var(--dim); text-align: center; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jtk-node { position: relative; z-index: 2; background: var(--card2); border: 1.5px solid var(--line);
+  border-radius: 9px; padding: 5px 7px; cursor: pointer; text-align: left;
+  transition: opacity .16s ease, border-color .16s ease, box-shadow .16s ease; }
+.jtk-node:active { transform: scale(.97); }
+.jtk-node .rk { font: 800 10.5px/1.2 ui-monospace, monospace; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jtk-node .pt { font: 600 9px/1.2 ui-monospace, monospace; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.jtk-node.hl-active { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.22); background: rgba(255,255,255,.09); }
+.jtk-node.hl-dim { opacity: .24; }
+.jtk-stage svg.jtk-connector { z-index: 1; pointer-events: stroke; cursor: pointer; transition: opacity .16s ease; }
+.jtk-stage svg.jtk-connector.hl-dim { opacity: .14; }
+.jtk-stage svg.jtk-connector.hl-active path { stroke-width: 3.5px; }
+.trace-cables { margin-top: 8px; border-top: 1px solid rgba(255,255,255,.06); padding-top: 6px; }
+.trace-cables-hdr { display: flex; justify-content: space-between; align-items: center;
+  font: 700 10px -apple-system, sans-serif; color: var(--dim); margin-bottom: 4px; }
+.trace-cable-btn { display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  width: 100%; text-align: left; background: rgba(255,255,255,.025); border: 1px solid transparent;
+  border-radius: 8px; padding: 6px 8px; margin-top: 4px; color: var(--text);
+  font: 600 10.5px/1.3 ui-monospace, monospace; cursor: pointer; }
+.trace-cable-btn.hl-active { border-color: var(--amber); background: rgba(245,165,36,.12); }
+.trace-cable-btn .path-str { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trace-cable-btn .inspect-pill { flex: none; font: 800 10px -apple-system, sans-serif; color: #111;
+  background: #fff; border-radius: 6px; padding: 2px 7px; }
 @media (min-width: 640px) { body { max-width: 640px; margin: 0 auto; } }
 </style>
 </head>
@@ -123,6 +161,7 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 <div class="sheet" id="sheet"></div>
 <script src="./kit-data.js"></script>
 <script src="./vendor/localforage/localforage.min.js"></script>
+<script src="./vendor/jsplumb/jsplumb.min.js"></script>
 <script>
 'use strict';
 /* BUF103 Cutsheet viewer v2 - interactive drill-down: hall -> racks ->
@@ -130,6 +169,7 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
    with copy buttons. Data bundled via the pipeline (ADR-0003). */
 var D = null, FAMS = [], RACKS = {};   // RACKS = {DH1: [{rack, n}...]}
 var MODE = 'browse', HALL = null, RACK = null, FAMFILTER = null, SHOWN = [];
+var _jtkInstances = [];
 function esc(t) { return KitData.esc(t); }
 function loadDone(d) {
   D = d; FAMS = d.fams;
@@ -150,13 +190,20 @@ function load() {
 }
 function totalRows() { var n = 0; FAMS.forEach(function (f) { n += D.rows[f].length; }); return n; }
 function buildRacks() {
-  // one pass over rows: per-rack connection counts, bucketed by hall
+  // one pass over rows: per-rack connection counts (including intermediate hop racks), bucketed by hall
   var counts = {};
   FAMS.forEach(function (fam) {
     D.rows[fam].forEach(function (row) {
+      var seen = {};
       var a = D.d[row[0]], z = D.d[row[2]];
-      if (a) counts[a] = (counts[a] || 0) + 1;
-      if (z && z !== a) counts[z] = (counts[z] || 0) + 1;
+      if (a) { counts[a] = (counts[a] || 0) + 1; seen[a] = 1; }
+      if (z && !seen[z]) { counts[z] = (counts[z] || 0) + 1; seen[z] = 1; }
+      if (row[6]) {
+        for (var hi = 0; hi < row[6].length; hi += 3) {
+          var hLoc = D.d[row[6][hi]];
+          if (hLoc && !seen[hLoc]) { counts[hLoc] = (counts[hLoc] || 0) + 1; seen[hLoc] = 1; }
+        }
+      }
     });
   });
   RACKS = {};
@@ -248,7 +295,13 @@ function connectionsFor(rack) {
   var hits = [];
   FAMS.forEach(function (fam) {
     D.rows[fam].forEach(function (row) {
-      if (D.d[row[0]] === rack || D.d[row[2]] === rack) hits.push([fam, row]);
+      var matched = (D.d[row[0]] === rack || D.d[row[2]] === rack);
+      if (!matched && row[6]) {
+        for (var hi = 0; hi < row[6].length; hi += 3) {
+          if (D.d[row[6][hi]] === rack) { matched = true; break; }
+        }
+      }
+      if (matched) hits.push([fam, row]);
     });
   });
   return hits;
@@ -430,28 +483,61 @@ function showMats() {
   });
 }
 
-/* ---------- trace: visual cable paths ---------- */
+/* ---------- trace: interactive jsPlumb cable paths (v76) ---------- */
+function shortRack(loc) {
+  if (!loc) return '?';
+  var p = loc.split('-R');
+  return p.length > 1 ? 'R' + p[1] : loc.replace(/^BUF103-/i, '');
+}
+function shortDev(dev) {
+  if (!dev) return '';
+  var parts = dev.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(-12);
+  return parts[0].slice(-8) + ' ' + parts[parts.length - 1].slice(0, 8);
+}
+function cableChain(row) {
+  var aLoc = D.d[row[0]] || '?', aDev = D.d[row[1]] || '';
+  var zLoc = D.d[row[2]] || '?', zDev = D.d[row[3]] || '';
+  var steps = [{ loc: aLoc, dev: aDev, role: 'A End' }];
+  if (row[6] && row[6].length >= 3) {
+    for (var hi = 0; hi < row[6].length; hi += 3) {
+      var hLoc = D.d[row[6][hi]] || '';
+      var hLbl = row[6][hi + 1] >= 0 ? (D.d[row[6][hi + 1]] || '') : '';
+      var hCab = row[6][hi + 2] >= 0 ? (D.d[row[6][hi + 2]] || '') : '';
+      if (hLoc) steps.push({ loc: hLoc, dev: hLbl, cable: hCab, role: hi === 0 ? 'EOR Hop' : 'DCN Hop' });
+    }
+  }
+  steps.push({ loc: zLoc, dev: zDev, role: 'Z End' });
+  return steps;
+}
+function cleanupJsPlumb() {
+  while (_jtkInstances.length) {
+    var inst = _jtkInstances.pop();
+    try { if (inst && inst.destroy) inst.destroy(); } catch (e) {}
+  }
+}
 function showTrace() {
+  cleanupJsPlumb();
   var out = document.getElementById('results');
   out.innerHTML = '';
-  var q = document.getElementById('q').value.trim();
+  var q = document.getElementById('q').value.trim() || RACK || '';
   var head = document.createElement('div');
   head.className = 'count';
   head.textContent = q ? 'Tracing: ' + q : 'Type a rack (like dh1-r0411) to see its cable paths visually';
   out.appendChild(head);
   if (!q) {
-    out.innerHTML += '<div class="trace-instruction">The Trace view draws every connection from a rack as a visual path diagram \u2014 A end on the left, Z end on the right, cable colored by family. Use Browse to find your rack first if needed.</div>';
+    out.innerHTML += '<div class="trace-instruction">The Trace view draws interactive jsPlumb cable paths across racks (including multi-hop EOR/DCN patch panels). Tap any cable or rack node to highlight its full path, or open its detail sheet.</div>';
     return;
   }
-  var rack = rackNorm(q);
+  var rack = rackNorm(q) || RACK;
   if (!rack) { out.innerHTML += '<div class="trace-instruction">Could not parse \u201c' + esc(q) + '\u201d as a rack. Try dh1-r0411.</div>'; return; }
+  RACK = rack;
   var hits = connectionsFor(rack);
   if (!hits.length) { out.innerHTML += '<div class="trace-instruction">No connections found for ' + esc(rack) + '</div>'; return; }
   renderTraceDiagram(rack, hits, out);
 }
 
 function renderTraceDiagram(rack, hits, out) {
-  // group by family for coloring
   var famColors = { 'TPU RACK PP <> OCS': '#30a46c', 'TOR <> DCN-SPN': '#55d0d6', 'RMU + TOR <> EOR': '#ffca16',
     'MACHINE <> TOR (INTRA RACK)': '#e5484d', 'MACHINE <> TPU (INTRA RACK)': '#6aa9e8', 'MACHINE BMC <> RMU (INTRA RACK)': '#ff7ab8',
     'RMU <> BAT + RECT (INTRA RACK)': '#46a758', 'BMS <> FB0 <> FB1': '#f5a524' };
@@ -467,92 +553,201 @@ function renderTraceDiagram(rack, hits, out) {
   title.textContent = rack + ' \u00b7 ' + total + ' connections \u00b7 ' + groups.length + ' families';
   out.appendChild(title);
 
+  // family distribution bar (v70) stays above jsPlumb diagrams
+  if (groups.length > 1) {
+    var bar = document.createElement('div');
+    bar.style.cssText = 'display:flex;height:8px;border-radius:4px;overflow:hidden;margin:8px 0 6px;';
+    bar.innerHTML = groups.map(function (g) {
+      return '<span title="' + esc(g.fam) + ': ' + g.hits.length + '" style="flex:' + g.hits.length + ';background:' + g.color + '"></span>';
+    }).join('');
+    out.appendChild(bar);
+  }
+
   groups.forEach(function (g) {
-    var card = document.createElement('div');
-    card.className = 'tracecard';
-    var svg = buildTraceSVG(rack, g);
-    card.appendChild(svg);
-    var label = document.createElement('div');
-    label.className = 'trace-label';
-    label.textContent = g.fam + ' \u00b7 ' + g.hits.length + ' connections';
-    card.appendChild(label);
-    out.appendChild(card);
+    buildTraceCard(rack, g, out);
   });
 }
 
-function buildTraceSVG(rack, group) {
-  var NS = 'http://www.w3.org/2000/svg';
-  var svg = document.createElementNS(NS, 'svg');
-  var W = 350, H = Math.max(60, group.hits.length * 18 + 40);
-  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
-  svg.setAttribute('role', 'img');
-  svg.setAttribute('aria-label', 'Cable paths for ' + rack);
-  var maxShow = Math.min(group.hits.length, 12);
-  var rows = group.hits.slice(0, maxShow);
-  var y0 = 30;
-  var rowH = Math.min(18, (H - 50) / maxShow);
-  var rackShort = rack.split('-R')[1] || rack.slice(-4);
+function buildTraceCard(rack, group, out) {
+  var card = document.createElement('div');
+  card.className = 'tracecard';
+  var maxShow = Math.min(group.hits.length, 8);
+  var sampleHits = group.hits.slice(0, maxShow);
+  var chains = sampleHits.map(function (h) { return cableChain(h[1]); });
+  var numCols = 2;
+  chains.forEach(function (ch) { if (ch.length > numCols) numCols = ch.length; });
 
-  // A-side rack label
-  var aLabel = document.createElementNS(NS, 'text');
-  aLabel.setAttribute('x', 10); aLabel.setAttribute('y', 16);
-  aLabel.setAttribute('fill', '#edeef0'); aLabel.setAttribute('font-size', '11');
-  aLabel.setAttribute('font-weight', '800'); aLabel.setAttribute('font-family', 'monospace');
-  aLabel.textContent = 'R' + rackShort;
-  svg.appendChild(aLabel);
+  var hdr = document.createElement('div');
+  hdr.className = 'trace-hdr';
+  hdr.innerHTML = '<div class="trace-title"><span class="fam" style="color:' + group.color + '">' + esc(group.fam) +
+    '</span> \u00b7 ' + group.hits.length + '</div>' +
+    '<span class="trace-badge">' + (numCols > 2 ? (numCols + '-hop path') : 'direct') + '</span>';
+  card.appendChild(hdr);
 
-  rows.forEach(function (hit, i) {
-    var row = hit[1];
-    var aLoc = D.d[row[0]] || '?';
-    var zLoc = D.d[row[2]] || '?';
-    var zShort = zLoc.split('-R')[1] || zLoc.slice(-4);
-    var isA = aLoc === rack;
-    var y = y0 + i * rowH;
-    // the cable path line
-    var line = document.createElementNS(NS, 'line');
-    line.setAttribute('x1', 55); line.setAttribute('x2', W - 55);
-    line.setAttribute('y1', y); line.setAttribute('y2', y);
-    line.setAttribute('stroke', group.color);
-    line.setAttribute('stroke-width', '2');
-    line.setAttribute('stroke-linecap', 'round');
-    // arrow direction: A→Z
-    line.setAttribute('marker-end', 'url(#arrow' + group.fam.replace(/\W/g, '') + ')');
-    svg.appendChild(line);
-    // A-side port
-    var aPort = document.createElementNS(NS, 'text');
-    aPort.setAttribute('x', 52); aPort.setAttribute('y', y - 3);
-    aPort.setAttribute('text-anchor', 'end');
-    aPort.setAttribute('fill', '#b0b4ba'); aPort.setAttribute('font-size', '8');
-    aPort.setAttribute('font-family', 'monospace');
-    aPort.textContent = (D.d[row[1]] || '').split(' ').pop().slice(0, 8);
-    svg.appendChild(aPort);
-    // Z-side rack + port
-    var zText = document.createElementNS(NS, 'text');
-    zText.setAttribute('x', W - 52); zText.setAttribute('y', y - 3);
-    zText.setAttribute('fill', '#b0b4ba'); zText.setAttribute('font-size', '8');
-    zText.setAttribute('font-family', 'monospace');
-    zText.textContent = zShort + ' ' + (D.d[row[3]] || '').split(' ').pop().slice(0, 6);
-    svg.appendChild(zText);
+  var stage = document.createElement('div');
+  stage.className = 'jtk-stage' + (numCols > 2 ? ' multihop' : '');
+  stage.setAttribute('role', 'region');
+  stage.setAttribute('aria-label', 'Interactive cable trace for ' + group.fam);
+  card.appendChild(stage);
+
+  // Build columns & deduplicated rack/device nodes per column
+  var cols = [];
+  var colNodeMap = [];
+  var allNodes = [];
+  for (var c = 0; c < numCols; c++) {
+    var colEl = document.createElement('div');
+    colEl.className = 'jtk-col';
+    var colHdr = document.createElement('div');
+    colHdr.className = 'jtk-col-hdr';
+    colHdr.textContent = c === 0 ? 'A End' : (c === numCols - 1 ? 'Z End' : ('Hop ' + c));
+    colEl.appendChild(colHdr);
+    stage.appendChild(colEl);
+    cols.push(colEl);
+    colNodeMap.push({});
+  }
+
+  // Decide per-column grouping: if a column has >1 unique rack across sampleHits, group by rack+port cluster;
+  // otherwise group by individual device/port so intra-rack and single-source fans are distinct.
+  var colUniqueRacks = [];
+  for (var c2 = 0; c2 < numCols; c2++) {
+    var rset = {};
+    chains.forEach(function (ch) {
+      var st = ch[Math.min(c2, ch.length - 1)];
+      if (st && st.loc) rset[st.loc] = 1;
+    });
+    colUniqueRacks.push(Object.keys(rset).length);
+  }
+
+  var cableNodeLists = [];
+  chains.forEach(function (ch, cableIdx) {
+    var nList = [];
+    for (var colIdx = 0; colIdx < numCols; colIdx++) {
+      var st = ch[Math.min(colIdx, ch.length - 1)];
+      var key = colUniqueRacks[colIdx] > 1
+        ? (st.loc + '::' + (st.dev ? st.dev.split(' ')[0] : ''))
+        : (st.loc + '::' + (st.dev || ('idx' + cableIdx)));
+      var nodeEl = colNodeMap[colIdx][key];
+      if (!nodeEl) {
+        nodeEl = document.createElement('button');
+        nodeEl.type = 'button';
+        nodeEl.className = 'jtk-node';
+        nodeEl.setAttribute('data-cable-idx', String(cableIdx));
+        nodeEl.innerHTML = '<div class="rk">' + esc(shortRack(st.loc)) + '</div>' +
+          (st.dev ? '<div class="pt">' + esc(shortDev(st.dev)) + '</div>' : '');
+        cols[colIdx].appendChild(nodeEl);
+        colNodeMap[colIdx][key] = nodeEl;
+        allNodes.push(nodeEl);
+      }
+      nList.push(nodeEl);
+    }
+    cableNodeLists.push(nList);
   });
 
-  // Z-side header
-  var zHeader = document.createElementNS(NS, 'text');
-  zHeader.setAttribute('x', W - 10); zHeader.setAttribute('y', 16);
-  zHeader.setAttribute('text-anchor', 'end');
-  zHeader.setAttribute('fill', '#edeef0'); zHeader.setAttribute('font-size', '11');
-  zHeader.setAttribute('font-weight', '800'); zHeader.setAttribute('font-family', 'monospace');
-  zHeader.textContent = 'far end';
-  svg.appendChild(zHeader);
+  // Interactive cable list below the diagram for tap-to-highlight & tap-to-inspect
+  var listWrap = document.createElement('div');
+  listWrap.className = 'trace-cables';
+  listWrap.innerHTML = '<div class="trace-cables-hdr"><span>Tap cable to highlight path (' +
+    maxShow + ' of ' + group.hits.length + ' shown)</span><span>Inspect</span></div>';
+  var cableBtns = [];
+  sampleHits.forEach(function (hit, idx) {
+    var ch = chains[idx];
+    var pathTxt = ch.map(function (st) {
+      return shortRack(st.loc) + (st.dev ? ' (' + shortDev(st.dev) + ')' : '');
+    }).join(' \u2192 ');
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'trace-cable-btn';
+    btn.setAttribute('data-trace-idx', String(idx));
+    btn.innerHTML = '<span class="path-str">' + esc(pathTxt) + '</span>' +
+      '<span class="inspect-pill" data-open-sheet="' + idx + '">Details \u2197</span>';
+    listWrap.appendChild(btn);
+    cableBtns.push(btn);
+  });
+  card.appendChild(listWrap);
 
-  if (group.hits.length > maxShow) {
-    var more = document.createElementNS(NS, 'text');
-    more.setAttribute('x', W / 2); more.setAttribute('y', H - 6);
-    more.setAttribute('text-anchor', 'middle');
-    more.setAttribute('fill', '#777b84'); more.setAttribute('font-size', '9');
-    more.textContent = '+' + (group.hits.length - maxShow) + ' more';
-    svg.appendChild(more);
+  // Append card to live DOM BEFORE connecting with jsPlumb so element offsets are non-zero
+  out.appendChild(card);
+
+  var cableConns = [];
+  var allConns = [];
+  if (typeof jsPlumb !== 'undefined' && jsPlumb.newInstance) {
+    var inst = jsPlumb.newInstance({
+      container: stage,
+      elementsDraggable: false,
+      connector: { type: 'Bezier', options: { curviness: 40 } },
+      paintStyle: { strokeWidth: 2, stroke: group.color },
+      endpoints: ['Blank', 'Blank'],
+      anchors: ['Right', 'Left']
+    });
+    _jtkInstances.push(inst);
+    cableNodeLists.forEach(function (nList, cIdx) {
+      var cList = [];
+      for (var s = 0; s < nList.length - 1; s++) {
+        if (nList[s] === nList[s + 1]) continue;
+        var conn = inst.connect({
+          source: nList[s],
+          target: nList[s + 1],
+          paintStyle: { strokeWidth: 2, stroke: group.color }
+        });
+        if (conn) {
+          cList.push(conn);
+          allConns.push({ conn: conn, cableIdx: cIdx });
+        }
+      }
+      cableConns.push(cList);
+    });
   }
-  return svg;
+
+  var activeIdx = -1;
+  function highlightCable(idx) {
+    if (activeIdx === idx) { activeIdx = -1; } else { activeIdx = idx; }
+    allNodes.forEach(function (nd) {
+      nd.classList.remove('hl-active', 'hl-dim');
+      if (activeIdx >= 0) nd.classList.add('hl-dim');
+    });
+    var svgs = stage.querySelectorAll('svg.jtk-connector');
+    for (var si = 0; si < svgs.length; si++) {
+      svgs[si].classList.remove('hl-active', 'hl-dim');
+      if (activeIdx >= 0) svgs[si].classList.add('hl-dim');
+    }
+    cableBtns.forEach(function (b, bi) {
+      b.classList.toggle('hl-active', bi === activeIdx);
+    });
+    if (activeIdx >= 0) {
+      (cableNodeLists[activeIdx] || []).forEach(function (nd) {
+        nd.classList.remove('hl-dim');
+        nd.classList.add('hl-active');
+      });
+      (cableConns[activeIdx] || []).forEach(function (conn) {
+        var el = conn && (conn.canvas || (conn.connector && conn.connector.canvas));
+        if (el) {
+          el.classList.remove('hl-dim');
+          el.classList.add('hl-active');
+        }
+      });
+    }
+  }
+
+  stage.addEventListener('click', function (e) {
+    var nd = e.target.closest('.jtk-node');
+    if (nd && nd.hasAttribute('data-cable-idx')) {
+      var ci = +nd.getAttribute('data-cable-idx');
+      if (activeIdx === ci) { openSheet(sampleHits[ci]); } else { highlightCable(ci); }
+    }
+  });
+  listWrap.addEventListener('click', function (e) {
+    var pill = e.target.closest('[data-open-sheet]');
+    if (pill) {
+      e.stopPropagation();
+      openSheet(sampleHits[+pill.getAttribute('data-open-sheet')]);
+      return;
+    }
+    var btn = e.target.closest('[data-trace-idx]');
+    if (btn) {
+      var ti = +btn.getAttribute('data-trace-idx');
+      if (activeIdx === ti) { openSheet(sampleHits[ti]); } else { highlightCable(ti); }
+    }
+  });
 }
 
 /* ---------- detail sheet ---------- */
@@ -561,11 +756,22 @@ function openSheet(hit) {
   var fam = hit[0], row = hit[1];
   var a = D.d[row[0]], aDev = D.d[row[1]], z = D.d[row[2]], zDev = D.d[row[3]];
   var spec = D.d[row[4]] || '\u2014', panel = D.d[row[5]] || '';
+  var hopsHtml = '';
+  if (row[6] && row[6].length >= 3) {
+    var chain = cableChain(row);
+    hopsHtml = '<div class="kv"><div class="k">Full multi-hop path (' + chain.length + ' racks)</div>' +
+      chain.map(function (st, idx) {
+        return '<div class="v" style="font-size:11.5px;margin-top:3px">' +
+          '<span style="color:var(--amber-t)">' + (idx + 1) + '. ' + esc(st.role) + ':</span> ' +
+          esc(st.loc) + (st.dev ? ' \u00b7 <span style="color:var(--muted)">' + esc(st.dev) + '</span>' : '') + '</div>';
+      }).join('') + '</div>';
+  }
   var sh = document.getElementById('sheet');
   sh.innerHTML = '<div class="grab"></div>' +
     '<div class="ct"><span class="fam">' + esc(fam) + '</span></div>' +
     '<div class="kv"><div class="k">A end</div><div class="v">' + esc(a) + '</div>' +
     (aDev ? '<div class="v" style="font-weight:600;color:var(--muted)">' + esc(aDev) + '</div>' : '') + '</div>' +
+    hopsHtml +
     '<div class="kv"><div class="k">Z end</div><div class="v">' + esc(z) + '</div>' +
     (zDev ? '<div class="v" style="font-weight:600;color:var(--muted)">' + esc(zDev) + '</div>' : '') + '</div>' +
     '<div class="kv"><div class="k">Cable / spec</div><div class="v">' + esc(spec) + '</div>' +
