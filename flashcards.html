@@ -80,32 +80,34 @@ body { margin: 0; background: var(--bg); color: var(--text);
 </div>
 <div id="mount"><div class="count" style="margin-top:14px">Loading cards&hellip;</div></div>
 <script src="./kit-data.js"></script>
+<script src="./vendor/localforage/localforage.min.js"></script>
 <script>
 'use strict';
 /* Knowledge Cards - flip-card drill over the course glossary (103 terms,
    extracted from the training package by the build pipeline). Simple
    spaced repetition: "know" retires a card for the session, "review
-   again" requeues it; per-term stats persist in localStorage. */
+   again" requeues it; per-term stats persist in IndexedDB (localForage). */
 var CARDS = null, DECK = [], IDX = 0, KNOWN = 0;
 var MODE = 'flip', QDECK = [], QIDX = 0, QRIGHT = 0, QWRONG = 0;
 var LS = 'mp.flashcards';
-function stats() { try { return JSON.parse(localStorage.getItem(LS) || '{}'); } catch (e) { return {}; } }
+var _statsCache = null;
+function stats() {
+  if (_statsCache) return _statsCache;
+  try { _statsCache = JSON.parse(localStorage.getItem(LS) || '{}'); } catch (e) { _statsCache = {}; }
+  return _statsCache;
+}
 function saveStat(term, know) {
   var s = stats(); var e = s[term] || { seen: 0, known: 0 };
   e.seen++; if (know) e.known++;
   s[term] = e;
+  _statsCache = s;
+  try { if (typeof localforage !== 'undefined') localforage.setItem(LS, s); } catch (x) {}
   try { localStorage.setItem(LS, JSON.stringify(s)); } catch (x) {}
 }
 function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 function startDeck(fresh) {
   var s = stats();
-  // least-known first: unseen cards first, then fewest known, then random
-  DECK = CARDS.slice().sort(function (x, y) {
-    var sx = s[x.term] || { seen: 0, known: 0 }, sy = s[y.term] || { seen: 0, known: 0 };
-    return (sx.seen - sx.known) - (sy.seen - sy.known);
-  });
-  shuffle(DECK.filter(function (c, i) { return true; })); // shuffle base order
-  // stable-ish: keep the sort priority but within it random is fine - simple: fully shuffled, unseen prioritized
+  // Shuffle base order, then prioritize least-seen / least-known cards first
   DECK = shuffle(CARDS.slice());
   DECK.sort(function (x, y) {
     var sx = (s[x.term] || { seen: 0 }).seen, sy = (s[y.term] || { seen: 0 }).seen;
@@ -162,7 +164,6 @@ function startQuiz() {
   QIDX = 0; QRIGHT = 0; QWRONG = 0;
   renderQuiz();
 }
-function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 function renderQuiz() {
   var mount = document.getElementById('mount');
   if (QIDX >= QDECK.length) {
@@ -197,7 +198,17 @@ function renderQuiz() {
   });
 }
 
-KitData.load('./data/glossary.json.gz', 'cards', 'mount').then(function (d) {
+var _lfPromise = (typeof localforage !== 'undefined' && localforage)
+  ? localforage.getItem(LS).then(function (v) {
+      if (v && typeof v === 'object') { _statsCache = v; }
+      else {
+        var legacy = stats();
+        if (Object.keys(legacy).length) localforage.setItem(LS, legacy);
+      }
+    }).catch(function () {})
+  : Promise.resolve();
+Promise.all([KitData.load('./data/glossary.json.gz', 'cards', 'mount'), _lfPromise]).then(function (res) {
+  var d = res[0];
   CARDS = d;
   document.getElementById('meta').textContent = d.length + ' terms \u00b7 Data Hall 4 glossary';
   startDeck();

@@ -890,6 +890,7 @@
 <script src="report-engine.js"></script>
 <script src="sync-engine.js"></script>
 <script src="stamp-engine.js"></script>
+<script src="./vendor/localforage/localforage.min.js"></script>
 <script>var STATUS_META = ReportEngine.STATUS_META, STATUS_ORDER = ReportEngine.STATUS_ORDER,
 REPORT_STATUS_ORDER = ReportEngine.REPORT_STATUS_ORDER, CABLES = ReportEngine.CABLES,
 CABLE_LABEL = ReportEngine.CABLE_LABEL, sideOverall = ReportEngine.sideOverall,
@@ -897,7 +898,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v73';
+var APP_VERSION = 'v74';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1129,7 +1130,30 @@ function defaultState() {
 }
 
 /* ---------------- persistence ---------------- */
-var state = loadState();
+var state = defaultState(); // replaced after async load (see initStorage below)
+var _bootDone = false;
+function initStorage() {
+  var lf = (typeof localforage !== 'undefined' && localforage && localforage.getItem)
+    ? localforage.getItem(STORAGE_KEY)
+    : Promise.resolve(null);
+  return lf.then(function (saved) {
+    // migration: one-time move from localStorage to IndexedDB
+    if (!saved) {
+      try {
+        var legacy = localStorage.getItem(STORAGE_KEY);
+        if (legacy) {
+          saved = JSON.parse(legacy);
+          if (typeof localforage !== 'undefined' && localforage) {
+            localforage.setItem(STORAGE_KEY, saved);
+          }
+        }
+      } catch (e) {}
+    }
+    if (saved && saved.halls) state = migrateState(saved);
+    _bootDone = true;
+    boot();
+  }).catch(function () { _bootDone = true; boot(); });
+}
 var undoStack = [];
 
 // ---- state module (architecture candidate #5): one shape, versioned ----
@@ -1157,16 +1181,7 @@ function migrateState(s) {
   s.version = STATE_VERSION;
   return s;
 }
-function loadState() {
-  try {
-    var raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      var s = JSON.parse(raw);
-      if (s && s.halls) return migrateState(s);
-    }
-  } catch (e) {}
-  var d = defaultState(); d.version = STATE_VERSION; return d;
-}
+function loadState() { return state; } // async version in initStorage
 var _syncTimer = null;
 function syncSoon() {
   // debounced push: rapid stamps batch into one sync call after 2s of quiet
@@ -1186,7 +1201,10 @@ function saveState() {
   try { Sync.markChanged(state); } catch (e) {}
   try { syncSoon(); } catch (e) {}
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (typeof localforage !== 'undefined' && localforage) {
+      localforage.setItem(STORAGE_KEY, state);
+    }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e2) {}
     var t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     document.getElementById('saveIndicator').textContent = APP_VERSION + ' \u2022 saved ' + t;
   } catch (e) {
@@ -2354,7 +2372,7 @@ function renderAll() {
 }
 
 /* ---------------- boot ---------------- */
-(function boot() {
+function boot() {
   var sel = document.getElementById('numStyle');
   if (sel && state.settings.numStyle) sel.value = state.settings.numStyle;
   sel.addEventListener('change', function () { state.settings.numStyle = sel.value; saveState(); });
@@ -2367,7 +2385,7 @@ function renderAll() {
     if (document.visibilityState === 'visible') requestWake();
   });
   renderAll();
-  routeFromHash(); // lands on Home unless a #/tool deep link was opened
+  routeFromHash();
   try { window.__SYNC_NAME = localStorage.getItem('mp_sync_name') || ''; } catch (e) {}
   try {
     if (Sync.restore()) {
@@ -2473,7 +2491,9 @@ function renderAll() {
       });
     }).catch(function () {});
   }
-})();
+}
+initStorage();
+
 </script>
 
   <div class="palette-sheet" id="settingsSheet">

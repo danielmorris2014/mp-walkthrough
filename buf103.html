@@ -122,6 +122,7 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 <div class="sheetbg" id="sheetbg"></div>
 <div class="sheet" id="sheet"></div>
 <script src="./kit-data.js"></script>
+<script src="./vendor/localforage/localforage.min.js"></script>
 <script>
 'use strict';
 /* BUF103 Cutsheet viewer v2 - interactive drill-down: hall -> racks ->
@@ -331,9 +332,12 @@ function run() {
   out.innerHTML = '';
   if (!q) { MODE = 'browse'; document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-v') === 'browse'); }); return render(); }
   var rack = rackNorm(q);
-  if (rack) { RACK = rack; HALL = null; MODE = 'rack'; FAMFILTER = null;
-    document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-v') === 'rack'); });
-    return render(); }
+  if (rack) {
+    RACK = rack; HALL = null; FAMFILTER = null;
+    if (MODE !== 'trace') MODE = 'browse';
+    document.querySelectorAll('#seg button').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-v') === MODE); });
+    return render();
+  }
   var t0 = performance.now();
   var qu = q.toUpperCase();
   var hit = new Set();
@@ -365,43 +369,52 @@ function run() {
   });
 }
 /* ---------- materials ---------- */
+function renderMatsProgress(st, mountEl) {
+  if (!st || !st.halls || !mountEl) return;
+  try {
+    var rows = [];
+    Object.keys(st.halls).forEach(function (hid) {
+      if (hid.indexOf('BUF103_') !== 0) return; // hall ids stay BUF103_ (the cutsheet prefix)
+      var hall = st.halls[hid];
+      var total = 0, hung = 0;
+      Object.keys(hall.rows || {}).forEach(function (rn) {
+        ['11', '13'].forEach(function (sd) {
+          var seg = hall.rows[rn][sd]; if (!seg) return;
+          total++;
+          if (seg.F144 === 'hung' && seg.OCS === 'hung' && seg.CAT6 === 'hung') hung++;
+        });
+      });
+      rows.push({ name: hall.name, total: total, hung: hung,
+        pct: total ? Math.round((hung / total) * 100) : 0,
+        planned: (RACKS[hid.slice(7)] || []).length });
+    });
+    if (rows.length) {
+      mountEl.innerHTML = '<div class="card"><div class="ct">Build progress ' + String.fromCharCode(0x2014) + ' walkthrough vs cutsheet</div>' +
+        rows.map(function (r3) {
+          return '<div class="mrow"><span class="s">' + esc(r3.name) + ' ' + String.fromCharCode(0x00b7) + ' ' + r3.hung + '/' + r3.total +
+            ' sides fully hung (' + r3.pct + '%) ' + String.fromCharCode(0x00b7) + ' ' + r3.planned + ' racks planned</span><span class="n">' + r3.pct + '%</span></div>';
+        }).join('') + '</div>';
+    }
+  } catch (e) {}
+}
 function showMats() {
   var out = document.getElementById('results');
   out.innerHTML = '';
+  var progSlot = document.createElement('div');
+  progSlot.id = 'matsProgress';
+  out.appendChild(progSlot);
   var h = document.createElement('div');
   h.className = 'count'; h.textContent = 'Planned cables by family \u2014 counts and specs from this cutsheet revision';
-  // walkthrough progress for BUF103 halls (same-origin localStorage)
-  try {
-    var st = JSON.parse(localStorage.getItem('mp_walkthrough_v1') || 'null');
-    if (st && st.halls) {
-      var rows = [];
-      Object.keys(st.halls).forEach(function (hid) {
-        if (hid.indexOf('BUF103_') !== 0) return; // hall ids stay BUF103_ (the cutsheet prefix)
-        var hall = st.halls[hid];
-        var total = 0, hung = 0;
-        Object.keys(hall.rows || {}).forEach(function (rn) {
-          ['11', '13'].forEach(function (sd) {
-            var seg = hall.rows[rn][sd]; if (!seg) return;
-            total++;
-            if (seg.F144 === 'hung' && seg.OCS === 'hung' && seg.CAT6 === 'hung') hung++;
-          });
-        });
-        rows.push({ name: hall.name, total: total, hung: hung,
-          pct: total ? Math.round((hung / total) * 100) : 0,
-          planned: (RACKS[hid.slice(7)] || []).length });
-      });
-      if (rows.length) {
-        var pc = document.createElement('div');
-        pc.className = 'card';
-        pc.innerHTML = '<div class=ct>Build progress ' + String.fromCharCode(0x2014) + ' walkthrough vs cutsheet</div>' +
-          rows.map(function (r3) {
-            return '<div class="mrow"><span class="s">' + esc(r3.name) + ' ' + String.fromCharCode(0x00b7) + ' ' + r3.hung + '/' + r3.total +
-              ' sides fully hung (' + r3.pct + '%) ' + String.fromCharCode(0x00b7) + ' ' + r3.planned + ' racks planned</span><span class="n">' + r3.pct + '%</span></div>';
-          }).join('');
-        out.appendChild(pc);
-      }
+  // walkthrough progress for BUF103 halls (IndexedDB via localForage, fallback localStorage)
+  var pLoad = (typeof localforage !== 'undefined' && localforage)
+    ? localforage.getItem('mp_walkthrough_v1')
+    : Promise.resolve(null);
+  pLoad.then(function (st) {
+    if (!st) {
+      try { st = JSON.parse(localStorage.getItem('mp_walkthrough_v1') || 'null'); } catch (e) {}
     }
-  } catch (e) {}
+    renderMatsProgress(st, progSlot);
+  }).catch(function () {});
   out.appendChild(h);
   FAMS.forEach(function (fam) {
     var specs = D.mats[fam] || [];

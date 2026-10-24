@@ -1,6 +1,6 @@
 // MP Walkthrough — minimal offline-first service worker.
 // Bump CACHE_VERSION whenever index.html/icons change so every phone picks up the update.
-var CACHE_VERSION = 'mp-walk-v73';
+var CACHE_VERSION = 'mp-walk-v74';
 
 self.addEventListener('message', function (event) {
   if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
@@ -17,6 +17,7 @@ var CORE = [
   './stamp-engine.js',
   './sync-engine.js',
   './kit-data.js',
+  './vendor/localforage/localforage.min.js',
   './chrome.css',
   './manifest.webmanifest',
   './icons/apple-touch-icon.png',
