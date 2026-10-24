@@ -168,6 +168,20 @@ with sync_playwright() as p:
       out.localNewerWins = Sync.merge({ blockers: ['remote'], _meta: { blockers_at: 1 } },
                                       { blockers: ['local'], _meta: { blockers_at: 2 } }).blockers[0] === 'local';
       out.winnerStampCarried = merged._meta && merged._meta.blockers_at === local2._meta.blockers_at;
+      // Yjs CRDT field-level merge: two phones stamp different rows/cables simultaneously -> both survive
+      const phoneA = JSON.parse(JSON.stringify(state));
+      const phoneB = JSON.parse(JSON.stringify(state));
+      phoneA.halls.CB5_DH1.rows[17]['11'].F144 = 'hung';
+      phoneA.halls.CB5_DH1.rows[17]['11']._st = { F144: { by: 'PhoneA', at: 1000 } };
+      phoneA._meta = { halls_at: 1000 };
+      phoneB.halls.CB5_DH1.rows[22]['13'].OCS = 'ran';
+      phoneB.halls.CB5_DH1.rows[22]['13']._st = { OCS: { by: 'PhoneB', at: 2000 } };
+      phoneB._meta = { halls_at: 2000 };
+      const crdtMerged = Sync.merge(phoneA, phoneB);
+      out.crdtConcurrentStampsSurvive =
+        crdtMerged.halls.CB5_DH1.rows[17]['11'].F144 === 'hung' &&
+        crdtMerged.halls.CB5_DH1.rows[22]['13'].OCS === 'ran' &&
+        !!Sync.getYDoc();
       return out;
     }""")
     for k, ok in res7.items():

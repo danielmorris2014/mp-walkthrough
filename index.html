@@ -888,6 +888,7 @@
 </div>
 
 <script src="report-engine.js"></script>
+<script src="./vendor/yjs/yjs.min.js"></script>
 <script src="sync-engine.js"></script>
 <script src="stamp-engine.js"></script>
 <script src="./vendor/localforage/localforage.min.js"></script>
@@ -898,7 +899,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v74';
+var APP_VERSION = 'v75';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1150,6 +1151,7 @@ function initStorage() {
       } catch (e) {}
     }
     if (saved && saved.halls) state = migrateState(saved);
+    try { Sync.syncToYDoc(state); } catch (e) {}
     _bootDone = true;
     boot();
   }).catch(function () { _bootDone = true; boot(); });
