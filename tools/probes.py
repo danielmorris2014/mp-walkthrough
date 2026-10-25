@@ -207,6 +207,13 @@ with sync_playwright() as p:
       phoneClear._meta = { halls_at: 3000, _cleared: { 'CB5_DH1:17:11:F144': 3000 } };
       const clearMerged = Sync.merge(phoneA, phoneClear);
       out.clearTombstoneWins = clearMerged.halls.CB5_DH1.rows[17]['11'].F144 === 'none';
+      const prevName = Sync.getName();
+      Sync.setName('DAN');
+      out.syncNameAndTransport = Sync.getName() === 'DAN'
+        && typeof Sync.setTransport === 'function'
+        && typeof Sync.schedule === 'function'
+        && typeof Sync.startPolling === 'function';
+      Sync.setName(prevName);
       return out;
     }""")
     for k, ok in res7.items():
@@ -263,6 +270,11 @@ with sync_playwright() as p:
       out.reportOutput = !!(document.getElementById('reportOutput') && document.getElementById('reportStyle')
         && document.getElementById('emailReportBtn')
         && parts && parts.subject && parts.body);
+      out.uniqueSettingsIds = ['signature','textSizeBtn','wakeBtn','syncName','syncSettingsInfo']
+        .every(id => document.querySelectorAll('#' + id).length === 1);
+      out.kitDataStoreAndNav = typeof KitData === 'object'
+        && typeof KitData.store === 'object'
+        && typeof KitData.nav === 'object';
       return out;
     }""")
     for k, ok in res9.items():
@@ -320,6 +332,13 @@ with sync_playwright() as p:
         check(f"page[{name}].inputs16px", r["smallInputs"] == 0, f"{r['smallInputs']} small")
         if name == "buf103":
             check("page[buf103].dataLoaded", "cables" in r["bodyText"], r["bodyText"][:60])
+            ce = sp.evaluate("""() => ({
+              hasEngine: typeof CutsheetEngine === 'object',
+              hasIdx: !!(typeof IDX === 'object' && IDX && IDX.byRack),
+              conns: (typeof CutsheetEngine === 'object' && IDX) ? CutsheetEngine.connectionsFor(IDX, 'BUF103-DH1-R0102').length : 0,
+              role: typeof CutsheetEngine === 'object' ? CutsheetEngine.classifyRackRole('BUF103-DH1-R0102') : ''
+            })""")
+            check("page[buf103].cutsheetEngineIndex", ce["hasEngine"] and ce["hasIdx"] and ce["conns"] > 0 and isinstance(ce["role"], dict) and ce["role"].get("code") == "NET RACK", str(ce))
             tr = sp.evaluate("""() => {
               const q = document.getElementById('q');
               q.value = 'dh1-r0102';

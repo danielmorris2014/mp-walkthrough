@@ -127,9 +127,134 @@ var KitData = (function () {
     renderErr(url, label, mount);
   }
 
+  // ---- store: unified IndexedDB (localForage) + localStorage fallback/migration ----
+  function readLs(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      if (raw === null || raw === undefined) return fallback;
+      try { return JSON.parse(raw); } catch (e) { return raw; }
+    } catch (e) { return fallback; }
+  }
+  var store = {
+    get: function (key, fallback) {
+      var fb = fallback === undefined ? null : fallback;
+      if (typeof localforage !== 'undefined' && localforage && localforage.getItem) {
+        return localforage.getItem(key).then(function (val) {
+          if (val !== null && val !== undefined) return val;
+          var lsVal = readLs(key, null);
+          if (lsVal !== null && lsVal !== undefined) {
+            try { localforage.setItem(key, lsVal); } catch (e) {}
+            return lsVal;
+          }
+          return fb;
+        }).catch(function () {
+          return readLs(key, fb);
+        });
+      }
+      return Promise.resolve(readLs(key, fb));
+    },
+    set: function (key, val) {
+      try {
+        localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+      } catch (e) {}
+      if (typeof localforage !== 'undefined' && localforage && localforage.setItem) {
+        return localforage.setItem(key, val).catch(function () {});
+      }
+      return Promise.resolve();
+    },
+    remove: function (key) {
+      try { localStorage.removeItem(key); } catch (e) {}
+      if (typeof localforage !== 'undefined' && localforage && localforage.removeItem) {
+        return localforage.removeItem(key).catch(function () {});
+      }
+      return Promise.resolve();
+    }
+  };
+
+  // ---- nav: single cross-page handoff seam (buf103, guide, labels, walk) ----
+  var nav = {
+    toCutsheet: function (opts) {
+      try {
+        if (typeof opts === 'string') {
+          sessionStorage.setItem('mp.ocrq', opts);
+        } else if (opts && typeof opts === 'object') {
+          if (opts.q) sessionStorage.setItem('mp.ocrq', String(opts.q));
+          if (opts.hall || opts.row || opts.rack || opts.mode) {
+            sessionStorage.setItem('mp.buf103_nav', JSON.stringify({
+              hall: opts.hall || null,
+              row: opts.row || null,
+              rack: opts.rack || null,
+              mode: opts.mode || null
+            }));
+          }
+        }
+      } catch (e) {}
+      if (!opts || !opts.noNavigate) window.location.href = './buf103.html';
+    },
+    toGuideFind: function (query, opts) {
+      try {
+        var q = String(query || '').trim();
+        if (q) {
+          sessionStorage.setItem('mp.scan_query', q);
+          sessionStorage.setItem('mp.ocrq', q);
+        }
+        sessionStorage.setItem('mp_embed', '1');
+      } catch (e) {}
+      if (!opts || !opts.noNavigate) window.location.href = './guide.html#/find';
+    },
+    toLabels: function (draft, opts) {
+      try {
+        sessionStorage.setItem('mp.label_draft', JSON.stringify(draft || { site: 'BUF103', lines: [] }));
+      } catch (e) {}
+      if (!opts || !opts.noNavigate) window.location.href = './labels.html';
+    },
+    toWalkRow: function (hallCode, rowNum, opts) {
+      try {
+        var hc = String(hallCode || 'DH1').replace(/^BUF103_/, '');
+        sessionStorage.setItem('mp_jump_hall_row', JSON.stringify({
+          hall: 'BUF103_' + hc,
+          hallCode: hc,
+          row: parseInt(rowNum, 10) || 1
+        }));
+      } catch (e) {}
+      if (!opts || !opts.noNavigate) window.location.href = './index.html#/walk';
+    },
+    consume: function (target) {
+      try {
+        if (target === 'buf103') {
+          var rawNav = sessionStorage.getItem('mp.buf103_nav');
+          var rawQ = sessionStorage.getItem('mp.ocrq');
+          sessionStorage.removeItem('mp.buf103_nav');
+          sessionStorage.removeItem('mp.ocrq');
+          var navObj = rawNav ? JSON.parse(rawNav) : null;
+          if (!navObj && !rawQ) return null;
+          return { nav: navObj, q: rawQ || '' };
+        }
+        if (target === 'guide') {
+          var gq = sessionStorage.getItem('mp.scan_query') || sessionStorage.getItem('mp.ocrq') || '';
+          sessionStorage.removeItem('mp.scan_query');
+          sessionStorage.removeItem('mp.ocrq');
+          return String(gq).trim();
+        }
+        if (target === 'labels') {
+          var ld = sessionStorage.getItem('mp.label_draft');
+          sessionStorage.removeItem('mp.label_draft');
+          return ld ? JSON.parse(ld) : null;
+        }
+        if (target === 'walk') {
+          var wr = sessionStorage.getItem('mp_jump_hall_row');
+          sessionStorage.removeItem('mp_jump_hall_row');
+          return wr ? JSON.parse(wr) : null;
+        }
+      } catch (e) {}
+      return null;
+    }
+  };
+
   return {
     load: load, retry: retry, esc: esc, copy: copy, showError: showError,
     fitFixedTop: fitFixedTop, watchFixedTop: watchFixedTop,
+    store: store, nav: nav,
     state: function (url) { return states[url] ? states[url].state : 'unknown'; }
   };
 })();

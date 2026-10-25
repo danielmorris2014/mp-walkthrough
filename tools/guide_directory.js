@@ -109,6 +109,22 @@
     KitData.showError('./data/directory.json.gz', 'barcode database', 'mpDirErr');
   }
 
+  var _pendingHandoffQ = '';
+  function consumeHandoffQ() {
+    if (_pendingHandoffQ) return _pendingHandoffQ;
+    try {
+      var hq = (typeof KitData !== 'undefined' && KitData.nav && KitData.nav.consume)
+        ? KitData.nav.consume('guide')
+        : (sessionStorage.getItem('mp.scan_query') || sessionStorage.getItem('mp.ocrq') || '');
+      if (hq) {
+        sessionStorage.removeItem('mp.scan_query');
+        sessionStorage.removeItem('mp.ocrq');
+        _pendingHandoffQ = String(hq).trim();
+      }
+    } catch (e) {}
+    return _pendingHandoffQ;
+  }
+
   // kit search box on empty find views: the guide's own input lives on its
   // HOME screen, so deep-linking to #/find (the kit's 'Find a cable' tile)
   // showed a bare 'Results:' with nothing to do. Inject a search card that
@@ -123,11 +139,18 @@
       '<input type="text" placeholder="Barcode, rack, port or dry-run line" aria-label="Find a cable" ' +
       'style="flex:1;min-width:0;min-height:44px;font-size:16px;border-radius:10px;border:1px solid var(--line,#363a3f);background:var(--surface,#18191b);color:var(--text,#edeef0);padding:0 12px;">' +
       '<button type="submit" style="min-height:44px;padding:0 14px;border:0;border-radius:10px;background:#fff;color:#111;font:700 13px -apple-system,sans-serif;">Find</button></form>';
+    var boxInp = box.querySelector('input');
+    var hq = consumeHandoffQ();
+    if (hq && boxInp) boxInp.value = hq;
     box.querySelector('form').addEventListener('submit', function (e) {
       e.preventDefault();
       var v = box.querySelector('input').value.trim();
       if (!v) return;
-      if (typeof handleInput === 'function') handleInput(v, 'typed');
+      var fn = (typeof handleInput === 'function') ? handleInput : (window.SPFG && window.SPFG.handleInput);
+      if (typeof fn === 'function') fn(v, 'typed');
+      var old1 = document.getElementById('mpDirCard'); if (old1) old1.remove();
+      var old2 = document.getElementById('mpDirCard2'); if (old2) old2.remove();
+      augment();
     });
     view.insertBefore(box, view.firstChild);
   }
@@ -136,7 +159,9 @@
     if (!view) return;
     try { ensureFindBox(view); } catch (e) {}
     if (document.getElementById('mpDirCard')) return;
-    var inp = view.querySelector('input[data-in]') || document.getElementById('rq') || document.getElementById('q');
+    var inp = view.querySelector('input[data-in]') || document.getElementById('rq') || document.getElementById('q') || view.querySelector('#mpFindBox input');
+    var hq = consumeHandoffQ();
+    if (hq && inp && !inp.value) inp.value = hq;
     var q = '';
     if (inp && inp.offsetParent && (!inp.type || inp.type === 'text' || inp.type === 'search')) q = inp.value;
     if (!q || !q.trim()) {
@@ -144,6 +169,8 @@
       var rs = view.querySelector('.h2 > .id');
       if (rs && /^(Results|Resultados)/.test(rs.parentNode.textContent)) q = rs.textContent;
     }
+    if ((!q || !q.trim()) && hq) q = hq;
+    if (q && q.trim() && _pendingHandoffQ) _pendingHandoffQ = '';
     if (!q || !q.trim()) return;
     if (KitData.state('./data/directory.json.gz') !== 'ready' && KitData.state('./data/directory.json.gz') !== 'loading') dirLoad();
     var mount = function () {

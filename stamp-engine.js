@@ -39,7 +39,7 @@ var Stamp = (function () {
     opts = opts || {};
     var sides = (target.sides && target.sides.length) ? target.sides : ['11', '13'];
     var cs = (target.cables && target.cables.length) ? target.cables : cablesIn(target.scope || 'ALL');
-    var by = target.by || (typeof window !== 'undefined' && window.__SYNC_NAME) || 'unknown';
+    var by = target.by || (typeof Sync !== 'undefined' && Sync && Sync.getName && Sync.getName()) || (typeof window !== 'undefined' && window.__SYNC_NAME) || 'unknown';
     var at = Date.now();
 
     // resolve existing rows first — missing rows are skipped like stampRows always did

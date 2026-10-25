@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (2026-10-20)
+Updated (2026-10-24 — documents Site Code over GitHub Contents transport)
 
 ## Context
 
@@ -10,23 +10,20 @@ The MP Kit needs to sync row statuses, blockers, crew, and report history betwee
 
 Three approaches were considered:
 
-1. **GitHub-based sync** — store shared state in the repo, auth via GitHub tokens hidden inside "site codes"
-2. **Account-based sync** — traditional login/logout with a user database
-3. **Site-code sync via a tiny cloud store** — a simple key-value service where the code IS the credential
+1. **Account-based sync** — traditional login/logout with a user database
+2. **External cloud database / custom server** — separate backend service to deploy and maintain
+3. **Site-code sync (`MP-...`) backed by a single versioned file in the GitHub repository** — zero external infrastructure, where the Site Code IS the credential
 
 ## Decision
 
-**Site-code sync via a tiny cloud store. No accounts, no logins, no sessions.**
+**Site-code sync (`MP-...`) backed by the GitHub Contents endpoint (`sync/state.json`), behind a pluggable transport seam. No accounts, no logins, no sessions.**
 
-- A 30-line cloud function (free tier) stores and serves one JSON blob per site code
-- The site creator presses "Create shared site" → gets a code like `MP-7XK2Q` → texts it to others
-- Others type the code once on first open. The app asks for their name (identity, not auth). Done.
-- Sync fires automatically: on app open, on signal return, on every stamp
-- If someone leaves: reset the code (old one dies, new one shared with who stays)
+- The Site Code (`MP-<base64>`) encapsulates the repository credential so superintendents never see or manage raw tokens or accounts
+- Others type the Site Code once on first open and enter their one-word Name (identity, not auth)
+- Sync fires automatically: on app open, on signal return, every 8 seconds while visible, and debounced on every Stamp
+- If someone leaves or a code needs rotation: rotate the underlying credential and issue a new `MP-...` Site Code
 
-GitHub tokens were rejected because: they put the site owner's infrastructure into every user's hands, token management is friction for non-developers, and revocation requires GitHub knowledge.
-
-Accounts were rejected because: sessions expire (the "kicked out while working" problem), password resets require email/internet, iOS PWAs handle auth redirects poorly, and the field context demands zero-friction offline access.
+Accounts were rejected because: sessions expire (the "kicked out while working" problem), password resets require email/internet, iOS PWAs handle auth redirects poorly, and the field context demands zero-friction offline access. Separate cloud servers were rejected to keep the deployment 100% static on GitHub Pages with zero external hosting dependencies.
 
 ## Consequences
 

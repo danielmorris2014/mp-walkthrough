@@ -235,13 +235,10 @@ function barcodeHit(code) {
     '<button class="go" id="goDir" style="flex:1;' + (!is103 ? '' : 'background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--line);') + '">Search CB4/5 Dir</button>' +
     '</div></div>';
   document.getElementById('goBuf103').onclick = function () {
-    try { sessionStorage.setItem('mp.ocrq', code); } catch (e) {}
-    location.href = './buf103.html';
+    KitData.nav.toCutsheet(code);
   };
   document.getElementById('goDir').onclick = function () {
-    try { sessionStorage.setItem('mp.ocrq', code); } catch (e) {}
-    try { sessionStorage.setItem('mp_embed', '1'); } catch (e) {}
-    location.href = './guide.html#/find';
+    KitData.nav.toGuideFind(code);
   };
 }
 
@@ -304,12 +301,10 @@ function renderTextResults(text) {
   };
 }
 function goQ(q) {
-  try { sessionStorage.setItem('mp.ocrq', q); } catch (e) {}
   if (/^BUF102/i.test(q)) {
-    try { sessionStorage.setItem('mp_embed', '1'); } catch (e) {}
-    location.href = './guide.html#/find';
+    KitData.nav.toGuideFind(q);
   } else {
-    location.href = './buf103.html';
+    KitData.nav.toCutsheet(q);
   }
 }
 function setStatus(t) {

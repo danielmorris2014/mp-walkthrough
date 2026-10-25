@@ -2,20 +2,21 @@
 
 ## Status
 
-Accepted (2026-10-20)
+Updated (2026-10-24 — refined to Field-Level Yjs CRDT + Per-Cable Timestamp & Tombstone LWW)
 
 ## Context
 
-Two supers walk the same hall on the same night, both offline. Both stamp row 311 — one says "Ran and Hung" at 8 PM, the other says "Ran" at 10 PM (walked later, saw it wasn't hung yet). They sync at midnight. What should happen?
-
-Three approaches:
-1. Latest timestamp wins, automatically
-2. First stamper holds — later conflicting stamps ignored
-3. Show conflicts, ask the user to resolve manually
+Two supers walk the same hall on the same night, both offline.
+- Case A (different rows or different cables): Phone A stamps Row 17 Side 11 `144F`, while Phone B stamps Row 22 Side 13 `OCS`.
+- Case B (same cable on the same Row-Side): Both stamp Row 3 Side 11 `144F` — one says "Ran and Hung" at 8 PM, the other says "Ran" at 10 PM, or clears a mistaken stamp.
 
 ## Decision
 
-**Latest timestamp wins, automatically. No prompts, no midnight decisions.**
+**Merge at the individual cable field level (`hall → row → side → cable`) using Yjs CRDT state containers combined with per-cable UTC timestamps (`seg._st[cable].at`) and clear tombstones (`_meta._cleared`).**
+
+- Concurrent stamps on different halls, rows, sides, or cables both survive automatically with zero data loss.
+- When two phones edit the exact same cable on the same Row-Side, the latest UTC timestamp (stamp `at` vs. clear tombstone timestamp) wins automatically. No prompts, no midnight decisions.
+- Shared collections (`blockers`, `crewPool`, `meta`, `history`, `baseline`) resolve via section-level `_meta.<key>_at` timestamps, while `hall.notes` merges via order-preserving set union.
 
 ## Rationale
 

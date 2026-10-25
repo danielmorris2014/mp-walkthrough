@@ -219,6 +219,7 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 <div class="sheetbg" id="sheetbg"></div>
 <div class="sheet" id="sheet"></div>
 <script src="./kit-data.js"></script>
+<script src="./cutsheet-engine.js"></script>
 <script src="./vendor/localforage/localforage.min.js"></script>
 <script src="./vendor/jsplumb/jsplumb.min.js"></script>
 <script>
@@ -227,7 +228,7 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
    connections; search; materials; every connection opens a detail sheet
    with copy buttons. Data bundled via the pipeline (ADR-0003) or updated
    in the field via SheetJS on-device .xlsx parser (v77). */
-var D = null, FAMS = [], RACKS = {};   // RACKS = {DH1: [{rack, n}...]}
+var D = null, IDX = null, FAMS = [], RACKS = {};   // RACKS = {DH1: [{rack, n}...]}
 var MODE = 'browse', HALL = null, RACK = null, ROWFILTER = null, FAMFILTER = null, SHOWN = [];
 var _jtkInstances = [];
 var CUTSHEET_LF_KEY = 'mp_buf103_cutsheet';
@@ -247,9 +248,10 @@ function loadDone(d) {
 }
 function checkOcrQuery() {
   try {
-    var nav = JSON.parse(sessionStorage.getItem('mp.buf103_nav') || 'null');
-    if (nav) {
-      sessionStorage.removeItem('mp.buf103_nav');
+    var handoff = KitData.nav.consume('buf103');
+    if (!handoff) return;
+    if (handoff.nav) {
+      var nav = handoff.nav;
       if (nav.hall) HALL = nav.hall;
       if (nav.row) ROWFILTER = String(nav.row).padStart(2, '0');
       if (nav.rack) RACK = nav.rack;
@@ -260,8 +262,10 @@ function checkOcrQuery() {
       render();
       return;
     }
-    var q = sessionStorage.getItem('mp.ocrq');
-    if (q) { sessionStorage.removeItem('mp.ocrq'); document.getElementById('q').value = q; run(); }
+    if (handoff.q) {
+      document.getElementById('q').value = handoff.q;
+      run();
+    }
   } catch (e) {}
 }
 function loadBundled() {
@@ -272,10 +276,7 @@ function loadBundled() {
   });
 }
 function load() {
-  var lf = (typeof localforage !== 'undefined' && localforage && localforage.getItem)
-    ? localforage.getItem(CUTSHEET_LF_KEY)
-    : Promise.resolve(null);
-  lf.then(function (custom) {
+  KitData.store.get(CUTSHEET_LF_KEY, null).then(function (custom) {
     if (custom && custom.d && custom.rows && custom.fams) {
       _isCustomCutsheet = true;
       loadDone(custom);
@@ -320,13 +321,10 @@ function handleXlsxFile(file) {
     var buf = reader.result;
     function finishParse(resData, resHallsCfg) {
       updateProgUI('Saving to device IndexedDB\u2026', resData.fams.length + ' families \u00b7 storing offline override\u2026', 98, false);
-      var pSave = (typeof localforage !== 'undefined' && localforage)
-        ? Promise.all([
-            localforage.setItem(CUTSHEET_LF_KEY, resData),
-            localforage.setItem(HALLS_LF_KEY, resHallsCfg)
-          ])
-        : Promise.resolve();
-      pSave.then(function () {
+      Promise.all([
+        KitData.store.set(CUTSHEET_LF_KEY, resData),
+        KitData.store.set(HALLS_LF_KEY, resHallsCfg)
+      ]).then(function () {
         document.getElementById('cutsheetProgress').style.display = 'none';
         _isCustomCutsheet = true;
         HALL = null; RACK = null; FAMFILTER = null;
@@ -397,65 +395,28 @@ document.getElementById('xlsxInput').addEventListener('change', function (e) {
   if (f) handleXlsxFile(f);
 });
 document.getElementById('resetXlsxBtn').addEventListener('click', function () {
-  var pClear = (typeof localforage !== 'undefined' && localforage)
-    ? Promise.all([localforage.removeItem(CUTSHEET_LF_KEY), localforage.removeItem(HALLS_LF_KEY)])
-    : Promise.resolve();
-  pClear.then(function () {
+  Promise.all([KitData.store.remove(CUTSHEET_LF_KEY), KitData.store.remove(HALLS_LF_KEY)]).then(function () {
     HALL = null; RACK = null; FAMFILTER = null;
     document.getElementById('loadstate').style.display = 'block';
     loadBundled();
   });
 });
-function totalRows() { var n = 0; FAMS.forEach(function (f) { n += D.rows[f].length; }); return n; }
+function totalRows() { return IDX ? IDX.totalRows : 0; }
 function buildRacks() {
-  // one pass over rows: per-rack connection counts (including intermediate hop racks), bucketed by hall
-  var counts = {};
-  FAMS.forEach(function (fam) {
-    D.rows[fam].forEach(function (row) {
-      var seen = {};
-      var a = D.d[row[0]], z = D.d[row[2]];
-      if (a) { counts[a] = (counts[a] || 0) + 1; seen[a] = 1; }
-      if (z && !seen[z]) { counts[z] = (counts[z] || 0) + 1; seen[z] = 1; }
-      if (row[6]) {
-        for (var hi = 0; hi < row[6].length; hi += 3) {
-          var hLoc = D.d[row[6][hi]];
-          if (hLoc && !seen[hLoc]) { counts[hLoc] = (counts[hLoc] || 0) + 1; seen[hLoc] = 1; }
-        }
-      }
-    });
-  });
-  RACKS = {};
-  Object.keys(counts).forEach(function (loc) {
-    var m = /^BUF103-(DH\d+)-R(\d+)$/.exec(loc);
-    if (!m) return;
-    (RACKS[m[1]] = RACKS[m[1]] || []).push({ rack: loc, n: counts[loc] });
-  });
-  Object.keys(RACKS).forEach(function (h) { RACKS[h].sort(function (x, y) { return x.rack < y.rack ? -1 : 1; }); });
+  IDX = CutsheetEngine.createIndex(D);
+  RACKS = IDX.racks;
 }
 /* ---------- navigation: CB (Building) -> Hall -> Row -> Rack (v78) ---------- */
 function parseRackMeta(rack) {
-  var m = /^BUF103-(DH\d+)-R(\d{2})(\d{2})$/.exec(rack || '');
-  if (!m) return { hall: HALL || 'DH1', row: '01', spot: '01' };
-  return { hall: m[1], row: m[2], spot: m[3] };
+  return CutsheetEngine.parseRackMeta(rack, HALL);
 }
 function sendHitsToLabels(hits) {
   if (!hits || !hits.length) return;
-  var lines = hits.slice(0, 60).map(function (h) {
-    var r = h[1];
-    var a = (D.d[r[0]] || '') + (D.d[r[1]] ? '-' + D.d[r[1]].replace(/\s+/g, '-') : '');
-    var z = (D.d[r[2]] || '') + (D.d[r[3]] ? '-' + D.d[r[3]].replace(/\s+/g, '-') : '');
-    return a.toUpperCase() + ' | ' + z.toUpperCase();
-  }).join('\n');
-  try {
-    sessionStorage.setItem('mp.label_draft', JSON.stringify({ site: 'BUF103', lines: lines }));
-  } catch (e) {}
-  location.href = './labels.html';
+  var lines = CutsheetEngine.formatLabelLines(D, hits, 60);
+  KitData.nav.toLabels({ site: 'BUF103', lines: lines });
 }
 function jumpToWalkthroughRow(hallCode, rowNum) {
-  try {
-    sessionStorage.setItem('mp_jump_hall_row', JSON.stringify({ hall: 'BUF103_' + hallCode, row: parseInt(rowNum, 10) || 1 }));
-  } catch (e) {}
-  location.href = './index.html#/walk';
+  KitData.nav.toWalkRow(hallCode, rowNum);
 }
 document.getElementById('seg').addEventListener('click', function (e) {
   var b = e.target.closest('button'); if (!b) return;
@@ -468,8 +429,7 @@ document.getElementById('q').addEventListener('keydown', function (e) { if (e.ke
 document.getElementById('view').addEventListener('click', function (e) {
   var cbSwitch = e.target.closest('[data-goto-cb4]');
   if (cbSwitch) {
-    try { sessionStorage.setItem('mp_embed', '1'); } catch (err) {}
-    location.href = './guide.html#/find';
+    KitData.nav.toGuideFind('');
     return;
   }
   var resetCb = e.target.closest('[data-reset-cb]');
@@ -705,19 +665,7 @@ function showBrowse() {
 }
 /* ---------- rack view ---------- */
 function connectionsFor(rack) {
-  var hits = [];
-  FAMS.forEach(function (fam) {
-    D.rows[fam].forEach(function (row) {
-      var matched = (D.d[row[0]] === rack || D.d[row[2]] === rack);
-      if (!matched && row[6]) {
-        for (var hi = 0; hi < row[6].length; hi += 3) {
-          if (D.d[row[6][hi]] === rack) { matched = true; break; }
-        }
-      }
-      if (matched) hits.push([fam, row]);
-    });
-  });
-  return hits;
+  return CutsheetEngine.connectionsFor(IDX || D, rack);
 }
 function rackView() {
   var out = document.getElementById('results');
@@ -793,9 +741,7 @@ function rowHtml(row, ri) {
 }
 /* ---------- search ---------- */
 function rackNorm(q) {
-  var m = /(buf103[-/])?(dh\d)\s*[-/ ]\s*r(\d{2,4})\b/i.exec(q.trim());
-  if (!m) return null;
-  return 'BUF103-' + m[2].toUpperCase() + '-R' + m[3];
+  return CutsheetEngine.rackNorm(q);
 }
 function run() {
   if (!D) { load(); return; }
@@ -811,23 +757,8 @@ function run() {
     return render();
   }
   var t0 = performance.now();
-  var qu = q.toUpperCase();
-  var hit = new Set();
-  for (var i = 0; i < D.d.length; i++) { if (D.d[i].toUpperCase().indexOf(qu) >= 0) hit.add(i); }
-  var matches = [], LIMIT = 400;
-  for (var f = 0; f < FAMS.length && matches.length < LIMIT; f++) {
-    var fam = FAMS[f], rows = D.rows[fam];
-    for (var r = 0; r < rows.length && matches.length < LIMIT; r++) {
-      var row = rows[r];
-      var mRow = hit.has(row[0]) || hit.has(row[1]) || hit.has(row[2]) || hit.has(row[3]) || hit.has(row[4]) || hit.has(row[5]);
-      if (!mRow && row[6]) {
-        for (var hi = 0; hi < row[6].length; hi++) {
-          if (hit.has(row[6][hi])) { mRow = true; break; }
-        }
-      }
-      if (mRow) matches.push([fam, row]);
-    }
-  }
+  var LIMIT = 400;
+  var matches = CutsheetEngine.search(D, q, LIMIT);
   var ms = Math.round(performance.now() - t0);
   var head = document.createElement('div');
   head.className = 'count';
@@ -883,14 +814,8 @@ function showMats() {
   out.appendChild(progSlot);
   var h = document.createElement('div');
   h.className = 'count'; h.textContent = 'Planned cables by family \u2014 counts and specs from this cutsheet revision';
-  // walkthrough progress for BUF103 halls (IndexedDB via localForage, fallback localStorage)
-  var pLoad = (typeof localforage !== 'undefined' && localforage)
-    ? localforage.getItem('mp_walkthrough_v1')
-    : Promise.resolve(null);
-  pLoad.then(function (st) {
-    if (!st) {
-      try { st = JSON.parse(localStorage.getItem('mp_walkthrough_v1') || 'null'); } catch (e) {}
-    }
+  // walkthrough progress for BUF103 halls via KitData.store
+  KitData.store.get('mp_walkthrough_v1', null).then(function (st) {
     renderMatsProgress(st, progSlot);
   }).catch(function () {});
   out.appendChild(h);
@@ -908,108 +833,12 @@ function showMats() {
   });
 }
 
-/* ---------- trace: interactive jsPlumb cable paths & physical channel diagrams (v76/v80) ---------- */
-function shortRack(loc) {
-  if (!loc) return '?';
-  var p = loc.split('-R');
-  return p.length > 1 ? 'R' + p[1] : loc.replace(/^BUF103-/i, '');
-}
-function shortDev(dev) {
-  if (!dev) return '';
-  var s = dev.trim()
-    .replace(/^buf103-pod\d+-rack\d+-/i, '')
-    .replace(/^buf103-pod\d+-/i, '')
-    .replace(/^buf103-/i, '')
-    .replace(/^(fpp|cpp)-[a-z0-9]+-r\d{4}-/i, '$1-')
-    .replace(/\bEthernet/gi, 'Et')
-    .replace(/\bconsole\b/gi, 'con')
-    .replace(/\s*\[[^\]]*\]/g, '');
-  var parts = s.trim().split(/\s+/);
-  if (parts.length <= 2) return parts.join(' ').slice(0, 18);
-  return (parts[0] + ' ' + parts.slice(1).join(' ')).slice(0, 20);
-}
-function shortCableSpec(spec) {
-  if (!spec) return '';
-  var lenM = /\b(\d+\s*M)\b/i.exec(spec) || /\((\d+M)\)/i.exec(spec);
-  var len = lenM ? lenM[1].toUpperCase().replace(/\s+/g, '') : '';
-  var trkM = /\b(Trunk\s*#\d+|H\d+(?:\s*\(Leg\s*\d+\))?)\b/i.exec(spec);
-  var trk = trkM ? trkM[1] : '';
-  var kind = '';
-  if (/192F/i.test(spec)) kind = '192F MPO8 Trunk';
-  else if (/144F/i.test(spec)) kind = '144F MPO8 Trunk';
-  else if (/72F/i.test(spec)) kind = '72F MPO12 Trunk';
-  else if (/48F/i.test(spec)) kind = '48F LC-MPO8';
-  else if (/24F/i.test(spec)) kind = '24F LC-MPO8';
-  else if (/18F/i.test(spec)) kind = '18F MPO12';
-  else if (/12F/i.test(spec)) kind = '12F LC-MPO12';
-  else if (/4xLC.*Harness|Harness/i.test(spec)) kind = 'MPO8\u21924xLC Harness';
-  else if (/8F.*MPO8/i.test(spec)) kind = '8F MPO8 Cord';
-  else if (/2F.*LC/i.test(spec)) kind = '2F LC Cord';
-  else if (/VisiPatch/i.test(spec)) kind = 'VisiPatch Cat6';
-  else if (/Standard Patch Cord/i.test(spec)) {
-    var colM = /\((Blue|Yellow|Green|Gray|Red|White|Orange|Black)\)/i.exec(spec);
-    kind = 'Patch Cord' + (colM ? ' (' + colM[1] + ')' : '');
-  } else if (/Cat6|RJ45/i.test(spec)) kind = 'Cat6 Cord';
-  else kind = spec.slice(0, 22);
-  var bits = [];
-  if (len) bits.push(len);
-  if (kind) bits.push(kind);
-  if (trk && kind.indexOf(trk) < 0) bits.push(trk);
-  return bits.join(' \u00b7 ');
-}
-function classifyRackRole(loc, dev) {
-  var devL = (dev || '').toLowerCase();
-  var locU = (loc || '').toUpperCase();
-  var m = /-R(\d{2})(\d{2})$/.exec(locU);
-  var rowNum = m ? parseInt(m[1], 10) : 0;
-  var spot = m ? m[2] : '';
-  if (devL.indexOf('fpp-dcn') >= 0 || devL.indexOf('dcnpp') >= 0) {
-    return { code: 'DCN-PP', label: 'DCN Patch Panel', color: '#55d0d6', bg: 'rgba(85,208,214,.16)' };
-  }
-  if ((spot === '11' || spot === '13' || devL.indexOf('eor') >= 0) && (devL.indexOf('fpp-') >= 0 || devL.indexOf('cpp-') >= 0 || devL.indexOf('pp') === 0)) {
-    return { code: 'AIO PANEL', label: 'AIO / EOR Patch Panel (Spot ' + (spot || '11/13') + ')', color: '#ffca16', bg: 'rgba(255,202,22,.16)' };
-  }
-  if ((rowNum <= 2 || rowNum >= 24) && (devL.indexOf('fpp-') >= 0 || devL.indexOf('cpp-') >= 0)) {
-    return { code: 'SPINE PP', label: 'Network Row Patch Panel', color: '#c084fc', bg: 'rgba(192,132,252,.16)' };
-  }
-  if (devL.indexOf('spn') >= 0 || devL.indexOf('ocslf') >= 0 || devL.indexOf('sal') >= 0 || devL.indexOf('ant-cr') >= 0 || devL.indexOf('fs-edg') >= 0 || devL.indexOf('mgmt-cr') >= 0 || devL.indexOf('oxide') >= 0) {
-    return { code: 'SPINE / CORE', label: 'Spine / Core Switch', color: '#a855f7', bg: 'rgba(168,85,247,.16)' };
-  }
-  if (spot === '12' || devL.indexOf('spocs') >= 0) {
-    return { code: 'SPOCS', label: 'SPOCS Optical Switch Rack (Spot 12)', color: '#30a46c', bg: 'rgba(48,164,108,.16)' };
-  }
-  if (spot === '11' || spot === '13' || devL.indexOf('mgmt-lf') >= 0 || devL.indexOf('tr-lf') >= 0 || devL.indexOf('mgmt-con') >= 0 || devL.indexOf('bms-fb') >= 0) {
-    return { code: 'AIO / EOR', label: 'All-In-One EOR Rack (Spot ' + (spot || '11/13') + ')', color: '#f5a524', bg: 'rgba(245,165,36,.16)' };
-  }
-  if (devL.indexOf('pp1') === 0 || devL.indexOf('fpp-') >= 0 || devL.indexOf('cpp-') >= 0) {
-    return { code: 'RACK PP', label: 'Rack Patch Panel', color: '#30a46c', bg: 'rgba(48,164,108,.16)' };
-  }
-  if (rowNum <= 2 || rowNum >= 24) {
-    return { code: 'NET RACK', label: 'Network Row Rack (Row ' + rowNum + ')', color: '#a855f7', bg: 'rgba(168,85,247,.16)' };
-  }
-  return { code: 'TPU / RACK', label: 'Compute / TPU Rack' + (spot ? ' (Spot ' + spot + ')' : ''), color: '#6aa9e8', bg: 'rgba(106,169,232,.16)' };
-}
-function cableChain(row) {
-  var aLoc = D.d[row[0]] || '?', aDev = D.d[row[1]] || '';
-  var zLoc = D.d[row[2]] || '?', zDev = D.d[row[3]] || '';
-  var mainSpec = D.d[row[4]] || '';
-  var rA = classifyRackRole(aLoc, aDev);
-  var steps = [{ loc: aLoc, dev: aDev, cable: mainSpec, role: rA.code, roleLabel: rA.label, roleColor: rA.color, roleBg: rA.bg }];
-  if (row[6] && row[6].length >= 3) {
-    for (var hi = 0; hi < row[6].length; hi += 3) {
-      var hLoc = D.d[row[6][hi]] || '';
-      var hLbl = row[6][hi + 1] >= 0 ? (D.d[row[6][hi + 1]] || '') : '';
-      var hCab = row[6][hi + 2] >= 0 ? (D.d[row[6][hi + 2]] || '') : '';
-      if (hLoc) {
-        var rH = classifyRackRole(hLoc, hLbl);
-        steps.push({ loc: hLoc, dev: hLbl, cable: hCab || mainSpec, role: rH.code, roleLabel: rH.label, roleColor: rH.color, roleBg: rH.bg });
-      }
-    }
-  }
-  var rZ = classifyRackRole(zLoc, zDev);
-  steps.push({ loc: zLoc, dev: zDev, cable: '', role: rZ.code, roleLabel: rZ.label, roleColor: rZ.color, roleBg: rZ.bg });
-  return steps;
-}
+/* ---------- trace: interactive jsPlumb cable paths & physical channel diagrams (v76/v80/v83) ---------- */
+function shortRack(loc) { return CutsheetEngine.shortRack(loc); }
+function shortDev(dev) { return CutsheetEngine.shortDev(dev); }
+function shortCableSpec(spec) { return CutsheetEngine.shortCableSpec(spec); }
+function classifyRackRole(loc, dev) { return CutsheetEngine.classifyRackRole(loc, dev); }
+function cableChain(row) { return CutsheetEngine.cableChain(D, row); }
 function cleanupJsPlumb() {
   while (_jtkInstances.length) {
     var inst = _jtkInstances.pop();

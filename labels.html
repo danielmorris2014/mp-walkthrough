@@ -73,10 +73,7 @@ var $=function(i){return document.getElementById(i)};
 var KEY='mp_labels';
 function esc(s){return KitData.esc(s)}
 function ldSync(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}}
-function sv(o){
- try{if(typeof localforage!=='undefined'&&localforage)localforage.setItem(KEY,o);}catch(e){}
- try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}
-}
+function sv(o){KitData.store.set(KEY,o)}
 var st=ldSync();st.list=st.list||[];
 function applySt(){
  if(st.site)$('site').value=st.site;
@@ -121,23 +118,17 @@ $('csv').onclick=function(){var r=['serial,line1_A_end,line2_Z_end,made'].concat
  var b=new Blob([r.join('\n')],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='flag-labels.csv';document.body.appendChild(a);a.click();a.remove()};
 $('clr').onclick=function(){if(confirm('Clear label history? Serial counter stays.')){st.list=[];sv(st);hist()}};
 
-// Load IndexedDB state via localForage + check for pre-filled draft from BUF103 cutsheet
-var pLoad=(typeof localforage!=='undefined'&&localforage)?localforage.getItem(KEY):Promise.resolve(null);
-pLoad.then(function(saved){
+// Load IndexedDB state via KitData.store + check for pre-filled draft from BUF103 cutsheet
+KitData.store.get(KEY,null).then(function(saved){
  if(saved&&typeof saved==='object'){
   st=saved;st.list=st.list||[];applySt();
- }else if(st.list&&st.list.length&&typeof localforage!=='undefined'&&localforage){
-  localforage.setItem(KEY,st);
  }
- try{
-  var draft=JSON.parse(sessionStorage.getItem('mp.label_draft')||'null');
-  if(draft&&draft.lines){
-   sessionStorage.removeItem('mp.label_draft');
-   if(draft.site)$('site').value=draft.site;
-   $('in').value=draft.lines;
-   $('mk').click();
-  }
- }catch(e){}
+ var draft=KitData.nav.consume('labels');
+ if(draft&&draft.lines){
+  if(draft.site)$('site').value=draft.site;
+  $('in').value=draft.lines;
+  $('mk').click();
+ }
 }).catch(function(){});
 KitData.watchFixedTop('.topbar');
 })();

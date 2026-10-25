@@ -363,6 +363,9 @@
   };
 
   root.CutsheetParser = api;
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = api;
+  }
 
   // Web Worker message handler
   if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {

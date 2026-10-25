@@ -20,7 +20,7 @@ The domain language of the MP Kit. Implementation details live in AGENTS.md, not
 
 **Sync Status** — The one-line indicator on the Home card: "Synced [time]" (green), "Sync pending — N changes" (amber), or "Standalone" (gray, no Site Code entered).
 
-**Conflict** — When two phones Stamp the same Row-Side differently while offline. Resolved automatically: the latest timestamp wins. The overwritten Stamp stays in history.
+**Conflict** — When two phones Stamp the same Row-Side differently while offline. Stamps on different rows or different cables merge concurrently without loss; when two phones edit the exact same cable on the same Row-Side, the latest timestamp wins. The overwritten Stamp stays in history.
 
 **Baseline** — A snapshot of all Row-Side statuses saved at end of night. Used for the last-night comparison on the Home card and for changes-only reports. Not a projection — purely backward-looking.
 
@@ -51,3 +51,7 @@ The domain language of the MP Kit. Implementation details live in AGENTS.md, not
 **Field Reference** — The offline in-kit copy of the Reference Guide: standards, cable paths, trunk landing sheets, part numbers. For looking things up on the job, not for tracking progress.
 
 **Wrong Label** — A cable whose printed flag disagrees with the database. Logged from the Field Guide; open items ride the nightly report and now warn at scan time.
+
+**Physical Channel** — The ordered end-to-end sequence of physical stages a Cutsheet connection traverses from A-end device to Z-end device, including intermediate patch panels, AIO/EOR racks, trunks, DCN-PP panels, and breakout harnesses.
+
+**Rack Role** — The functional identity of a rack or patch point in a hall's topology: Compute / TPU Rack, Rack Patch Panel, All-In-One EOR Rack (Spot 11/13), AIO Patch Panel, SPOCS Optical Switch Rack (Spot 12), DCN Patch Panel, Network Row Patch Panel, or Spine / Core Switch.

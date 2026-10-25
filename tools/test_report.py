@@ -1,6 +1,7 @@
 # Reconstruct Daniel's 10/19 night in the app and diff the formal report
 # against his target format (status-first bullets, numeric regrouping,
-# mixed-row grouping).
+# mixed-row grouping), plus direct unit assertions on ReportEngine's deepened
+# seam (effectiveHalls, wrongLabelLines, buildEmailParts).
 from playwright.sync_api import sync_playwright
 import os, sys
 
@@ -86,8 +87,6 @@ with sync_playwright() as p:
     print("ALL", len(EXPECT_SUBSTRINGS), "EXPECTED LINES PRESENT")
 
     # numStyle regression guard: 'plain' must reach hallBlock/formalHallLines2
-    # (a v37 fix — these used to read an out-of-scope var and always render
-    # 'short', silently dead-ening the Row-numbers dropdown).
     plain = pg.evaluate(
         "() => { document.getElementById('numStyle').value = 'plain'; renderReport();"
         " return document.getElementById('reportOutput').textContent; }")
@@ -97,13 +96,29 @@ with sync_playwright() as p:
     if not plain_ok:
         print("  plain report still renders short-style tokens")
         sys.exit(1)
-    all_styles_ok = pg.evaluate("""() => {
-      return ['formal', 'mine', 'crew', 'boss'].every(st => {
+    seam_ok = pg.evaluate("""() => {
+      const stylesOk = ['formal', 'mine', 'crew', 'boss'].every(st => {
         const out = ReportEngine.buildReport(st, { state, numStyle: 'short', halls: state.halls });
         return typeof out === 'string' && out.length > 80;
       });
+      // Test ReportEngine.effectiveHalls (changes-only vs baseline)
+      const snap = JSON.parse(JSON.stringify(state));
+      snap.baseline = { date: '10/18/2026', halls: JSON.parse(JSON.stringify(state.halls)) };
+      snap.halls.CB5_DH1.rows[20]['11'] = { F144: 'hung', OCS: 'hung', CAT6: 'hung' };
+      const diffHalls = ReportEngine.effectiveHalls(snap, 'changes');
+      const diffOk = diffHalls.CB5_DH1.rows[1]['11'].F144 === 'none' &&
+                     diffHalls.CB5_DH1.rows[20]['11'].F144 === 'hung';
+      // Test ReportEngine.wrongLabelLines & ReportEngine.buildEmailParts
+      const wl = ReportEngine.wrongLabelLines([{ id: 'BUF102#001', sa: 'R0101', da: 'R0102', done: false }]);
+      const parts = ReportEngine.buildEmailParts('formal', {
+        state: snap, numStyle: 'short', scope: 'changes',
+        mislabels: [{ id: 'BUF102#001', sa: 'R0101', da: 'R0102', done: false }]
+      });
+      return stylesOk && diffOk && wl.includes('WRONG LABELS FOUND') &&
+             parts.subject.includes('Shift Update') && parts.body.includes('2001\u20132011') &&
+             parts.body.includes('WRONG LABELS FOUND');
     }""")
-    print("ALL REPORT TEMPLATES:", "PASS" if all_styles_ok else "FAIL")
-    if not all_styles_ok:
+    print("REPORT ENGINE SEAM (styles/effectiveHalls/wrongLabels/emailParts):", "PASS" if seam_ok else "FAIL")
+    if not seam_ok:
         sys.exit(1)
     b.close()

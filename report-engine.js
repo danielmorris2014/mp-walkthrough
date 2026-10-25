@@ -1,6 +1,10 @@
 /* report-engine.js - the report formatter as a deep module (architecture
-   candidate #2). The seam: ReportEngine.buildReport(style, ctx) where
-   ctx = { state, numStyle, halls }. No DOM reads inside this file.
+   candidate #2 & v83 deepening). The seam:
+     ReportEngine.buildReport(style, ctx)
+     ReportEngine.effectiveHalls(state, scope)
+     ReportEngine.wrongLabelLines(mislabels)
+     ReportEngine.buildEmailParts(styleOrText, ctx)
+   where ctx = { state, numStyle, halls, scope, mislabels }. No DOM reads inside this file.
    index.html supplies a thin adapter; tools/test_report.py runs this file
    headless with a plain ctx for the 21-line format diff. */
 var CABLES = ['F144', 'OCS', 'CAT6'];
@@ -287,10 +291,45 @@ function activeHallNames(halls) {
     .map(function (h) { return h.name; });
 }
 
+function effectiveHalls(state, scope) {
+  if (!state || !state.halls) return {};
+  if (scope !== 'changes' || !state.baseline || !state.baseline.halls) return state.halls;
+  var out = {};
+  Object.keys(state.halls).forEach(function (hid) {
+    var h = state.halls[hid];
+    var b = (state.baseline.halls[hid] && state.baseline.halls[hid].rows) || {};
+    var rows = {};
+    Object.keys(h.rows).forEach(function (r) {
+      rows[r] = {};
+      ['11', '13'].forEach(function (s) {
+        var was = (b[r] && b[r][s]) ? b[r][s] : { F144: 'none', OCS: 'none', CAT6: 'none' };
+        var moved = CABLES.some(function (c) { return h.rows[r][s][c] !== was[c]; });
+        rows[r][s] = moved ? JSON.parse(JSON.stringify(h.rows[r][s])) : Side.empty();
+      });
+    });
+    out[hid] = { id: h.id, name: h.name, maxRow: h.maxRow, groups: h.groups, notes: h.notes, rows: rows };
+  });
+  return out;
+}
+
+function wrongLabelLines(mislabels) {
+  if (!Array.isArray(mislabels)) return '';
+  var list = mislabels.filter(function (r) { return r && !r.done; });
+  if (!list.length) return '';
+  var out = ['WRONG LABELS FOUND'];
+  list.forEach(function (r) {
+    var bits = [];
+    if (r.sa) bits.push('A end reads ' + r.sa + ' (database: ' + r.da + ')');
+    if (r.sz) bits.push('Z end reads ' + r.sz + ' (database: ' + r.dz + ')');
+    out.push('\u2022 ' + (r.id || 'Cable') + (r.title ? ' \u2013 ' + r.title : '') + ': ' + (bits.join('; ') || 'printed label does not match the database') + (r.note ? ' \u2013 ' + r.note : ''));
+  });
+  return out.join('\n');
+}
+
 function buildReport(style, ctx) {
   ctx = ctx || {};
   var state = ctx.state;
-  var hallsNow = ctx.halls || state.halls;
+  var hallsNow = ctx.halls || effectiveHalls(state, ctx.scope || 'all');
   var numStyleVal = ctx.numStyle || 'short';
   var m = state.meta;
   var activeCrew = state.crewPool.filter(function (c) { return c.active; }).map(function (c) { return c.name; });
@@ -376,10 +415,32 @@ function buildReport(style, ctx) {
     out += state.blockers.length ? state.blockers.map(function (b) { return b.date + ' – ' + b.text + ' (i)'; }).join('\n') + '\n' : 'None\n';
     out += '\nTasks for tomorrow:\n' + ((m.tasksTomorrow || '').trim() || 'None');
   }
+  if (ctx.mislabels) {
+    var wl = wrongLabelLines(ctx.mislabels);
+    if (wl) out = out.replace(/\s+$/, '') + '\n\n' + wl;
+  }
   return out;
 }
+
+function buildEmailParts(styleOrText, ctx) {
+  var txt = (ctx && ctx.state) ? buildReport(styleOrText || 'formal', ctx) : String(styleOrText || '');
+  txt = txt.replace(/\r\n/g, '\n');
+  var m = /^Subject:\s*(.+)\n(?:\n)?([\s\S]*)$/.exec(txt);
+  if (m) {
+    return { subject: m[1].trim(), body: m[2], fullText: txt };
+  }
+  var st = (ctx && ctx.state) || {};
+  var subj = 'Shift Update \u2013 ' + reportDateStr(st) +
+    (st.meta && st.meta.shiftTime ? ' (' + st.meta.shiftTime + ')' : '');
+  return { subject: subj, body: txt, fullText: txt };
+}
+
   return {
     buildReport: buildReport,
+    effectiveHalls: effectiveHalls,
+    wrongLabelLines: wrongLabelLines,
+    buildEmailParts: buildEmailParts,
+    activeHallNames: activeHallNames,
     STATUS_META: STATUS_META, STATUS_ORDER: STATUS_ORDER,
     REPORT_STATUS_ORDER: REPORT_STATUS_ORDER, CABLES: CABLES, CABLE_LABEL: CABLE_LABEL,
     sideOverall: sideOverall, hallSentences: hallSentences, Side: Side

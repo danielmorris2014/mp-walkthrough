@@ -18,6 +18,28 @@ var Sync = (function () {
   var CABLES = ['F144', 'OCS', 'CAT6'];
   var lastMarked = null;       // snapshot of shared keys at last markChanged
   var ydoc = (typeof Y !== 'undefined' && Y && Y.Doc) ? new Y.Doc() : null;
+  var customTransport = null;  // optional { get, put } transport adapter (ADR-0001)
+  var syncName = '';
+  var debounceTimer = null;
+  var pollIntervalId = null;
+
+  function getName() {
+    if (syncName) return syncName;
+    try { syncName = localStorage.getItem('mp_sync_name') || ''; } catch (e) {}
+    if (!syncName && typeof window !== 'undefined' && window.__SYNC_NAME) syncName = window.__SYNC_NAME;
+    return syncName || '';
+  }
+
+  function setName(n) {
+    syncName = String(n || '').trim();
+    try { localStorage.setItem('mp_sync_name', syncName); } catch (e) {}
+    if (typeof window !== 'undefined') window.__SYNC_NAME = syncName;
+    return syncName;
+  }
+
+  function setTransport(adapter) {
+    customTransport = adapter || null;
+  }
 
   // ---- base64 <-> Uint8Array helpers for Yjs binary updates ----
   function bytesToBase64(bytes) {
@@ -151,8 +173,11 @@ var Sync = (function () {
     try { return atob(code.slice(3)); } catch (e) { return null; }
   }
 
-  // ---- GitHub Contents API (handles both JSON+Yjs envelope and raw Yjs binary) ----
+  // ---- GitHub Contents API (or injected transport adapter) ----
   function apiGet() {
+    if (customTransport && typeof customTransport.get === 'function') {
+      return Promise.resolve(customTransport.get());
+    }
     return fetch(API + '?t=' + Date.now(), {
       headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
     }).then(function (r) {
@@ -192,6 +217,9 @@ var Sync = (function () {
   }
 
   function apiPut(stateObj) {
+    if (customTransport && typeof customTransport.put === 'function') {
+      return Promise.resolve(customTransport.put(stateObj));
+    }
     var body = JSON.stringify(stateObj);
     var payload = {
       message: 'sync ' + new Date().toISOString(),
@@ -394,7 +422,7 @@ var Sync = (function () {
     if (ydoc) syncToYDoc(s, ydoc);
     if (lastMarked && !silent) {
       SHARED_KEYS.forEach(function (k) {
-        if (JSON.stringify(s[k]) !== lastMarked[k]) touch(k);
+        if (JSON.stringify(s[k]) !== lastMarked[k]) touch(k, s);
       });
     }
     lastMarked = {};
@@ -443,7 +471,7 @@ var Sync = (function () {
     });
     stateObj._meta = localState._meta || {};
     stateObj._meta.syncedAt = Date.now();
-    stateObj._meta.pushedBy = (window.__SYNC_NAME || 'unknown');
+    stateObj._meta.pushedBy = (getName() || 'unknown');
     if (ydoc && typeof Y !== 'undefined') {
       try { stateObj._yjs = bytesToBase64(Y.encodeStateAsUpdate(ydoc)); } catch (e) {}
     }
@@ -499,12 +527,60 @@ var Sync = (function () {
     }).catch(function () { return localState; });
   }
 
-  function touch(key) {
-    if (!window.state) return;
-    if (!window.state._meta) window.state._meta = {};
-    window.state._meta[key + '_at'] = Date.now();
+  function touch(key, s) {
+    var target = s || (typeof window !== 'undefined' ? window.state : null);
+    if (!target) return;
+    if (!target._meta) target._meta = {};
+    target._meta[key + '_at'] = Date.now();
     pendingChanges++;
     status = 'pending';
+  }
+
+  function schedule(getState, onMerged, delayMs) {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function () {
+      debounceTimer = null;
+      if ((typeof navigator === 'undefined' || navigator.onLine) && token) {
+        var cur = typeof getState === 'function' ? getState() : getState;
+        if (!cur) return;
+        sync(cur).then(function (m) {
+          if (m !== cur && typeof onMerged === 'function') onMerged(m);
+        }).catch(function () {});
+      }
+    }, delayMs || 2000);
+  }
+
+  function startPolling(opts) {
+    opts = opts || {};
+    var getState = opts.getState;
+    var onMerged = opts.onMerged;
+    var onStatusChange = opts.onStatusChange;
+    function pollOnce() {
+      if (!token) return;
+      if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+      var cur = typeof getState === 'function' ? getState() : null;
+      if (!cur) return;
+      sync(cur).then(function (m) {
+        if (m !== cur && typeof onMerged === 'function') onMerged(m);
+        if (typeof onStatusChange === 'function') onStatusChange();
+      }).catch(function () {});
+    }
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') pollOnce();
+      });
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', function () {
+        pollOnce();
+      });
+    }
+    if (pollIntervalId) clearInterval(pollIntervalId);
+    pollIntervalId = setInterval(function () {
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+      pollOnce();
+    }, opts.intervalMs || 8000);
+    return pollOnce;
   }
 
   function getStatus() {
@@ -537,6 +613,11 @@ var Sync = (function () {
     syncToYDoc: syncToYDoc,
     extractFromYDoc: extractFromYDoc,
     getYDoc: function () { return ydoc; },
+    getName: getName,
+    setName: setName,
+    setTransport: setTransport,
+    schedule: schedule,
+    startPolling: startPolling,
     getStatus: getStatus,
     timeAgo: timeAgo,
     encodeCode: encodeCode
