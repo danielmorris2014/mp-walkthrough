@@ -947,7 +947,8 @@
     <div class="card">
       <div class="card-title">Hall notes</div>
       <div class="batch-row">
-        <input type="text" id="noteInput" placeholder="e.g. HAC 17, Rows 33–36 – Staged (8 hrs per person)" style="flex:1; min-width:150px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addNote();}">
+        <select id="noteHall" style="width:118px;"></select>
+        <input type="text" id="noteInput" placeholder="e.g. Rows 14–16 dressed and Velcroed" style="flex:1; min-width:140px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addNote();}">
         <button class="btn btn-secondary" onclick="addNote()">+ Note</button>
       </div>
       <div id="notesWrap"></div>
@@ -1135,7 +1136,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v85';
+var APP_VERSION = 'v86';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1333,7 +1334,7 @@ function grp(name, from, to) {
 
 function defaultState() {
   var s = {
-    version: 2,
+    version: 3,
     activeHall: 'CB5_DH1',
     brush: 'hung', scope: 'ALL',
     settings: {
@@ -1388,8 +1389,6 @@ function defaultState() {
   [3, 5, 6].forEach(function (r) { stamp(r, '13', 'prog'); });
   for (var r7 = 7; r7 <= 13; r7++) { stamp(r7, '11', 'staged'); stamp(r7, '13', 'staged'); }
 
-  s.halls['CB4_DH2'].notes.push('HAC 17, Rows 33–36 – Staged (8 hrs per person).');
-  s.halls['CB4_DH4'].notes.push('Remediation – Continued working through cut sheet.');
   return s;
 }
 
@@ -1410,7 +1409,26 @@ var undoStack = [];
 // CORE_SHAPE is the single list of keys that undo, restore, and the backup
 // all move together — it was hand-enumerated in three places before.
 var CORE_SHAPE = ['halls', 'crewPool', 'blockers', 'meta', 'history', 'baseline'];
-var STATE_VERSION = 2;
+var STATE_VERSION = 3;
+var LEGACY_SEED_NOTES = [
+  'HAC 17, Rows 33\u201336 \u2013 Staged (8 hrs per person).',
+  'HAC 17, Rows 33-36 - Staged (8 hrs per person).',
+  'Remediation \u2013 Continued working through cut sheet.',
+  'Remediation - Continued working through cut sheet.'
+];
+function stripLegacySeedNotes(s) {
+  if (!s || !s.halls) return s;
+  Object.keys(s.halls).forEach(function (hid) {
+    var h = s.halls[hid];
+    if (h && Array.isArray(h.notes)) {
+      h.notes = h.notes.filter(function (n) {
+        var clean = String(n || '').trim();
+        return LEGACY_SEED_NOTES.indexOf(clean) < 0 && !/8\s*hrs?\s*per\s*person/i.test(clean);
+      });
+    }
+  });
+  return s;
+}
 // MIGRATIONS[n] upgrades a version-n state to n+1. Add an entry when the
 // shape changes; old phones load cleanly instead of silently breaking.
 var MIGRATIONS = {
@@ -1418,6 +1436,11 @@ var MIGRATIONS = {
     s.settings = Object.assign({ onboarded: false, numStyle: 'short', orientation: 'h11',
       signature: '', textSize: 'normal', wakeLock: true, lastBackup: 0 }, s.settings || {});
     s.version = 2;
+    return s;
+  },
+  2: function (s) {
+    stripLegacySeedNotes(s);
+    s.version = 3;
     return s;
   }
 };
@@ -1428,6 +1451,7 @@ function migrateState(s) {
     s = MIGRATIONS[v](s);
     v = s.version;
   }
+  stripLegacySeedNotes(s);
   s.settings = s.settings || {};
   if (!s.settings.emailTo) s.settings.emailTo = ReportEngine.DEFAULT_EMAIL_TO;
   if (!s.settings.emailCc) s.settings.emailCc = ReportEngine.DEFAULT_EMAIL_CC;
@@ -1437,7 +1461,7 @@ function migrateState(s) {
 function loadState() { return state; } // async version in initStorage
 function syncSoon() {
   Sync.schedule(function () { return state; }, function (m) {
-    state = m; renderAll(); updateSyncStatus();
+    state = migrateState(m); renderAll(); updateSyncStatus();
   }, 2000);
 }
 function saveState() {
@@ -1652,14 +1676,30 @@ function scrollToRow(r) {
   }
 }
 function renderHallNotes() {
-  var hall = state.halls[state.activeHall];
   var nw = document.getElementById('notesWrap');
-  if (!nw || !hall) return;
-  // hall notes live in the Blockers panel (v35) — rendered here, called by renderBlockersTab
-  nw.innerHTML = (hall.notes || []).map(function (n, i) {
-    return '<div class="note-item"><span>\uD83D\uDCCC ' + escapeHtml(n) + '</span>' +
-      '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:44px; min-width:44px; border-radius:10px;" aria-label="Remove note" onclick="removeNote(' + i + ')">\u2715</button></div>';
-  }).join('');
+  var sel = document.getElementById('noteHall');
+  if (sel && state.halls) {
+    var prev = sel.value;
+    sel.innerHTML = Object.keys(state.halls).map(function (hid) {
+      var h = state.halls[hid];
+      return '<option value="' + escapeAttr(hid) + '">' + escapeHtml(h.name) + '</option>';
+    }).join('');
+    sel.value = (prev && state.halls[prev]) ? prev : state.activeHall;
+  }
+  if (!nw || !state.halls) return;
+  // hall notes live in the Blockers panel — render notes across ALL halls so no hall's note is ever hidden
+  var items = [];
+  Object.keys(state.halls).forEach(function (hid) {
+    var h = state.halls[hid];
+    if (!h || !Array.isArray(h.notes)) return;
+    h.notes.forEach(function (n, i) {
+      items.push(
+        '<div class="note-item"><span><span style="color:var(--accent); font-weight:800;">' + escapeHtml(h.name) + '</span> \u2013 ' + escapeHtml(n) + '</span>' +
+        '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:44px; min-width:44px; border-radius:10px;" aria-label="Remove note" onclick="removeNote(' + i + ', \'' + escapeAttr(hid) + '\')">\u2715</button></div>'
+      );
+    });
+  });
+  nw.innerHTML = items.length ? items.join('') : '<div class="muted">No hall notes added.</div>';
 }
 function renderWalk() {
   renderHallStrip();
@@ -1794,17 +1834,21 @@ function buildSideHtml(hall, r, side) {
 /* ---------------- notes ---------------- */
 function addNote() {
   var inp = document.getElementById('noteInput');
-  var v = inp.value.trim();
+  var v = inp ? inp.value.trim() : '';
   if (!v) return;
+  var sel = document.getElementById('noteHall');
+  var hid = (sel && sel.value && state.halls[sel.value]) ? sel.value : state.activeHall;
   pushUndo();
-  state.halls[state.activeHall].notes.push(v);
+  state.halls[hid].notes.push(v);
   inp.value = '';
   saveState(); renderHallNotes();
 }
-function removeNote(i) {
+function removeNote(i, hallId) {
+  var hid = (hallId && state.halls[hallId]) ? hallId : state.activeHall;
+  if (!state.halls[hid] || !state.halls[hid].notes) return;
   pushUndo();
-  state.halls[state.activeHall].notes.splice(i, 1);
-  saveState(); renderWalk();
+  state.halls[hid].notes.splice(i, 1);
+  saveState(); renderHallNotes(); renderWalk();
 }
 
 /* ---------------- hall editor ---------------- */
@@ -2177,7 +2221,7 @@ function saveBaseline(quiet) {
   var halls = {};
   Object.keys(state.halls).forEach(function (hid) {
     var h = state.halls[hid];
-    halls[hid] = { rows: JSON.parse(JSON.stringify(h.rows)) };
+    halls[hid] = { rows: JSON.parse(JSON.stringify(h.rows)), notes: (h.notes || []).slice() };
   });
   state.baseline = { date: new Date().toLocaleDateString('en-US'), halls: halls };
   saveState();
@@ -2749,7 +2793,7 @@ function joinSite() {
     // joining IS syncing — one merge policy (ADR-0002 latest-wins), no
     // private remote-wins copy here anymore. Baselines ride along too.
     Sync.sync(state).then(function (m) {
-      if (m !== state) { state = m; renderAll(); }
+      if (m !== state) { state = migrateState(m); renderAll(); }
       if (msg) msg.textContent = 'Connected!';
       setTimeout(dismissOnboarding, 800);
     });
@@ -2765,7 +2809,7 @@ function syncNow() {
   if (!st.connected) { showToast('Not connected to a shared site'); return; }
   showToast('Syncing...');
   Sync.sync(state).then(function (m) {
-    if (m !== state) { state = m; renderAll(); }
+    if (m !== state) { state = migrateState(m); renderAll(); }
     updateSyncStatus();
     showToast('Synced!');
   }).catch(function () { showToast('Sync failed. Check your connection and try again.'); });
@@ -2823,7 +2867,7 @@ function boot() {
   try {
     if (Sync.restore()) {
       Sync.sync(state).then(function (m) {
-        if (m !== state) { state = m; renderAll(); }
+        if (m !== state) { state = migrateState(m); renderAll(); }
         updateSyncStatus();
       });
     }
@@ -2831,7 +2875,7 @@ function boot() {
 
   Sync.startPolling({
     getState: function () { return state; },
-    onMerged: function (m) { state = m; renderAll(); },
+    onMerged: function (m) { state = migrateState(m); renderAll(); },
     onStatusChange: function () { updateSyncStatus(); },
     intervalMs: 8000
   });
@@ -2931,7 +2975,7 @@ initStorage();
       </div>
       <div id="syncSettingsInfo" class="muted" style="margin-top:6px;"></div>
       <div class="batch-row" style="justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
-        <span class="muted">App version: <strong style="color:var(--text);">v85</strong></span>
+        <span class="muted">App version: <strong style="color:var(--text);">v86</strong></span>
         <button class="btn btn-secondary" onclick="forceAppUpdate()">Force Update</button>
       </div>
       <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closeSettings()">Close</button>

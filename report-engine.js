@@ -336,7 +336,9 @@ function effectiveHalls(state, scope) {
   var out = {};
   Object.keys(state.halls).forEach(function (hid) {
     var h = state.halls[hid];
-    var b = (state.baseline.halls[hid] && state.baseline.halls[hid].rows) || {};
+    var bh = state.baseline.halls[hid] || {};
+    var b = bh.rows || {};
+    var bNotes = Array.isArray(bh.notes) ? bh.notes : [];
     var rows = {};
     Object.keys(h.rows).forEach(function (r) {
       rows[r] = {};
@@ -346,7 +348,8 @@ function effectiveHalls(state, scope) {
         rows[r][s] = moved ? JSON.parse(JSON.stringify(h.rows[r][s])) : Side.empty();
       });
     });
-    out[hid] = { id: h.id, name: h.name, maxRow: h.maxRow, groups: h.groups, notes: h.notes, rows: rows };
+    var diffNotes = (h.notes || []).filter(function (n) { return bNotes.indexOf(n) < 0; });
+    out[hid] = { id: h.id, name: h.name, maxRow: h.maxRow, groups: h.groups, notes: diffNotes, rows: rows };
   });
   return out;
 }

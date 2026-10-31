@@ -264,9 +264,15 @@ with sync_playwright() as p:
         && document.getElementById('addShiftTimeBtn'));
       switchTab('blockers');
       out.blockersList = !!document.getElementById('blockerList');
-      out.hallNotesHome = !!document.getElementById('notesWrap');   // lives on this panel
+      out.hallNotesHome = !!document.getElementById('notesWrap') && !!document.getElementById('noteHall');   // lives on this panel
       switchTab('report');
       const parts = typeof parseReportEmailParts === 'function' ? parseReportEmailParts() : null;
+      const rptTxt = buildReport('formal');
+      const v2Mock = { version: 2, halls: { CB4_DH2: { notes: ['HAC 17, Rows 33\u201336 \u2013 Staged (8 hrs per person).', 'Real note'] } } };
+      migrateState(v2Mock);
+      out.noHardcodedSeedNotes = !rptTxt.includes('8 hrs per person')
+        && v2Mock.halls.CB4_DH2.notes.length === 1
+        && v2Mock.halls.CB4_DH2.notes[0] === 'Real note';
       out.reportOutput = !!(document.getElementById('reportOutput') && document.getElementById('reportStyle')
         && document.getElementById('emailReportBtn')
         && parts && parts.subject && parts.body);
