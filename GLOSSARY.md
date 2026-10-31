@@ -6,9 +6,12 @@ The domain language of the MP Kit. Implementation details live in AGENTS.md, not
 
 **Row-Side** — One side of one row in a hall. The atomic unit of walkthrough progress. Identified by row number + side (11 or 13). Example: "row 3, 11-side." Each Row-Side tracks three cables (144F, OCS, CAT6) independently.
 
-**Stamp** — The act of setting a Row-Side's status (Staged, In Progress, Ran, Ran & Hung, Remediation). Every Stamp carries the stamper's Name and a timestamp. Stamps are the events that sync between phones. One rule everywhere (v41): tapping a target that already fully holds the brush status clears it — row taps, per-cable taps, row-number taps and pod buttons all behave the same. Implemented in `stamp-engine.js` (`Stamp.apply`); attribution is stored per cable in `seg._st` as `{by, at}`.
+**Stamp** — The act of setting a Row-Side's status (Staged, In Progress, Ran, Ran & Hung, Remediation). Every Stamp carries the stamper's Name and a timestamp. Stamps are the events that sync between phones. Tapping a target that already fully holds the active brush status clears it across row taps, per-cable taps, row-number taps, and pod buttons alike.
 
-**Walk View** — The walk screen's rendering seam (`WalkView` in index.html). A Stamp patches only the side-cards it touched (`WalkView.update`); hall switches, undo and sync pulls rebuild the whole screen (`renderWalk`). The two paths share the derived-stats code so they can never disagree.
+**Shift Report** — The nightly status dispatch sent to ServicePoint leadership via Outlook. Under `WORK PERFORMED`, every Midpoint (`MP | <Hall>`) section is derived strictly from the Hall's current Row-Side Stamps (or changes since Baseline), while ServicePoint (`SP`) work, **Blockers**, and **Areas of Concern** capture crew and site-level commentary.
+_Avoid_: Hall Notes, manual MP summary
+
+**Walk View** — The walk screen's live view of a Hall, combining the row-by-row stamping grid, progress strip, and live `MP | <Hall>` report preview so the crew sees the exact report bullets change as they tap rows.
 
 **Status** — Where a cable is in its lifecycle: Not Started → Staged → In Progress → Ran → Ran & Hung. Remediation is a parallel status, not part of the forward progression.
 

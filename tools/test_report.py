@@ -59,13 +59,12 @@ EXPECT_SUBSTRINGS = [
     "\u2022 1411: 144F and CAT6 ran; OCS in progress",
     "\u2022 1413, 1513, 1613: 144F and CAT6 ran; OCS staged",
     "\u2022 1511: OCS ran; 144F and CAT6 staged",
-    "\u2022 1711, 1713, 1811, 1813: OCS and CAT6 staged; 144F not started",
+    "\u2022 1711, 1713, 1811, 1813: OCS and CAT6 staged",
     "\u2022 Ran and hung: 1313\u20131613, 1711\u20132411, 1713\u20132413",
     "\u2022 Ran: 913, 1013, 1111\u20131113, 1211\u20131213, 1311\u20131611",
     "\u2022 Staged: 613",
     "\u2022 713: 144F and CAT6 ran; OCS staged",
     "\u2022 813: 144F and CAT6 ran; OCS in progress",
-    "\u2022 Continued working through cut sheet",
     "\u2022 Received and Staged 2,000 waterfalls in CB4 DH1",
     "\u2022 CB4 DH2: Waiting on AIO racks, currently have 0",
     "\u2022 None",
@@ -83,6 +82,9 @@ with sync_playwright() as p:
     if missing:
         print("MISSING", len(missing), "of", len(EXPECT_SUBSTRINGS))
         for m in missing: print("  X", m)
+        sys.exit(1)
+    if "not started" in txt.lower() or "CB4 DH4" in txt or "Continued working through cut sheet" in txt:
+        print("FAIL: report included unstamped cable/hall or legacy free-text hall note")
         sys.exit(1)
     print("ALL", len(EXPECT_SUBSTRINGS), "EXPECTED LINES PRESENT")
 
@@ -124,7 +126,13 @@ with sync_playwright() as p:
       const richPreviewOk = !!document.querySelector('#reportOutput .rp-sec') &&
                             !!document.querySelector('#reportEnvelope .to-pill') &&
                             typeof parts.html === 'string' && parts.html.includes('SHIFT SUMMARY');
-      // End-to-end UI input -> Report propagation check (including uncommitted blocker/note flush)
+      // End-to-end UI input -> Report propagation check (including live Walk View report preview & uncommitted blocker flush)
+      document.getElementById('numStyle').value = 'short';
+      state.settings.numStyle = 'short';
+      switchTab('walk');
+      setBrush('remed');
+      tapBoth(25);
+      const walkPreviewTxt = document.getElementById('walkReportPreview').textContent || '';
       switchTab('crew');
       document.getElementById('supers').value = 'Daniel Morris & Jack Tracy';
       document.getElementById('supers').dispatchEvent(new Event('input'));
@@ -134,19 +142,19 @@ with sync_playwright() as p:
       document.getElementById('spWorkNotes').dispatchEvent(new Event('input'));
       switchTab('blockers');
       document.getElementById('blockerText').value = 'Pending patch panels on Row 12';
-      document.getElementById('noteInput').value = 'Completed dressing on Row 4';
       document.getElementById('areasOfConcern').value = '- Fiber reel shortage in DH2';
       document.getElementById('areasOfConcern').dispatchEvent(new Event('input'));
       document.getElementById('signature').value = 'Daniel Morris – ServicePoint';
       savePrefs();
       switchTab('report');
       const liveTxt = document.getElementById('reportOutput').textContent;
-      const uiFlowOk = liveTxt.includes('Daniel Morris & Jack Tracy') &&
+      const uiFlowOk = walkPreviewTxt.includes('2511\u20132513') &&
+                       liveTxt.includes('2511\u20132513') &&
+                       liveTxt.includes('Daniel Morris & Jack Tracy') &&
                        liveTxt.includes('MP \u2013 64') &&
                        liveTxt.includes('\u2022 Verified 144F trunks in Row 9') &&
                        !liveTxt.includes('\u2022 \u2022') &&
                        liveTxt.includes('Pending patch panels on Row 12') &&
-                       liveTxt.includes('Completed dressing on Row 4') &&
                        liveTxt.includes('\u2022 Fiber reel shortage in DH2') &&
                        !liveTxt.includes('\u2022 -') &&
                        liveTxt.includes('Daniel Morris \u2013 ServicePoint');

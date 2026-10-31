@@ -148,10 +148,13 @@ function mixedBase(seg) {
     });
     if (maxK) base = maxK;
   }
-  var others = CABLES.filter(function (c) { return seg[c] !== base; }).map(function (c) {
-    return CABLE_LABEL[c] + (seg[c] === 'none' ? ' not started' : ' ' + STATUS_META[seg[c]].report.toLowerCase());
+  var others = CABLES.filter(function (c) { return seg[c] !== base && seg[c] !== 'none'; }).map(function (c) {
+    return CABLE_LABEL[c] + ' ' + STATUS_META[seg[c]].report.toLowerCase();
   });
-  return { base: base, desc: others.join(', ') };
+  var desc = others.length
+    ? others.join(', ')
+    : cableNamesAnd(CABLES.filter(function (c) { return seg[c] === base; }));
+  return { base: base, desc: desc };
 }
 
 function hallStatusLines(hall, cableFilter, style, splitAnd) {
@@ -201,7 +204,6 @@ function hallBlock(hall, ns) {
   var lines = [];
   var sents = hallSentences(hall, null, ns || 'short');
   if (sents.length) lines.push(hall.name + ' ' + sents.join('   '));
-  (hall.notes || []).forEach(function (n) { lines.push(hall.name + ' ' + n); });
   return lines;
 }
 
@@ -230,8 +232,6 @@ function mixedDesc2(seg) {
     var cs = CABLES.filter(function (c) { return seg[c] === st; });
     if (cs.length) groups.push(cableNamesAnd(cs) + ' ' + STATUS_META[st].report.toLowerCase());
   });
-  var noneC = CABLES.filter(function (c) { return seg[c] === 'none'; });
-  if (noneC.length) groups.push(cableNamesAnd(noneC) + ' not started');
   return groups.join('; ');
 }
 
@@ -293,9 +293,8 @@ function formalHallLines2(hall, ns) {
   Object.keys(byDesc).map(function (d) { return { d: d, rows: byDesc[d] }; })
     .sort(function (a, b) { var x = a.rows[0], y = b.rows[0]; return x.r - y.r || (x.side < y.side ? -1 : 1); })
     .forEach(function (g) {
-      out.push('\u2022 ' + g.rows.map(function (x) { return x.r + x.side; }).join(', ') + ': ' + g.d);
+      if (g.d) out.push('\u2022 ' + g.rows.map(function (x) { return x.r + x.side; }).join(', ') + ': ' + g.d);
     });
-  (hall.notes || []).forEach(function (n) { var ln = formalizeNote2(n); if (ln) out.push('\u2022 ' + ln.replace(/\.$/, '')); });
   return out;
 }
 
@@ -325,7 +324,7 @@ function activeHallNames(halls) {
       Object.keys(h.rows).forEach(function (r) {
         Side.sides().forEach(function (s) { if (h.rows[r][s] && Side.hasProgress(h.rows[r][s])) any = true; });
       });
-      return any || (h.notes && h.notes.length);
+      return any;
     })
     .map(function (h) { return h.name; });
 }
@@ -338,7 +337,6 @@ function effectiveHalls(state, scope) {
     var h = state.halls[hid];
     var bh = state.baseline.halls[hid] || {};
     var b = bh.rows || {};
-    var bNotes = Array.isArray(bh.notes) ? bh.notes : [];
     var rows = {};
     Object.keys(h.rows).forEach(function (r) {
       rows[r] = {};
@@ -348,8 +346,7 @@ function effectiveHalls(state, scope) {
         rows[r][s] = moved ? JSON.parse(JSON.stringify(h.rows[r][s])) : Side.empty();
       });
     });
-    var diffNotes = (h.notes || []).filter(function (n) { return bNotes.indexOf(n) < 0; });
-    out[hid] = { id: h.id, name: h.name, maxRow: h.maxRow, groups: h.groups, notes: diffNotes, rows: rows };
+    out[hid] = { id: h.id, name: h.name, maxRow: h.maxRow, groups: h.groups, notes: [], rows: rows };
   });
   return out;
 }
@@ -393,6 +390,7 @@ function buildReport(style, ctx) {
       if (hl.length) blocks.push('MP | ' + h.name + '\n' + hl.join('\n'));
     });
     if (blocks.length) out += blocks.join('\n\n') + '\n\n';
+    else out += 'MP\n\u2022 No rows stamped yet\n\n';
     var spLines = (m.spWorkNotes || '').split('\n').map(function (l) { return l.replace(/^[\s\u2022\-\*]+/, '').trim(); }).filter(Boolean);
     out += 'SP\n' + (spLines.length ? spLines.map(function (l) { return '\u2022 ' + l; }).join('\n') : '\u2022 None') + '\n\n';
     out += blockersFormal(state) + '\n\n';
@@ -409,9 +407,11 @@ function buildReport(style, ctx) {
     out += 'Shift Time: ' + (m.shiftTime || '') + '\n';
     out += 'Personnel Count: MP ' + mpCount + ', SP ' + spCount + (activeCrew.length ? ' (' + activeCrew.join(', ') + ')' : '') + '\n\n';
     out += 'Work Completed:\nMP:\n';
+    var mineLines = [];
     Object.values(hallsNow).forEach(function (h) {
-      hallBlock(h, numStyleVal).forEach(function (l) { out += l + '\n'; });
+      hallBlock(h, numStyleVal).forEach(function (l) { mineLines.push(l); });
     });
+    out += (mineLines.length ? mineLines.join('\n') : 'No rows stamped yet') + '\n';
     out += '\nSP:\n' + ((m.spWorkNotes || '').trim() || 'None') + '\n\n';
     out += 'Blockers:\n';
     out += state.blockers.length ? state.blockers.map(function (b) { return '- ' + b.date + ' – ' + b.text; }).join('\n') + '\n' : '- None\n';
@@ -424,9 +424,11 @@ function buildReport(style, ctx) {
     out += 'Headcount: ' + mpCount + '\n';
     out += 'Location: ' + locs + '\n';
     out += 'Work Completed:\n';
+    var crewLines = [];
     Object.values(hallsNow).forEach(function (h) {
-      hallBlock(h, numStyleVal).forEach(function (l) { out += l + '\n'; });
+      hallBlock(h, numStyleVal).forEach(function (l) { crewLines.push(l); });
     });
+    out += (crewLines.length ? crewLines.join('\n') : 'No rows stamped yet') + '\n';
     out += '\nCompany/Crew: ServicePoint (SP)\n';
     out += 'Headcount: ' + spCount + '\n';
     out += 'Location: ' + locs + '\n';
@@ -438,6 +440,7 @@ function buildReport(style, ctx) {
     out += '2 overlapping 12 hour shifts ' + (m.shiftTime || '') + '\n';
     out += 'Personnel Count: ' + (mpCount + spCount) + '\n\n';
     out += 'Work areas completed:\n';
+    var anyBossHall = false;
     Object.values(hallsNow).forEach(function (h) {
       var hasAny = false;
       var cableLines = [];
@@ -445,14 +448,14 @@ function buildReport(style, ctx) {
         var sents = hallSentences(h, c, numStyleVal);
         if (sents.length) { cableLines.push(CABLE_LABEL[c] + ' Pulling – ' + sents.join(' ')); hasAny = true; }
       });
-      var hasNotes = (h.notes || []).length > 0;
-      if (hasAny || hasNotes) {
+      if (hasAny) {
+        anyBossHall = true;
         out += h.name + '\n';
-        (h.notes || []).forEach(function (n) { out += ' ' + n + '\n'; });
         cableLines.forEach(function (l) { out += ' ' + l + '\n'; });
         out += '\n';
       }
     });
+    if (!anyBossHall) out += 'No rows stamped yet\n\n';
     out += 'Blockers / Issues:\n';
     out += state.blockers.length ? state.blockers.map(function (b) { return b.date + ' – ' + b.text + ' (i)'; }).join('\n') + '\n' : 'None\n';
     out += '\nTasks for tomorrow:\n' + ((m.tasksTomorrow || '').trim() || 'None');
@@ -482,8 +485,8 @@ function formatPreviewHtml(reportText) {
     if (mpHall) {
       return '<span class="rp-hall"><span class="rp-badge-mp">' + escHtml(mpHall[1]) + '</span><span class="rp-hall-sep">' + escHtml(mpHall[2]) + '</span><span class="rp-hall-name">' + escHtml(mpHall[3]) + '</span></span>';
     }
-    if (line === 'SP' || line === 'MP:' || line === 'SP:') {
-      return '<span class="rp-hall"><span class="rp-badge-sp">' + escHtml(line) + '</span></span>';
+    if (line === 'SP' || line === 'MP' || line === 'MP:' || line === 'SP:') {
+      return '<span class="rp-hall"><span class="' + (line.indexOf('MP') === 0 ? 'rp-badge-mp' : 'rp-badge-sp') + '">' + escHtml(line) + '</span></span>';
     }
     var kvM = /^(Superintendent on [Ss]ite:\s*|Shift Time:\s*|Personnel Count:\s*|Company\/Crew:\s*|Headcount:\s*|Location:\s*|Crew Members:\s*)(.*)$/.exec(line);
     if (kvM) {
@@ -604,6 +607,7 @@ function buildEmailParts(styleOrText, ctx) {
 
   return {
     buildReport: buildReport,
+    formalHallLines: formalHallLines2,
     effectiveHalls: effectiveHalls,
     wrongLabelLines: wrongLabelLines,
     buildEmailParts: buildEmailParts,

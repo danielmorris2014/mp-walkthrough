@@ -264,15 +264,26 @@ with sync_playwright() as p:
         && document.getElementById('addShiftTimeBtn'));
       switchTab('blockers');
       out.blockersList = !!document.getElementById('blockerList');
-      out.hallNotesHome = !!document.getElementById('notesWrap') && !!document.getElementById('noteHall');   // lives on this panel
+      out.noHallNotesBox = !document.getElementById('noteInput') && !document.getElementById('notesWrap');
+      switchTab('walk');
+      out.walkReportPreview = !!document.getElementById('walkReportPreview');
       switchTab('report');
       const parts = typeof parseReportEmailParts === 'function' ? parseReportEmailParts() : null;
       const rptTxt = buildReport('formal');
-      const v2Mock = { version: 2, halls: { CB4_DH2: { notes: ['HAC 17, Rows 33\u201336 \u2013 Staged (8 hrs per person).', 'Real note'] } } };
-      migrateState(v2Mock);
+      const v3Mock = {
+        version: 3,
+        meta: { spWorkNotes: LEGACY_SP_DEMO, tasksTomorrow: LEGACY_TOMORROW_DEMO },
+        halls: {
+          CB5_DH1: { notes: ['8 hrs per person'], rows: { 1: { '11': { F144: 'hung', OCS: 'hung', CAT6: 'hung' }, '13': { F144: 'none', OCS: 'none', CAT6: 'none' } } } }
+        }
+      };
+      migrateState(v3Mock);
       out.noHardcodedSeedNotes = !rptTxt.includes('8 hrs per person')
-        && v2Mock.halls.CB4_DH2.notes.length === 1
-        && v2Mock.halls.CB4_DH2.notes[0] === 'Real note';
+        && !rptTxt.includes('Chris Dickman')
+        && v3Mock.halls.CB5_DH1.notes.length === 0
+        && v3Mock.halls.CB5_DH1.rows[1]['11'].F144 === 'none'
+        && v3Mock.meta.spWorkNotes === ''
+        && v3Mock.meta.tasksTomorrow === '';
       out.reportOutput = !!(document.getElementById('reportOutput') && document.getElementById('reportStyle')
         && document.getElementById('emailReportBtn')
         && parts && parts.subject && parts.body);

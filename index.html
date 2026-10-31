@@ -747,6 +747,32 @@
     color: var(--sky-9); font-size: 9.5px; font-weight: 800; letter-spacing: 0.2px;
     line-height: 1.2; cursor: pointer;
   }
+  .walk-report-preview {
+    margin: 0 0 8px 0; padding: 8px 11px; border-radius: 12px;
+    background: linear-gradient(180deg, rgba(16, 22, 34, 0.96) 0%, rgba(11, 15, 23, 0.98) 100%);
+    border: 1px solid rgba(124,226,254,0.2);
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  .wrp-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    margin-bottom: 4px;
+  }
+  .wrp-title {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.4px; color: var(--sky-9);
+    text-transform: uppercase; display: flex; align-items: center; gap: 6px;
+  }
+  .wrp-style-btn {
+    background: rgba(255,255,255,0.06); border: 1px solid var(--slate-6);
+    color: var(--slate-11); border-radius: 7px; padding: 2px 8px;
+    font-size: 10.5px; font-weight: 700; cursor: pointer; min-height: 24px;
+  }
+  .wrp-lines {
+    white-space: pre-wrap; word-break: break-word;
+    font-size: 12.5px; line-height: 1.48; color: #f8fafc;
+  }
+  .wrp-empty {
+    font-size: 11.5px; color: var(--muted); font-style: italic;
+  }
   .hist-entry { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; background: var(--bg2); }
   .hist-entry summary { padding: 10px 11px; font-weight: 700; font-size: 12.5px; cursor: pointer; color: var(--slate-11); }
   .hist-body { padding: 0 10px 10px 10px; }
@@ -874,6 +900,7 @@
     <span id="orientLabel" style="display:none;"></span>
     <div class="aisle-legend" id="aisleLegend"></div>
     <div class="hall-strip" id="hallStrip"></div>
+    <div class="walk-report-preview" id="walkReportPreview"></div>
     <div id="walkGrid"></div>
   </div>
 
@@ -943,15 +970,6 @@
         <button class="btn" onclick="addBlocker()">+ Add</button>
       </div>
       <div id="blockerList"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Hall notes</div>
-      <div class="batch-row">
-        <select id="noteHall" style="width:118px;"></select>
-        <input type="text" id="noteInput" placeholder="e.g. Rows 14–16 dressed and Velcroed" style="flex:1; min-width:140px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addNote();}">
-        <button class="btn btn-secondary" onclick="addNote()">+ Note</button>
-      </div>
-      <div id="notesWrap"></div>
     </div>
     <div class="card">
       <div class="card-title">Areas of concern</div>
@@ -1136,7 +1154,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v86';
+var APP_VERSION = 'v87';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1334,11 +1352,11 @@ function grp(name, from, to) {
 
 function defaultState() {
   var s = {
-    version: 3,
+    version: 4,
     activeHall: 'CB5_DH1',
     brush: 'hung', scope: 'ALL',
     settings: {
-      onboarded: false, numStyle: 'short', orientation: 'h11', signature: '',
+      onboarded: true, numStyle: 'short', orientation: 'h11', signature: '',
       textSize: 'normal', wakeLock: true, lastBackup: 0,
       emailTo: ReportEngine.DEFAULT_EMAIL_TO,
       emailCc: ReportEngine.DEFAULT_EMAIL_CC
@@ -1346,10 +1364,10 @@ function defaultState() {
     meta: {
       supers: '',
       shiftTime: '2:00 PM – 2:00 AM',
-      mpCount: 106, spCount: 11,
-      spWorkNotes: 'Started training with Chris Dickman. Shadowed MP on staging and remediation in CB5 DH1. Tested new hires on the system to gauge their training progress.\nTaking measurements with the cable pole to determine cable lengths.',
+      mpCount: 0, spCount: 11,
+      spWorkNotes: '',
       areasOfConcern: 'None',
-      tasksTomorrow: 'Allocating and pulling material in CB5 DH1.\nQC of pulled cables in CB4 DH2 and installing of cables as HAC\u2019s are approved.\nTroubleshooting of AI\u2019s sent to the team.'
+      tasksTomorrow: ''
     },
     crewPool: [
       'Richard Montgomery', 'Dwayne Phillips', 'Daniel Morris', 'Ken Smith',
@@ -1381,14 +1399,6 @@ function defaultState() {
     grp('POD 12 (Rows 19–26)', 19, 26)
   ]);
 
-  // Pre-load last night's CB5 DH1 walkthrough so the first run looks familiar.
-  var cb5 = s.halls['CB5_DH1'].rows;
-  function stamp(r, side, st) { cb5[r][side] = { F144: st, OCS: st, CAT6: st }; }
-  [1, 2].forEach(function (r) { stamp(r, '11', 'hung'); stamp(r, '13', 'hung'); });
-  [3, 5, 6].forEach(function (r) { stamp(r, '11', 'hung'); });
-  [3, 5, 6].forEach(function (r) { stamp(r, '13', 'prog'); });
-  for (var r7 = 7; r7 <= 13; r7++) { stamp(r7, '11', 'staged'); stamp(r7, '13', 'staged'); }
-
   return s;
 }
 
@@ -1409,24 +1419,37 @@ var undoStack = [];
 // CORE_SHAPE is the single list of keys that undo, restore, and the backup
 // all move together — it was hand-enumerated in three places before.
 var CORE_SHAPE = ['halls', 'crewPool', 'blockers', 'meta', 'history', 'baseline'];
-var STATE_VERSION = 3;
-var LEGACY_SEED_NOTES = [
-  'HAC 17, Rows 33\u201336 \u2013 Staged (8 hrs per person).',
-  'HAC 17, Rows 33-36 - Staged (8 hrs per person).',
-  'Remediation \u2013 Continued working through cut sheet.',
-  'Remediation - Continued working through cut sheet.'
-];
-function stripLegacySeedNotes(s) {
-  if (!s || !s.halls) return s;
-  Object.keys(s.halls).forEach(function (hid) {
-    var h = s.halls[hid];
-    if (h && Array.isArray(h.notes)) {
-      h.notes = h.notes.filter(function (n) {
-        var clean = String(n || '').trim();
-        return LEGACY_SEED_NOTES.indexOf(clean) < 0 && !/8\s*hrs?\s*per\s*person/i.test(clean);
-      });
+var STATE_VERSION = 4;
+var LEGACY_SP_DEMO = 'Started training with Chris Dickman. Shadowed MP on staging and remediation in CB5 DH1. Tested new hires on the system to gauge their training progress.\nTaking measurements with the cable pole to determine cable lengths.';
+var LEGACY_TOMORROW_DEMO = 'Allocating and pulling material in CB5 DH1.\nQC of pulled cables in CB4 DH2 and installing of cables as HAC\u2019s are approved.\nTroubleshooting of AI\u2019s sent to the team.';
+function stripLegacySeedData(s) {
+  if (!s) return s;
+  if (s.meta) {
+    if (s.meta.spWorkNotes === LEGACY_SP_DEMO) s.meta.spWorkNotes = '';
+    if (s.meta.tasksTomorrow === LEGACY_TOMORROW_DEMO) s.meta.tasksTomorrow = '';
+  }
+  if (s.halls) {
+    Object.keys(s.halls).forEach(function (hid) {
+      var h = s.halls[hid];
+      if (!h) return;
+      h.notes = [];
+    });
+    // Scrub un-attributed pre-loaded demo rows in CB5_DH1 (rows 1-13 that were seeded without _st)
+    var cb5 = s.halls['CB5_DH1'];
+    if (cb5 && cb5.rows) {
+      for (var r = 1; r <= 13; r++) {
+        if (!cb5.rows[r]) continue;
+        ['11', '13'].forEach(function (side) {
+          var seg = cb5.rows[r][side];
+          if (!seg) return;
+          var hasRealStamp = seg._st && CABLES.some(function (c) { return seg._st[c] && seg._st[c].at; });
+          if (!hasRealStamp && Side.hasProgress(seg)) {
+            cb5.rows[r][side] = Side.empty();
+          }
+        });
+      }
     }
-  });
+  }
   return s;
 }
 // MIGRATIONS[n] upgrades a version-n state to n+1. Add an entry when the
@@ -1439,8 +1462,12 @@ var MIGRATIONS = {
     return s;
   },
   2: function (s) {
-    stripLegacySeedNotes(s);
     s.version = 3;
+    return s;
+  },
+  3: function (s) {
+    stripLegacySeedData(s);
+    s.version = 4;
     return s;
   }
 };
@@ -1451,7 +1478,7 @@ function migrateState(s) {
     s = MIGRATIONS[v](s);
     v = s.version;
   }
-  stripLegacySeedNotes(s);
+  stripLegacySeedData(s);
   s.settings = s.settings || {};
   if (!s.settings.emailTo) s.settings.emailTo = ReportEngine.DEFAULT_EMAIL_TO;
   if (!s.settings.emailCc) s.settings.emailCc = ReportEngine.DEFAULT_EMAIL_CC;
@@ -1675,39 +1702,36 @@ function scrollToRow(r) {
     setTimeout(function () { el.classList.remove('flash'); }, 1800);
   }
 }
-function renderHallNotes() {
-  var nw = document.getElementById('notesWrap');
-  var sel = document.getElementById('noteHall');
-  if (sel && state.halls) {
-    var prev = sel.value;
-    sel.innerHTML = Object.keys(state.halls).map(function (hid) {
-      var h = state.halls[hid];
-      return '<option value="' + escapeAttr(hid) + '">' + escapeHtml(h.name) + '</option>';
-    }).join('');
-    sel.value = (prev && state.halls[prev]) ? prev : state.activeHall;
-  }
-  if (!nw || !state.halls) return;
-  // hall notes live in the Blockers panel — render notes across ALL halls so no hall's note is ever hidden
-  var items = [];
-  Object.keys(state.halls).forEach(function (hid) {
-    var h = state.halls[hid];
-    if (!h || !Array.isArray(h.notes)) return;
-    h.notes.forEach(function (n, i) {
-      items.push(
-        '<div class="note-item"><span><span style="color:var(--accent); font-weight:800;">' + escapeHtml(h.name) + '</span> \u2013 ' + escapeHtml(n) + '</span>' +
-        '<button class="btn btn-danger" style="padding:2px 8px; font-size:11px; min-height:44px; min-width:44px; border-radius:10px;" aria-label="Remove note" onclick="removeNote(' + i + ', \'' + escapeAttr(hid) + '\')">\u2715</button></div>'
-      );
-    });
-  });
-  nw.innerHTML = items.length ? items.join('') : '<div class="muted">No hall notes added.</div>';
+function renderWalkReportPreview(hall) {
+  var el = document.getElementById('walkReportPreview');
+  if (!el) return;
+  if (!hall) { el.innerHTML = ''; return; }
+  var ns = numStyle();
+  var lines = ReportEngine.formalHallLines ? ReportEngine.formalHallLines(hall, ns) : [];
+  var modeLabel = ns === 'plain' ? 'Style: Plain (Rows)' : 'Style: Short (Racks)';
+  var bodyHtml = lines.length
+    ? '<div class="wrp-lines">' + ReportEngine.formatPreviewHtml(lines.join('\n')) + '</div>'
+    : '<div class="wrp-empty">No rows stamped in ' + escapeHtml(hall.name) + ' yet \u2014 tap rows below to auto-build report bullets.</div>';
+  el.innerHTML =
+    '<div class="wrp-head">' +
+    '<span class="wrp-title"><span class="rp-badge-mp">MP</span><span>| ' + escapeHtml(hall.name) + ' Report Feed</span></span>' +
+    '<button type="button" class="wrp-style-btn" onclick="toggleWalkNumStyle()">' + escapeHtml(modeLabel) + '</button>' +
+    '</div>' + bodyHtml;
+}
+function toggleWalkNumStyle() {
+  var cur = numStyle();
+  var next = cur === 'plain' ? 'short' : 'plain';
+  state.settings.numStyle = next;
+  var sel = document.getElementById('numStyle');
+  if (sel) sel.value = next;
+  saveState();
+  renderWalkReportPreview(state.halls[state.activeHall]);
 }
 function renderWalk() {
   renderHallStrip();
   var hall = state.halls[state.activeHall];
   if (!hall) { state.activeHall = Object.keys(state.halls)[0]; hall = state.halls[state.activeHall]; }
   renderLegend();
-
-  renderHallNotes();
 
   // stats (shared with WalkView.update so patch and full render agree)
   renderWalkStats(hall);
@@ -1798,6 +1822,7 @@ function renderWalkStats(hall) {
   if (ring) ring.style.strokeDashoffset = (94.2 * (1 - pct)).toFixed(1);
   var pctEl = document.getElementById('progPct');
   if (pctEl) pctEl.textContent = Math.round(pct * 100) + '%';
+  renderWalkReportPreview(hall);
 }
 
 function buildSideHtml(hall, r, side) {
@@ -1829,26 +1854,6 @@ function buildSideHtml(hall, r, side) {
     '<div><div class="side-top"><span class="side-id">' + r + side + '</span><span class="side-span">' + span + '</span></div>' +
     '<span class="side-status-badge stb-' + (uniform ? st : 'mixed') + '">' + badge + '</span></div>' +
     '<div class="mini-cables">' + pills + '</div></div>';
-}
-
-/* ---------------- notes ---------------- */
-function addNote() {
-  var inp = document.getElementById('noteInput');
-  var v = inp ? inp.value.trim() : '';
-  if (!v) return;
-  var sel = document.getElementById('noteHall');
-  var hid = (sel && sel.value && state.halls[sel.value]) ? sel.value : state.activeHall;
-  pushUndo();
-  state.halls[hid].notes.push(v);
-  inp.value = '';
-  saveState(); renderHallNotes();
-}
-function removeNote(i, hallId) {
-  var hid = (hallId && state.halls[hallId]) ? hallId : state.activeHall;
-  if (!state.halls[hid] || !state.halls[hid].notes) return;
-  pushUndo();
-  state.halls[hid].notes.splice(i, 1);
-  saveState(); renderHallNotes(); renderWalk();
 }
 
 /* ---------------- hall editor ---------------- */
@@ -2016,7 +2021,7 @@ function renderCrewTab() {
   renderSettingsSheet();
 }
 
-// the blockers panel's own content: blocker list + hall notes + concern/tomorrow textareas
+// the blockers panel's own content: blocker list + concern/tomorrow textareas
 function renderBlockersTab() {
   var dEl = document.getElementById('blockerDate');
   if (dEl && !dEl.value) dEl.value = new Date().toLocaleDateString('en-US');
@@ -2025,14 +2030,11 @@ function renderBlockersTab() {
   var ttEl = document.getElementById('tasksTomorrow');
   if (ttEl && document.activeElement !== ttEl) ttEl.value = (state.meta && state.meta.tasksTomorrow) || '';
   renderBlockers();
-  renderHallNotes();
 }
 
 function flushPendingInputs() {
   var bTxt = document.getElementById('blockerText');
   if (bTxt && bTxt.value && bTxt.value.trim()) addBlocker();
-  var nTxt = document.getElementById('noteInput');
-  if (nTxt && nTxt.value && nTxt.value.trim()) addNote();
 }
 
 // the settings sheet's own fields
@@ -2975,7 +2977,7 @@ initStorage();
       </div>
       <div id="syncSettingsInfo" class="muted" style="margin-top:6px;"></div>
       <div class="batch-row" style="justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
-        <span class="muted">App version: <strong style="color:var(--text);">v86</strong></span>
+        <span class="muted">App version: <strong style="color:var(--text);">v87</strong></span>
         <button class="btn btn-secondary" onclick="forceAppUpdate()">Force Update</button>
       </div>
       <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closeSettings()">Close</button>
