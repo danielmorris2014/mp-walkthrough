@@ -1143,6 +1143,7 @@
 
 <script src="./kit-data.js"></script>
 <script src="report-engine.js"></script>
+<script src="walk-state.js"></script>
 <script src="./vendor/yjs/yjs.min.js"></script>
 <script src="sync-engine.js"></script>
 <script src="stamp-engine.js"></script>
@@ -1153,8 +1154,8 @@ CABLE_LABEL = ReportEngine.CABLE_LABEL, sideOverall = ReportEngine.sideOverall,
 hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
-var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v87';
+var STORAGE_KEY = WalkState.STORAGE_KEY;
+var APP_VERSION = 'v88';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1233,12 +1234,9 @@ var WalkView = (function () {
       var ph = pods[i];
       if (!ph) return;
       var existing = g.rows.filter(function (r) { return !!hall.rows[r]; });
-      var done = 0;
-      existing.forEach(function (r) {
-        Side.sides().forEach(function (s) { if (Side.isHung(hall.rows[r][s])) done++; });
-      });
+      var ps = existing.length ? Side.podSummary(hall, { from: existing[0], to: existing[existing.length - 1] }) : { done: 0, total: 0 };
       var cnt = ph.querySelector('.pod-count');
-      if (cnt) cnt.textContent = done + '/' + (existing.length * 2) + ' hung';
+      if (cnt) cnt.textContent = ps.done + '/' + ps.total + ' hung';
     });
     renderWalkStats(hall);
   }
@@ -1267,6 +1265,11 @@ var Overlay = (function () {
 // contracts, one name, string-handler bait) is gone; remove() takes an
 // optional id and defaults to the active hall.
 var Hall = (function () {
+  function syncBlockerHallSelect(hallId) {
+    var sel = document.getElementById('blockerHall');
+    var h = state.halls[hallId || state.activeHall];
+    if (sel && h) sel.value = h.name;
+  }
   function afterChange() {
     saveState();
     renderHallTabs(); renderWalk(); renderHome(); renderBlockers();
@@ -1277,6 +1280,7 @@ var Hall = (function () {
     if (!state.halls[id]) return;
     state.activeHall = id;
     afterChange();
+    syncBlockerHallSelect(id);
     flashHall(state.halls[id]);
   }
   function add(name) {
@@ -1290,6 +1294,7 @@ var Hall = (function () {
     ]);
     state.activeHall = id;
     afterChange();
+    syncBlockerHallSelect(id);
     return id;
   }
   function remove(id) {
@@ -1303,6 +1308,7 @@ var Hall = (function () {
     if (state.activeHall === id) state.activeHall = Object.keys(state.halls)[0];
     Overlay.close('hallEditor');
     afterChange();
+    syncBlockerHallSelect(state.activeHall);
     showToast('Hall deleted');
   }
   function addBuf103Halls(silent) {
@@ -1336,73 +1342,15 @@ var Hall = (function () {
   return { list: list, active: active, switchTo: switchTo, add: add, remove: remove, addBuf103Halls: addBuf103Halls };
 })();
 
+/* ---------------- state & persistence (delegated to WalkState) ---------------- */
+var emptyRow = WalkState.emptyRow;
+var makeHall = WalkState.makeHall;
+var grp = WalkState.grp;
+var defaultState = WalkState.defaultState;
+var migrateState = WalkState.migrateState;
+var CORE_SHAPE = WalkState.CORE_SHAPE;
+var STATE_VERSION = WalkState.STATE_VERSION;
 
-function emptyRow() { return { '11': Side.empty(), '13': Side.empty() }; }
-
-function makeHall(id, name, maxRow, groups) {
-  var rows = {};
-  for (var r = 1; r <= maxRow; r++) rows[r] = emptyRow();
-  return { id: id, name: name, maxRow: maxRow, groups: groups, notes: [], rows: rows };
-}
-function grp(name, from, to) {
-  var rows = [];
-  for (var r = from; r <= to; r++) rows.push(r);
-  return { name: name, rows: rows };
-}
-
-function defaultState() {
-  var s = {
-    version: 4,
-    activeHall: 'CB5_DH1',
-    brush: 'hung', scope: 'ALL',
-    settings: {
-      onboarded: true, numStyle: 'short', orientation: 'h11', signature: '',
-      textSize: 'normal', wakeLock: true, lastBackup: 0,
-      emailTo: ReportEngine.DEFAULT_EMAIL_TO,
-      emailCc: ReportEngine.DEFAULT_EMAIL_CC
-    },
-    meta: {
-      supers: '',
-      shiftTime: '2:00 PM – 2:00 AM',
-      mpCount: 0, spCount: 11,
-      spWorkNotes: '',
-      areasOfConcern: 'None',
-      tasksTomorrow: ''
-    },
-    crewPool: [
-      'Richard Montgomery', 'Dwayne Phillips', 'Daniel Morris', 'Ken Smith',
-      'Jonathan Hall', 'Rafael Trevino', 'Kendrick Freeman', 'Darius Moore',
-      'Chris Dickman', 'Jack Tracy', 'Steve Maffeo'
-    ].map(function (n) { return { name: n, active: true }; }),
-    blockers: [],
-    history: [],
-    baseline: null,
-    halls: {}
-  };
-  s.halls['CB5_DH1'] = makeHall('CB5_DH1', 'CB5 DH1', 26, [
-    grp('Network Rows 1–2', 1, 2),
-    grp('POD 1 (Rows 3–10)', 3, 10),
-    grp('POD 2 (Rows 11–18)', 11, 18),
-    grp('POD 3 (Rows 19–26)', 19, 26)
-  ]);
-  s.halls['CB4_DH2'] = makeHall('CB4_DH2', 'CB4 DH2', 36, [
-    grp('Network Rows 1–2', 1, 2),
-    grp('POD 10 (Rows 3–10)', 3, 10),
-    grp('POD 11 (Rows 11–18)', 11, 18),
-    grp('POD 12 (Rows 19–26)', 19, 26),
-    grp('Rows 27–36 (HAC area)', 27, 36)
-  ]);
-  s.halls['CB4_DH4'] = makeHall('CB4_DH4', 'CB4 DH4', 26, [
-    grp('Network Rows 1–2', 1, 2),
-    grp('POD 10 (Rows 3–10)', 3, 10),
-    grp('POD 11 (Rows 11–18)', 11, 18),
-    grp('POD 12 (Rows 19–26)', 19, 26)
-  ]);
-
-  return s;
-}
-
-/* ---------------- persistence ---------------- */
 var state = defaultState(); // replaced after async load (see initStorage below)
 var _bootDone = false;
 function initStorage() {
@@ -1415,81 +1363,16 @@ function initStorage() {
 }
 var undoStack = [];
 
-// ---- state module (architecture candidate #5): one shape, versioned ----
-// CORE_SHAPE is the single list of keys that undo, restore, and the backup
-// all move together — it was hand-enumerated in three places before.
-var CORE_SHAPE = ['halls', 'crewPool', 'blockers', 'meta', 'history', 'baseline'];
-var STATE_VERSION = 4;
-var LEGACY_SP_DEMO = 'Started training with Chris Dickman. Shadowed MP on staging and remediation in CB5 DH1. Tested new hires on the system to gauge their training progress.\nTaking measurements with the cable pole to determine cable lengths.';
-var LEGACY_TOMORROW_DEMO = 'Allocating and pulling material in CB5 DH1.\nQC of pulled cables in CB4 DH2 and installing of cables as HAC\u2019s are approved.\nTroubleshooting of AI\u2019s sent to the team.';
-function stripLegacySeedData(s) {
-  if (!s) return s;
-  if (s.meta) {
-    if (s.meta.spWorkNotes === LEGACY_SP_DEMO) s.meta.spWorkNotes = '';
-    if (s.meta.tasksTomorrow === LEGACY_TOMORROW_DEMO) s.meta.tasksTomorrow = '';
-  }
-  if (s.halls) {
-    Object.keys(s.halls).forEach(function (hid) {
-      var h = s.halls[hid];
-      if (!h) return;
-      h.notes = [];
-    });
-    // Scrub un-attributed pre-loaded demo rows in CB5_DH1 (rows 1-13 that were seeded without _st)
-    var cb5 = s.halls['CB5_DH1'];
-    if (cb5 && cb5.rows) {
-      for (var r = 1; r <= 13; r++) {
-        if (!cb5.rows[r]) continue;
-        ['11', '13'].forEach(function (side) {
-          var seg = cb5.rows[r][side];
-          if (!seg) return;
-          var hasRealStamp = seg._st && CABLES.some(function (c) { return seg._st[c] && seg._st[c].at; });
-          if (!hasRealStamp && Side.hasProgress(seg)) {
-            cb5.rows[r][side] = Side.empty();
-          }
-        });
-      }
-    }
-  }
-  return s;
-}
-// MIGRATIONS[n] upgrades a version-n state to n+1. Add an entry when the
-// shape changes; old phones load cleanly instead of silently breaking.
-var MIGRATIONS = {
-  1: function (s) {
-    s.settings = Object.assign({ onboarded: false, numStyle: 'short', orientation: 'h11',
-      signature: '', textSize: 'normal', wakeLock: true, lastBackup: 0 }, s.settings || {});
-    s.version = 2;
-    return s;
-  },
-  2: function (s) {
-    s.version = 3;
-    return s;
-  },
-  3: function (s) {
-    stripLegacySeedData(s);
-    s.version = 4;
-    return s;
-  }
-};
-function migrateState(s) {
-  var v = s.version || 1;
-  while (v < STATE_VERSION) {
-    if (!MIGRATIONS[v]) break; // unknown future version: load best-effort
-    s = MIGRATIONS[v](s);
-    v = s.version;
-  }
-  stripLegacySeedData(s);
-  s.settings = s.settings || {};
-  if (!s.settings.emailTo) s.settings.emailTo = ReportEngine.DEFAULT_EMAIL_TO;
-  if (!s.settings.emailCc) s.settings.emailCc = ReportEngine.DEFAULT_EMAIL_CC;
-  s.version = STATE_VERSION;
-  return s;
-}
 function loadState() { return state; } // async version in initStorage
+function applySyncedState(merged) {
+  if (merged && merged !== state) {
+    state = migrateState(merged);
+    renderAll();
+  }
+  updateSyncStatus();
+}
 function syncSoon() {
-  Sync.schedule(function () { return state; }, function (m) {
-    state = migrateState(m); renderAll(); updateSyncStatus();
-  }, 2000);
+  Sync.schedule(function () { return state; }, applySyncedState, 2000);
 }
 function saveState() {
   // markChanged diffs the shared keys and stamps only what moved — honest
@@ -1505,9 +1388,7 @@ function saveState() {
   }
 }
 function snapshotCore() {
-  var o = {};
-  CORE_SHAPE.forEach(function (k) { o[k] = state[k]; });
-  return JSON.stringify(o);
+  return WalkState.snapshotCore(state);
 }
 function pushUndo() {
   undoStack.push(snapshotCore());
@@ -1516,9 +1397,7 @@ function pushUndo() {
 }
 function doUndo() {
   if (!undoStack.length) { showToast('Nothing to undo'); return; }
-  var snap = JSON.parse(undoStack.pop());
-  CORE_SHAPE.forEach(function (k) { if (snap[k] !== undefined) state[k] = snap[k]; });
-  if ('baseline' in snap) state.baseline = snap.baseline;
+  WalkState.applySnapshot(state, undoStack.pop());
   saveState(); updateUndoBtn(); renderAll();
   showToast('Undone');
 }
@@ -1707,7 +1586,9 @@ function renderWalkReportPreview(hall) {
   if (!el) return;
   if (!hall) { el.innerHTML = ''; return; }
   var ns = numStyle();
-  var lines = ReportEngine.formalHallLines ? ReportEngine.formalHallLines(hall, ns) : [];
+  var effHalls = effectiveHalls();
+  var viewHall = (effHalls && effHalls[hall.id]) ? effHalls[hall.id] : hall;
+  var lines = ReportEngine.formalHallLines ? ReportEngine.formalHallLines(viewHall, ns) : [];
   var modeLabel = ns === 'plain' ? 'Style: Plain (Rows)' : 'Style: Short (Racks)';
   var bodyHtml = lines.length
     ? '<div class="wrp-lines">' + ReportEngine.formatPreviewHtml(lines.join('\n')) + '</div>'
@@ -1740,14 +1621,11 @@ function renderWalk() {
 
   (hall.groups || []).forEach(function (g) {
     var existing = g.rows.filter(function (r) { return !!hall.rows[r]; });
-    var doneCount = 0;
-    existing.forEach(function (r) {
-      Side.sides().forEach(function (s) { if (Side.isHung(hall.rows[r][s])) doneCount++; });
-    });
+    var ps = existing.length ? Side.podSummary(hall, { from: existing[0], to: existing[existing.length - 1] }) : { done: 0, total: 0 };
     var isBuf103 = hall.id.indexOf('BUF103_') === 0;
     var ph = document.createElement('div');
     ph.className = 'pod-header';
-    ph.innerHTML = '<span>' + escapeHtml(g.name) + ' <span class="pod-count">' + doneCount + '/' + (existing.length * 2) + ' hung</span></span>' +
+    ph.innerHTML = '<span>' + escapeHtml(g.name) + ' <span class="pod-count">' + ps.done + '/' + ps.total + ' hung</span></span>' +
       '<div class="pod-actions">' +
       (isBuf103 && existing.length ? '<button class="pod-btn" onclick="openBuf103Row(\'' + escapeHtml(hall.id) + '\', ' + existing[0] + ', \'trace\')">Trace \u2197</button>' : '') +
       '<button class="pod-btn" onclick="stampRows([' + existing.join(',') + '], \'11\')">11 side</button>' +
@@ -2220,12 +2098,7 @@ function toggleHistoryAll() {
 }
 function saveBaseline(quiet) {
   pushUndo();
-  var halls = {};
-  Object.keys(state.halls).forEach(function (hid) {
-    var h = state.halls[hid];
-    halls[hid] = { rows: JSON.parse(JSON.stringify(h.rows)), notes: (h.notes || []).slice() };
-  });
-  state.baseline = { date: new Date().toLocaleDateString('en-US'), halls: halls };
+  state.baseline = WalkState.buildBaseline(state);
   saveState();
   renderBaselineInfo(); renderReport();
   if (!quiet) showToast('Baseline saved \u2014 reports can now show changes since ' + state.baseline.date);
@@ -2257,15 +2130,12 @@ function effectiveHalls() {
   return ReportEngine.effectiveHalls(state, mode);
 }
 
-/* ---------------- report templates (delegated to ReportEngine) ---------------- */
+/* ---------------- report templates (delegated to ReportEngine & KitData.mislabels) ---------------- */
 function readMislabels() {
-  try {
-    var list = JSON.parse(localStorage.getItem('spfg.mislabels') || '[]');
-    return Array.isArray(list) ? list : [];
-  } catch (e) { return []; }
+  return KitData.mislabels.listAll();
 }
 function wrongLabelLines() {
-  return ReportEngine.wrongLabelLines(readMislabels());
+  return KitData.mislabels.formatReportLines();
 }
 function buildReport(style) {
   var sel = document.getElementById('reportScope');
@@ -2344,44 +2214,15 @@ function renderReport() {
 }
 
 /* ---------------- copy / share / history / backup ---------------- */
-function copyTextFallback(text) {
-  var ta = document.getElementById('copyFallback');
-  ta.value = text;
-  ta.style.left = '0'; ta.style.opacity = '0';
-  try {
-    ta.focus({ preventScroll: true });
-    ta.setSelectionRange(0, text.length);
-    var ok = document.execCommand('copy');
-    ta.blur(); ta.style.left = '-9999px';
-    return ok;
-  } catch (e) { ta.style.left = '-9999px'; return false; }
-}
 function copySomething(text, successMsg) {
-  text = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-  function fb() {
-    if (copyTextFallback(text)) showToast(successMsg);
-    else showToast('Copy failed');
-  }
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(function () { showToast(successMsg); }, fb);
-  } else fb();
+  KitData.copy(text, function (ok) {
+    showToast(ok ? successMsg : 'Copy failed');
+  });
 }
 function copyRichReport(text, html, successMsg) {
-  text = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-  if (navigator.clipboard && window.ClipboardItem && navigator.clipboard.write && html) {
-    try {
-      var item = new ClipboardItem({
-        'text/plain': new Blob([text], { type: 'text/plain' }),
-        'text/html': new Blob([html], { type: 'text/html' })
-      });
-      navigator.clipboard.write([item]).then(
-        function () { showToast(successMsg); },
-        function () { copySomething(text, successMsg); }
-      );
-      return;
-    } catch (e) {}
-  }
-  copySomething(text, successMsg);
+  KitData.copyRich(text, html, function (ok) {
+    showToast(ok ? successMsg : 'Copy failed');
+  });
 }
 function currentReportText() {
   var el = document.getElementById('reportOutput');
@@ -2446,7 +2287,7 @@ function dateStamp() {
 }
 function doBackup() {
   // lastBackup set on success only (bug 3)
-  var payload = { app: 'mp-walkthrough', version: 1, exported: new Date().toISOString(), state: state };
+  var payload = WalkState.buildBackupPayload(state);
   var json = JSON.stringify(payload);
   var fname = 'walkthrough-backup-' + dateStamp() + '.json';
   try {
@@ -2483,14 +2324,13 @@ function togglePasteRestore() {
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 function applyRestore(json) {
-  var payload;
-  try { payload = JSON.parse(json); } catch (e) { showToast('Not valid backup data'); return false; }
-  if (!payload || payload.app !== 'mp-walkthrough' || !payload.state || !payload.state.halls) {
-    showToast('Not a walkthrough backup file'); return false;
+  var parsed = WalkState.parseBackupPayload(json);
+  if (!parsed.ok) {
+    showToast(parsed.error); return false;
   }
-  if (!confirm('Restore backup from ' + (payload.exported || 'unknown date') + '? This replaces current data.')) return false;
+  if (!confirm('Restore backup from ' + parsed.exported + '? This replaces current data.')) return false;
   pushUndo();
-  state = migrateState(payload.state);
+  state = parsed.state;
   undoStack = [];
   updateUndoBtn();
   saveState(); renderAll();
@@ -2647,22 +2487,10 @@ window.addEventListener('hashchange', routeFromHash);
 
 /* ---------------- home / launcher ---------------- */
 function openGuide(r) {
-  try {
-    sessionStorage.setItem('mp_return_hash', location.hash || '#/walk');
-    sessionStorage.setItem('mp_embed', '1'); // guide chrome off: kit sections, not a second app
-  } catch (e) {}
-  window.location.href = './guide.html' + (r ? '#/' + r : '');
+  KitData.nav.toGuideSection(r, { returnHash: location.hash || '#/walk' });
 }
 function hallPctHung(hall) {
-  var tot = 0, hung = 0;
-  if (!hall) return 0;
-  Object.keys(hall.rows).forEach(function (r) {
-    ['11', '13'].forEach(function (sd) {
-      tot++;
-      if (sideOverall(hall.rows[r][sd], null) === 'hung') hung++;
-    });
-  });
-  return tot ? Math.round(100 * hung / tot) : 0;
+  return Side.hallSummary(hall).pct;
 }
 function updateSyncStatus() {
   var el = document.getElementById('syncStatus');
@@ -2695,38 +2523,27 @@ function openHallWalk(hallId, ev) {
 function runHomeJump() {
   var inp = document.getElementById('homeJumpInput');
   var q = inp ? inp.value.trim() : '';
-  if (!q) { switchTab('walk'); return; }
-  var mRow = /^(?:row\s*|r)?(\d{1,2})(?:11|13)?$/i.exec(q);
-  if (mRow) {
-    var rn = parseInt(mRow[1], 10);
-    var activeH = state.halls[state.activeHall];
-    if (activeH && activeH.rows && activeH.rows[rn]) {
-      if (inp) inp.value = '';
-      switchTab('walk');
-      setTimeout(function () { scrollToRow(rn); }, 90);
-      return;
+  KitData.nav.routeQuery(q, {
+    onEmpty: function () { switchTab('walk'); },
+    onWalkRow: function (rn) {
+      var activeH = state.halls[state.activeHall];
+      if (activeH && activeH.rows && activeH.rows[rn]) {
+        if (inp) inp.value = '';
+        switchTab('walk');
+        setTimeout(function () { scrollToRow(rn); }, 90);
+        return true;
+      }
+      return false;
     }
-  }
-  if (/^(buf102|cb4|cb5|#)/i.test(q)) {
-    KitData.nav.toGuideFind(q.replace(/^#/, ''));
-    return;
-  }
-  KitData.nav.toCutsheet(q);
+  });
 }
 function renderHome() {
   var heroEl = document.getElementById('homeWalkStatus');
   var h = state.halls[state.activeHall];
   if (!h) { var ks = Object.keys(state.halls); if (ks.length) h = state.halls[ks[0]]; }
-  var pct = hallPctHung(h);
-  var totSides = 0, hungSides = 0;
-  if (h && h.rows) {
-    Object.keys(h.rows).forEach(function (r) {
-      ['11', '13'].forEach(function (sd) {
-        totSides++;
-        if (sideOverall(h.rows[r][sd], null) === 'hung') hungSides++;
-      });
-    });
-  }
+  var hs = Side.hallSummary(h);
+  var pct = hs.pct;
+  var totSides = hs.total, hungSides = hs.done;
   var bl = (state.blockers || []).length;
   if (heroEl) {
     heroEl.textContent = h
@@ -2795,7 +2612,7 @@ function joinSite() {
     // joining IS syncing — one merge policy (ADR-0002 latest-wins), no
     // private remote-wins copy here anymore. Baselines ride along too.
     Sync.sync(state).then(function (m) {
-      if (m !== state) { state = migrateState(m); renderAll(); }
+      applySyncedState(m);
       if (msg) msg.textContent = 'Connected!';
       setTimeout(dismissOnboarding, 800);
     });
@@ -2811,8 +2628,7 @@ function syncNow() {
   if (!st.connected) { showToast('Not connected to a shared site'); return; }
   showToast('Syncing...');
   Sync.sync(state).then(function (m) {
-    if (m !== state) { state = migrateState(m); renderAll(); }
-    updateSyncStatus();
+    applySyncedState(m);
     showToast('Synced!');
   }).catch(function () { showToast('Sync failed. Check your connection and try again.'); });
 }
@@ -2869,25 +2685,19 @@ function boot() {
   try {
     if (Sync.restore()) {
       Sync.sync(state).then(function (m) {
-        if (m !== state) { state = migrateState(m); renderAll(); }
-        updateSyncStatus();
+        applySyncedState(m);
       });
     }
   } catch (e) {}
 
   Sync.startPolling({
     getState: function () { return state; },
-    onMerged: function (m) { state = migrateState(m); renderAll(); },
+    onMerged: applySyncedState,
     onStatusChange: function () { updateSyncStatus(); },
     intervalMs: 8000
   });
     var hasData = Object.keys(state.halls).some(function (hid) {
-      var h = state.halls[hid];
-      return Object.keys(h.rows).some(function (r) {
-        return Side.sides().some(function (sd) {
-          return h.rows[r][sd] && Side.hasProgress(h.rows[r][sd]);
-        });
-      });
+      return Side.hallSummary(state.halls[hid]).started > 0;
     });
     if (hasData && !state.settings.onboarded) { state.settings.onboarded = true; saveState(); }
     if (!state.settings.onboarded) {
@@ -2977,7 +2787,7 @@ initStorage();
       </div>
       <div id="syncSettingsInfo" class="muted" style="margin-top:6px;"></div>
       <div class="batch-row" style="justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
-        <span class="muted">App version: <strong style="color:var(--text);">v87</strong></span>
+        <span class="muted">App version: <strong style="color:var(--text);">v88</strong></span>
         <button class="btn btn-secondary" onclick="forceAppUpdate()">Force Update</button>
       </div>
       <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closeSettings()">Close</button>

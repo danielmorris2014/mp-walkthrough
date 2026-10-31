@@ -16,7 +16,7 @@ Two supers walk the same hall on the same night, both offline.
 
 - Concurrent stamps on different halls, rows, sides, or cables both survive automatically with zero data loss.
 - When two phones edit the exact same cable on the same Row-Side, the latest UTC timestamp (stamp `at` vs. clear tombstone timestamp) wins automatically. No prompts, no midnight decisions.
-- Shared collections (`blockers`, `crewPool`, `meta`, `history`, `baseline`) resolve via section-level `_meta.<key>_at` timestamps, while `hall.notes` merges via order-preserving set union.
+- Shared collections (`blockers`, `crewPool`, `meta`, `history`, `baseline`) resolve via section-level `_meta.<key>_at` timestamps (`WalkState.CORE_SHAPE`). Per [ADR-0004](./0004-mp-hall-report-strictly-derived-from-stamps.md), free-text `hall.notes` have been removed in favor of 100% row-derived hall reporting.
 
 ## Rationale
 

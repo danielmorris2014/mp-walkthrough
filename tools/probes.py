@@ -272,7 +272,11 @@ with sync_playwright() as p:
       const rptTxt = buildReport('formal');
       const v3Mock = {
         version: 3,
-        meta: { spWorkNotes: LEGACY_SP_DEMO, tasksTomorrow: LEGACY_TOMORROW_DEMO },
+        meta: {
+          mpCount: 106,
+          spWorkNotes: WalkState.LEGACY_SP_DEMO,
+          tasksTomorrow: WalkState.LEGACY_TOMORROW_DEMO
+        },
         halls: {
           CB5_DH1: { notes: ['8 hrs per person'], rows: { 1: { '11': { F144: 'hung', OCS: 'hung', CAT6: 'hung' }, '13': { F144: 'none', OCS: 'none', CAT6: 'none' } } } }
         }
@@ -280,8 +284,9 @@ with sync_playwright() as p:
       migrateState(v3Mock);
       out.noHardcodedSeedNotes = !rptTxt.includes('8 hrs per person')
         && !rptTxt.includes('Chris Dickman')
-        && v3Mock.halls.CB5_DH1.notes.length === 0
+        && !v3Mock.halls.CB5_DH1.notes
         && v3Mock.halls.CB5_DH1.rows[1]['11'].F144 === 'none'
+        && v3Mock.meta.mpCount === 0
         && v3Mock.meta.spWorkNotes === ''
         && v3Mock.meta.tasksTomorrow === '';
       out.reportOutput = !!(document.getElementById('reportOutput') && document.getElementById('reportStyle')
@@ -291,7 +296,16 @@ with sync_playwright() as p:
         .every(id => document.querySelectorAll('#' + id).length === 1);
       out.kitDataStoreAndNav = typeof KitData === 'object'
         && typeof KitData.store === 'object'
-        && typeof KitData.nav === 'object';
+        && typeof KitData.nav === 'object'
+        && typeof KitData.mislabels === 'object'
+        && KitData.nav.classifyQuery('Row 17').target === 'walk'
+        && KitData.nav.classifyQuery('BUF102#001').target === 'guide'
+        && KitData.nav.classifyQuery('BUF103-DH1-R0102').target === 'buf103';
+      out.walkStateAndSideSummary = typeof WalkState === 'object'
+        && Array.isArray(WalkState.CORE_SHAPE)
+        && typeof Side.hallSummary === 'function'
+        && typeof Side.podSummary === 'function'
+        && Side.hallSummary(state.halls[state.activeHall]).total > 0;
       return out;
     }""")
     for k, ok in res9.items():

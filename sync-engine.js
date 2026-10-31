@@ -14,7 +14,8 @@ var Sync = (function () {
   var lastSyncAt = 0;          // ms timestamp of last successful sync
   var pendingChanges = 0;      // local changes since last push
   var status = 'standalone';   // standalone | synced | pending | error
-  var SHARED_KEYS = ['halls', 'blockers', 'crewPool', 'meta', 'history', 'baseline'];
+  var SHARED_KEYS = (typeof WalkState !== 'undefined' && WalkState.CORE_SHAPE) ||
+    ['halls', 'crewPool', 'blockers', 'meta', 'history', 'baseline'];
   var CABLES = ['F144', 'OCS', 'CAT6'];
   var lastMarked = null;       // snapshot of shared keys at last markChanged
   var ydoc = (typeof Y !== 'undefined' && Y && Y.Doc) ? new Y.Doc() : null;
@@ -86,7 +87,7 @@ var Sync = (function () {
             return;
           }
           var yHall = ensureYMap(yHalls, hid);
-          ['id', 'name', 'maxRow', 'groups', 'notes'].forEach(function (hk) {
+          ['id', 'name', 'maxRow', 'groups'].forEach(function (hk) {
             if (JSON.stringify(yHall.get(hk)) !== JSON.stringify(h[hk])) {
               yHall.set(hk, h[hk] !== undefined ? JSON.parse(JSON.stringify(h[hk])) : null);
             }
@@ -302,13 +303,7 @@ var Sync = (function () {
       if (!lh) { outHalls[hid] = JSON.parse(JSON.stringify(rh)); return; }
 
       var baseHall = JSON.parse(JSON.stringify(localPreferred ? lh : rh));
-      // Merge hall notes (union preserving order)
-      var rNotes = rh.notes || [], lNotes = lh.notes || [];
-      var mergedNotes = (localPreferred ? lNotes : rNotes).slice();
-      (localPreferred ? rNotes : lNotes).forEach(function (n) {
-        if (mergedNotes.indexOf(n) < 0) mergedNotes.push(n);
-      });
-      baseHall.notes = mergedNotes;
+      delete baseHall.notes;
 
       var allRows = {};
       Object.keys(rh.rows || {}).forEach(function (r) { allRows[r] = true; });

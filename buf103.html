@@ -219,6 +219,7 @@ button.retry { width: 100%; margin-top: 8px; min-height: 44px; border: 0; border
 <div class="sheetbg" id="sheetbg"></div>
 <div class="sheet" id="sheet"></div>
 <script src="./kit-data.js"></script>
+<script src="./report-engine.js"></script>
 <script src="./cutsheet-engine.js"></script>
 <script src="./vendor/localforage/localforage.min.js"></script>
 <script src="./vendor/jsplumb/jsplumb.min.js"></script>
@@ -785,16 +786,9 @@ function renderMatsProgress(st, mountEl) {
     Object.keys(st.halls).forEach(function (hid) {
       if (hid.indexOf('BUF103_') !== 0) return; // hall ids stay BUF103_ (the cutsheet prefix)
       var hall = st.halls[hid];
-      var total = 0, hung = 0;
-      Object.keys(hall.rows || {}).forEach(function (rn) {
-        ['11', '13'].forEach(function (sd) {
-          var seg = hall.rows[rn][sd]; if (!seg) return;
-          total++;
-          if (seg.F144 === 'hung' && seg.OCS === 'hung' && seg.CAT6 === 'hung') hung++;
-        });
-      });
-      rows.push({ name: hall.name, total: total, hung: hung,
-        pct: total ? Math.round((hung / total) * 100) : 0,
+      var hs = ReportEngine.Side.hallSummary(hall);
+      rows.push({ name: hall.name, total: hs.total, hung: hs.done,
+        pct: hs.pct,
         planned: (RACKS[hid.slice(7)] || []).length });
     });
     if (rows.length) {

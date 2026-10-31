@@ -105,6 +105,25 @@ var KitData = (function () {
     } else fallback();
   }
 
+  function copyRich(text, html, onDone) {
+    var plain = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    if (html && navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
+      try {
+        var item = new ClipboardItem({
+          'text/plain': new Blob([plain], { type: 'text/plain' }),
+          'text/html': new Blob([String(html)], { type: 'text/html' })
+        });
+        navigator.clipboard.write([item]).then(function () {
+          if (onDone) onDone(true, true);
+        }).catch(function () {
+          copy(plain, function (ok) { if (onDone) onDone(ok, false); });
+        });
+        return;
+      } catch (e) {}
+    }
+    copy(plain, function (ok) { if (onDone) onDone(ok, false); });
+  }
+
   // ---- fitFixedTop(selector): the fixed top bar publishes its measured
   //      height; body padding derives from it (no constants) ----
   function fitFixedTop(selector) {
@@ -202,6 +221,43 @@ var KitData = (function () {
       } catch (e) {}
       if (!opts || !opts.noNavigate) window.location.href = './guide.html#/find';
     },
+    toGuideSection: function (route, opts) {
+      try {
+        sessionStorage.setItem('mp_return_hash', (opts && opts.returnHash) || location.hash || '#/walk');
+        sessionStorage.setItem('mp_embed', '1');
+      } catch (e) {}
+      if (!opts || !opts.noNavigate) {
+        window.location.href = './guide.html' + (route ? '#/' + route : '');
+      }
+    },
+    classifyQuery: function (rawQ) {
+      var q = String(rawQ || '').trim();
+      if (!q) return { target: 'empty', query: '', row: null };
+      var mRow = /^(?:row\s*|r)?(\d{1,2})(?:11|13)?$/i.exec(q);
+      if (mRow) {
+        return { target: 'walk', query: q, row: parseInt(mRow[1], 10) };
+      }
+      if (/^(buf102|cb4|cb5|#)/i.test(q) || (/BUF102/i.test(q) && !/BUF103/i.test(q))) {
+        return { target: 'guide', query: q.replace(/^#/, ''), row: null };
+      }
+      return { target: 'buf103', query: q, row: null };
+    },
+    routeQuery: function (rawQ, opts) {
+      var cl = nav.classifyQuery(rawQ);
+      if (cl.target === 'empty') {
+        if (opts && typeof opts.onEmpty === 'function') opts.onEmpty();
+        return cl;
+      }
+      if (cl.target === 'walk' && opts && typeof opts.onWalkRow === 'function') {
+        if (opts.onWalkRow(cl.row) !== false) return cl;
+      }
+      if (cl.target === 'guide') {
+        nav.toGuideFind(cl.query, opts);
+        return cl;
+      }
+      nav.toCutsheet(cl.query, opts);
+      return cl;
+    },
     toLabels: function (draft, opts) {
       try {
         sessionStorage.setItem('mp.label_draft', JSON.stringify(draft || { site: 'BUF103', lines: [] }));
@@ -251,10 +307,50 @@ var KitData = (function () {
     }
   };
 
+  // ---- mislabels: single Wrong Label ('spfg.mislabels') seam across Guide & Shift Report ----
+  var MISLABELS_KEY = 'spfg.mislabels';
+  var mislabels = {
+    listAll: function () {
+      var raw = readLs(MISLABELS_KEY, []);
+      return Array.isArray(raw) ? raw : [];
+    },
+    listOpen: function (overrideList) {
+      var src = Array.isArray(overrideList) ? overrideList : mislabels.listAll();
+      return src.filter(function (r) { return r && !r.done; });
+    },
+    forBarcode: function (bc) {
+      if (!bc) return null;
+      var target = String(bc).toUpperCase();
+      var open = mislabels.listOpen();
+      for (var i = 0; i < open.length; i++) {
+        var r = open[i];
+        if (r && (r.id === bc || String(r.id || '').toUpperCase() === target)) return r;
+      }
+      return null;
+    },
+    describeMismatch: function (r) {
+      if (!r) return '';
+      var bits = [];
+      if (r.sa) bits.push('A end reads ' + r.sa + ' (database: ' + r.da + ')');
+      if (r.sz) bits.push('Z end reads ' + r.sz + ' (database: ' + r.dz + ')');
+      return bits.join('; ') || 'printed label does not match the database';
+    },
+    formatReportLines: function (overrideList) {
+      var list = mislabels.listOpen(overrideList);
+      if (!list.length) return '';
+      var out = ['WRONG LABELS FOUND'];
+      list.forEach(function (r) {
+        out.push('\u2022 ' + (r.id || 'Cable') + (r.title ? ' \u2013 ' + r.title : '') + ': ' +
+          mislabels.describeMismatch(r) + (r.note ? ' \u2013 ' + r.note : ''));
+      });
+      return out.join('\n');
+    }
+  };
+
   return {
-    load: load, retry: retry, esc: esc, copy: copy, showError: showError,
+    load: load, retry: retry, esc: esc, copy: copy, copyRich: copyRich, showError: showError,
     fitFixedTop: fitFixedTop, watchFixedTop: watchFixedTop,
-    store: store, nav: nav,
+    store: store, nav: nav, mislabels: mislabels,
     state: function (url) { return states[url] ? states[url].state : 'unknown'; }
   };
 })();

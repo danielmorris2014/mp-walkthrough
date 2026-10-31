@@ -19,7 +19,7 @@ js = scripts[-1] if scripts else ''
 print('script blocks:', len(scripts), '| main script chars:', len(js))
 
 # --- 1. syntax (index.html + all shared JS modules) ---
-js_modules = ['kit-data.js', 'report-engine.js', 'stamp-engine.js', 'sync-engine.js',
+js_modules = ['kit-data.js', 'report-engine.js', 'walk-state.js', 'stamp-engine.js', 'sync-engine.js',
               'cutsheet-engine.js', 'tools/cutsheet-parser.js']
 try:
     esprima.parseScript(js)
@@ -74,7 +74,7 @@ if dup_ids:
 print('duplicate html ids:', dup_ids or 'none')
 
 # --- 4. git conflict markers must never ship ---
-check_files = ['index.html', 'sw.js', 'kit-data.js', 'report-engine.js', 'stamp-engine.js',
+check_files = ['index.html', 'sw.js', 'kit-data.js', 'report-engine.js', 'walk-state.js', 'stamp-engine.js',
                'sync-engine.js', 'cutsheet-engine.js', 'tools/cutsheet-parser.js',
                'tools/guide_directory.js', 'buf103.html', 'scan.html', 'labels.html', 'flashcards.html']
 marker_hits = []
@@ -100,6 +100,11 @@ expected_cache = ('mp-walk-' + app_v) if app_v else None
 if not app_v or not cache_v or cache_v != expected_cache:
     fail.append(f'VERSION MISMATCH: APP_VERSION={app_v} CACHE_VERSION={cache_v} (expected {expected_cache})')
 print(f'version pair: APP={app_v} CACHE={cache_v} ->', 'OK' if cache_v == expected_cache else 'MISMATCH')
+
+# --- 6. ADR-0004 guardrail: no free-text hall.notes or dead formalizeNote2 in report-engine.js ---
+rep_src = open(os.path.join(APP, 'report-engine.js'), encoding='utf-8').read()
+if 'formalizeNote' in rep_src or '.notes' in rep_src or 'notes:' in rep_src:
+    fail.append('ADR-0004 VIOLATION: report-engine.js references legacy hall notes or formalizeNote')
 
 print('RESULT:', 'FAIL' if fail else 'ALL CHECKS PASS')
 sys.exit(1 if fail else 0)

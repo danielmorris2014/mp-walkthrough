@@ -227,7 +227,8 @@ function decodeCanvas(cv, quiet) {
 }
 function barcodeHit(code) {
   setStatus('Barcode found \u2713');
-  var is103 = /BUF103/i.test(code);
+  var isGuide = KitData.nav.classifyQuery(code).target === 'guide';
+  var is103 = !isGuide;
   var box = document.getElementById('results');
   box.innerHTML = '<div class="hit" style="flex-wrap:wrap;"><span class="code" style="width:100%;margin-bottom:6px;">' + KitData.esc(code) + '</span>' +
     '<div style="display:flex;gap:8px;width:100%;">' +
@@ -301,11 +302,7 @@ function renderTextResults(text) {
   };
 }
 function goQ(q) {
-  if (/^BUF102/i.test(q)) {
-    KitData.nav.toGuideFind(q);
-  } else {
-    KitData.nav.toCutsheet(q);
-  }
+  KitData.nav.routeQuery(q);
 }
 function setStatus(t) {
   var el = document.getElementById('status');

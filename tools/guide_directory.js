@@ -80,26 +80,21 @@
   // wrong-label warning (feature #3): if this barcode was previously flagged
   // in the Field Guide (spfg.mislabels, open items), say so BEFORE the walk
   function mislabelFor(bc) {
-    try {
-      var list = JSON.parse(localStorage.getItem('spfg.mislabels') || '[]');
-      if (!Array.isArray(list)) return null;
-      for (var i = 0; i < list.length; i++) {
-        var r = list[i];
-        if (r && !r.done && (r.id === bc || String(r.id || '').toUpperCase() === String(bc).toUpperCase())) return r;
-      }
-    } catch (e) {}
+    if (typeof KitData !== 'undefined' && KitData.mislabels && KitData.mislabels.forBarcode) {
+      return KitData.mislabels.forBarcode(bc);
+    }
     return null;
   }
   function mislabelHtml(bc) {
     var r = mislabelFor(bc);
     if (!r) return '';
-    var bits = [];
-    if (r.sa) bits.push('A end reads ' + r.sa + ' (database: ' + r.da + ')');
-    if (r.sz) bits.push('Z end reads ' + r.sz + ' (database: ' + r.dz + ')');
+    var desc = (typeof KitData !== 'undefined' && KitData.mislabels && KitData.mislabels.describeMismatch)
+      ? KitData.mislabels.describeMismatch(r)
+      : 'printed label does not match the database';
     return '<div style="margin-top:8px;border:1px solid rgba(229,72,77,.5);border-radius:10px;padding:10px;background:rgba(229,72,77,.08);">' +
       '<div style="font:800 11px -apple-system,sans-serif;letter-spacing:.5px;color:#ff6369;">\u26A0 PREVIOUSLY FLAGGED WRONG LABEL</div>' +
       '<div style="font:600 11px/1.5 -apple-system,sans-serif;color:var(--text-2,#b0b4ba);margin-top:4px;">' +
-      (bits.join('. ') || 'printed label does not match the database') + (r.note ? '. Note: ' + r.note : '') + '</div></div>';
+      desc + (r.note ? '. Note: ' + r.note : '') + '</div></div>';
   }
   function mountError(view) {
     if (document.getElementById('mpDirErr')) return;

@@ -129,7 +129,65 @@ var Side = {
   overall: function (seg) { return sideOverall(seg, null); },  // status | 'MIXED'
   isAll: function (seg, status) { return seg.F144 === status && seg.OCS === status && seg.CAT6 === status; },
   isHung: function (seg) { return Side.isAll(seg, 'hung'); },
-  hasProgress: function (seg) { return seg.F144 !== 'none' || seg.OCS !== 'none' || seg.CAT6 !== 'none'; }
+  hasProgress: function (seg) { return seg.F144 !== 'none' || seg.OCS !== 'none' || seg.CAT6 !== 'none'; },
+  hallSummary: function (hall) {
+    var cables = {};
+    CABLES.forEach(function (c) { cables[c] = { hung: 0, prog: 0, total: 0 }; });
+    var total = 0, done = 0, ran = 0, prog = 0, started = 0;
+    if (hall && hall.rows) {
+      Object.keys(hall.rows).forEach(function (r) {
+        var row = hall.rows[r];
+        if (!row) return;
+        Side.sides().forEach(function (s) {
+          var seg = row[s];
+          if (!seg) return;
+          total++;
+          if (Side.isHung(seg)) done++;
+          else if (Side.isAll(seg, 'ran')) ran++;
+          else if (Side.hasProgress(seg)) prog++;
+          if (Side.hasProgress(seg)) started++;
+          CABLES.forEach(function (c) {
+            cables[c].total++;
+            if (seg[c] === 'hung') cables[c].hung++;
+            else if (seg[c] && seg[c] !== 'none') cables[c].prog++;
+          });
+        });
+      });
+    }
+    return {
+      total: total,
+      done: done,
+      hung: done,
+      ran: ran,
+      prog: prog,
+      started: started,
+      pct: total ? Math.round((done / total) * 100) : 0,
+      cables: cables
+    };
+  },
+  podSummary: function (hall, pod) {
+    var total = 0, done = 0, started = 0;
+    if (hall && hall.rows && pod) {
+      for (var r = pod.from; r <= pod.to; r++) {
+        var row = hall.rows[r];
+        if (!row) continue;
+        Side.sides().forEach(function (s) {
+          var seg = row[s];
+          if (!seg) return;
+          total++;
+          if (Side.isHung(seg)) done++;
+          if (Side.hasProgress(seg)) started++;
+        });
+      }
+    }
+    return {
+      total: total,
+      done: done,
+      hung: done,
+      started: started,
+      pct: total ? Math.round((done / total) * 100) : 0
+    };
+  }
 };
 
 function mixedBase(seg) {
@@ -148,12 +206,20 @@ function mixedBase(seg) {
     });
     if (maxK) base = maxK;
   }
+  var hasNone = Boolean(counts.none);
   var others = CABLES.filter(function (c) { return seg[c] !== base && seg[c] !== 'none'; }).map(function (c) {
     return CABLE_LABEL[c] + ' ' + STATUS_META[seg[c]].report.toLowerCase();
   });
-  var desc = others.length
-    ? others.join(', ')
-    : cableNamesAnd(CABLES.filter(function (c) { return seg[c] === base; }));
+  var desc;
+  if (hasNone && others.length) {
+    desc = CABLES.filter(function (c) { return seg[c] !== 'none'; }).map(function (c) {
+      return CABLE_LABEL[c] + ' ' + STATUS_META[seg[c]].report.toLowerCase();
+    }).join(', ');
+  } else if (others.length) {
+    desc = others.join(', ');
+  } else {
+    desc = cableNamesAnd(CABLES.filter(function (c) { return seg[c] === base; }));
+  }
   return { base: base, desc: desc };
 }
 
@@ -226,7 +292,7 @@ function cableNamesAnd(cables) {
   return formalJoin(cables.map(function (c) { return CABLE_SHORT[c]; }));
 }
 
-function mixedDesc2(seg) {
+function mixedDesc(seg) {
   var groups = [];
   REPORT_STATUS_ORDER.forEach(function (st) {
     var cs = CABLES.filter(function (c) { return seg[c] === st; });
@@ -235,26 +301,7 @@ function mixedDesc2(seg) {
   return groups.join('; ');
 }
 
-function formalizeNote2(n) {
-  var t = (n || '').trim();
-  if (!t) return '';
-  var lead = t.match(/^(Ran and hung|Ran|In progress|Staged|Remediation)\s*[\u2013-]\s*(.+)$/i);
-  if (lead) return polishSentence(lead[2]);
-  var trail = t.match(/^(.+?)\s*[\u2013-]\s*(Ran and hung|Ran|In progress|Staged|Remediation)\b\s*(\([^)]*\))?\s*\.?\s*$/i);
-  if (trail) {
-    var word = null;
-    Object.keys(STATUS_META).forEach(function (k) {
-      if (STATUS_META[k].report.toLowerCase() === trail[2].toLowerCase()) word = STATUS_META[k].report;
-    });
-    if (word) {
-      var paren = trail[3] ? ' ' + trail[3].replace(/\.$/, '') : '';
-      return trail[1].replace(/[.;,]+$/, '') + ': ' + word + paren + '.';
-    }
-  }
-  return polishSentence(t);
-}
-
-function formalHallLines2(hall, ns) {
+function formalHallLines(hall, ns) {
   var style = ns || 'short';
   var out = [];
   REPORT_STATUS_ORDER.forEach(function (target) {
@@ -283,7 +330,7 @@ function formalHallLines2(hall, ns) {
   Object.keys(hall.rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (r) {
     ['11', '13'].forEach(function (side) {
       var seg = hall.rows[r][side];
-      if (sideOverall(seg, null) === 'MIXED') mixed.push({ r: r, side: side, desc: mixedDesc2(seg) });
+      if (sideOverall(seg, null) === 'MIXED') mixed.push({ r: r, side: side, desc: mixedDesc(seg) });
     });
   });
   // Group every row sharing the same description (not just adjacent ones),
@@ -296,6 +343,14 @@ function formalHallLines2(hall, ns) {
       if (g.d) out.push('\u2022 ' + g.rows.map(function (x) { return x.r + x.side; }).join(', ') + ': ' + g.d);
     });
   return out;
+}
+
+function allHallBlocks(hallsNow, numStyleVal) {
+  var lines = [];
+  Object.values(hallsNow).forEach(function (h) {
+    hallBlock(h, numStyleVal).forEach(function (l) { lines.push(l); });
+  });
+  return lines.length ? lines.join('\n') : 'No rows stamped yet';
 }
 
 function reportDateStr(state) {
@@ -319,12 +374,7 @@ function blockersFormal(state) {
 function activeHallNames(halls) {
   return Object.values(halls || {})
     .filter(function (h) {
-      if (!h || !h.rows) return false;
-      var any = false;
-      Object.keys(h.rows).forEach(function (r) {
-        Side.sides().forEach(function (s) { if (h.rows[r][s] && Side.hasProgress(h.rows[r][s])) any = true; });
-      });
-      return any;
+      return Boolean(h && Side.hallSummary(h).started > 0);
     })
     .map(function (h) { return h.name; });
 }
@@ -346,12 +396,16 @@ function effectiveHalls(state, scope) {
         rows[r][s] = moved ? JSON.parse(JSON.stringify(h.rows[r][s])) : Side.empty();
       });
     });
-    out[hid] = { id: h.id, name: h.name, maxRow: h.maxRow, groups: h.groups, notes: [], rows: rows };
+    out[hid] = { id: h.id, name: h.name, maxRow: h.maxRow, groups: h.groups, rows: rows };
   });
   return out;
 }
 
 function wrongLabelLines(mislabels) {
+  if (typeof KitData !== 'undefined' && KitData && KitData.mislabels && KitData.mislabels.formatReportLines) {
+    if (!Array.isArray(mislabels)) return '';
+    return KitData.mislabels.formatReportLines(mislabels);
+  }
   if (!Array.isArray(mislabels)) return '';
   var list = mislabels.filter(function (r) { return r && !r.done; });
   if (!list.length) return '';
@@ -386,7 +440,7 @@ function buildReport(style, ctx) {
     out += 'WORK PERFORMED\n\n';
     var blocks = [];
     Object.values(hallsNow).forEach(function (h) {
-      var hl = formalHallLines2(h, numStyleVal);
+      var hl = formalHallLines(h, numStyleVal);
       if (hl.length) blocks.push('MP | ' + h.name + '\n' + hl.join('\n'));
     });
     if (blocks.length) out += blocks.join('\n\n') + '\n\n';
@@ -407,15 +461,12 @@ function buildReport(style, ctx) {
     out += 'Shift Time: ' + (m.shiftTime || '') + '\n';
     out += 'Personnel Count: MP ' + mpCount + ', SP ' + spCount + (activeCrew.length ? ' (' + activeCrew.join(', ') + ')' : '') + '\n\n';
     out += 'Work Completed:\nMP:\n';
-    var mineLines = [];
-    Object.values(hallsNow).forEach(function (h) {
-      hallBlock(h, numStyleVal).forEach(function (l) { mineLines.push(l); });
-    });
-    out += (mineLines.length ? mineLines.join('\n') : 'No rows stamped yet') + '\n';
+    out += allHallBlocks(hallsNow, numStyleVal) + '\n';
     out += '\nSP:\n' + ((m.spWorkNotes || '').trim() || 'None') + '\n\n';
     out += 'Blockers:\n';
-    out += state.blockers.length ? state.blockers.map(function (b) { return '- ' + b.date + ' – ' + b.text; }).join('\n') + '\n' : '- None\n';
-    out += '\nAreas of concern:\n- ' + ((m.areasOfConcern || '').trim() || 'None');
+    out += state.blockers.length ? state.blockers.map(function (b) { return '- ' + b.date + ' \u2013 ' + b.text; }).join('\n') + '\n' : '- None\n';
+    var mineAoc = (m.areasOfConcern || '').split('\n').map(function (l) { return l.replace(/^[\s\u2022\-\*]+/, '').trim(); }).filter(Boolean);
+    out += '\nAreas of concern:\n' + (mineAoc.length ? mineAoc.map(function (l) { return '- ' + l; }).join('\n') : '- None');
   }
 
   else if (style === 'crew') {
@@ -424,11 +475,7 @@ function buildReport(style, ctx) {
     out += 'Headcount: ' + mpCount + '\n';
     out += 'Location: ' + locs + '\n';
     out += 'Work Completed:\n';
-    var crewLines = [];
-    Object.values(hallsNow).forEach(function (h) {
-      hallBlock(h, numStyleVal).forEach(function (l) { crewLines.push(l); });
-    });
-    out += (crewLines.length ? crewLines.join('\n') : 'No rows stamped yet') + '\n';
+    out += allHallBlocks(hallsNow, numStyleVal) + '\n';
     out += '\nCompany/Crew: ServicePoint (SP)\n';
     out += 'Headcount: ' + spCount + '\n';
     out += 'Location: ' + locs + '\n';
@@ -446,7 +493,7 @@ function buildReport(style, ctx) {
       var cableLines = [];
       CABLES.forEach(function (c) {
         var sents = hallSentences(h, c, numStyleVal);
-        if (sents.length) { cableLines.push(CABLE_LABEL[c] + ' Pulling – ' + sents.join(' ')); hasAny = true; }
+        if (sents.length) { cableLines.push(CABLE_LABEL[c] + ' Pulling \u2013 ' + sents.join(' ')); hasAny = true; }
       });
       if (hasAny) {
         anyBossHall = true;
@@ -457,7 +504,7 @@ function buildReport(style, ctx) {
     });
     if (!anyBossHall) out += 'No rows stamped yet\n\n';
     out += 'Blockers / Issues:\n';
-    out += state.blockers.length ? state.blockers.map(function (b) { return b.date + ' – ' + b.text + ' (i)'; }).join('\n') + '\n' : 'None\n';
+    out += state.blockers.length ? state.blockers.map(function (b) { return b.date + ' \u2013 ' + b.text + ' (i)'; }).join('\n') + '\n' : 'None\n';
     out += '\nTasks for tomorrow:\n' + ((m.tasksTomorrow || '').trim() || 'None');
   }
   if (ctx.mislabels) {
@@ -467,52 +514,76 @@ function buildReport(style, ctx) {
   return out;
 }
 
+/* Single line-classifier shared by formatPreviewHtml and buildEmailHtml so
+   section headers, MP | Hall subheaders, key-value metadata, and status/mixed
+   bullets never drift between in-app preview and Outlook HTML copy. */
+function classifyReportLine(line) {
+  if (!line) return { kind: 'empty' };
+  var subjM = /^(Subject:\s*)(.+)$/.exec(line);
+  if (subjM) return { kind: 'subject', k: subjM[1], v: subjM[2] };
+  if (/^(SHIFT SUMMARY|WORK PERFORMED|BLOCKERS(?:\s*\u2013\s*.+)?|AREAS OF CONCERN|WRONG LABELS FOUND|Work Completed:|Blockers:|Areas of concern:|Work areas completed:|Blockers \/ Issues:|Tasks for tomorrow:)$/.test(line)) {
+    return { kind: 'section', text: line };
+  }
+  var mpHall = /^(MP)(\s*\|\s*)(.+)$/.exec(line);
+  if (mpHall) return { kind: 'mpHall', badge: mpHall[1], sep: mpHall[2], hall: mpHall[3], text: line };
+  if (line === 'SP' || line === 'MP' || line === 'MP:' || line === 'SP:') {
+    return { kind: 'subhead', isMp: line.indexOf('MP') === 0, text: line };
+  }
+  var kvM = /^(Superintendent on [Ss]ite:\s*|Shift Time:\s*|Personnel Count:\s*|Company\/Crew:\s*|Headcount:\s*|Location:\s*|Crew Members:\s*)(.*)$/.exec(line);
+  if (kvM) return { kind: 'kv', k: kvM[1], v: kvM[2] };
+  var stBul = /^(\u2022\s*)(Ran and hung|Ran|In progress|Staged|Remediation)(:\s*)(.+)$/.exec(line);
+  if (stBul) return { kind: 'statusBullet', dot: stBul[1], status: stBul[2], colon: stBul[3], racks: stBul[4] };
+  var mixBul = /^(\u2022\s*|-\s*)([^:]+:\s*)(.+)$/.exec(line);
+  if (mixBul) return { kind: 'colonBullet', dot: mixBul[1], label: mixBul[2], rest: mixBul[3] };
+  var anyBul = /^(\u2022\s*|-\s*)(.+)$/.exec(line);
+  if (anyBul) return { kind: 'simpleBullet', dot: anyBul[1], rest: anyBul[2] };
+  if (line === 'Team,' || line === 'Please see the shift update below.') {
+    return { kind: 'greet', text: line };
+  }
+  return { kind: 'plain', text: line };
+}
+
 /* Rich in-app document formatter: wraps each line in semantic spans while
    preserving exact line characters and '\n' separators so .textContent
    is 100% identical to the plain-text report. */
 function formatPreviewHtml(reportText) {
   var raw = String(reportText || '').replace(/\r\n/g, '\n');
   return raw.split('\n').map(function (line) {
-    if (!line) return '';
-    var subjM = /^(Subject:\s*)(.+)$/.exec(line);
-    if (subjM) {
-      return '<span class="rp-subj"><span class="rp-subj-k">' + escHtml(subjM[1]) + '</span><span class="rp-subj-v">' + escHtml(subjM[2]) + '</span></span>';
+    var cl = classifyReportLine(line);
+    if (cl.kind === 'empty') return '';
+    if (cl.kind === 'subject') {
+      return '<span class="rp-subj"><span class="rp-subj-k">' + escHtml(cl.k) + '</span><span class="rp-subj-v">' + escHtml(cl.v) + '</span></span>';
     }
-    if (/^(SHIFT SUMMARY|WORK PERFORMED|BLOCKERS(?:\s*\u2013\s*.+)?|AREAS OF CONCERN|WRONG LABELS FOUND|Work Completed:|Blockers:|Areas of concern:|Work areas completed:|Blockers \/ Issues:|Tasks for tomorrow:)$/.test(line)) {
-      return '<span class="rp-sec">' + escHtml(line) + '</span>';
+    if (cl.kind === 'section') {
+      return '<span class="rp-sec">' + escHtml(cl.text) + '</span>';
     }
-    var mpHall = /^(MP)(\s*\|\s*)(.+)$/.exec(line);
-    if (mpHall) {
-      return '<span class="rp-hall"><span class="rp-badge-mp">' + escHtml(mpHall[1]) + '</span><span class="rp-hall-sep">' + escHtml(mpHall[2]) + '</span><span class="rp-hall-name">' + escHtml(mpHall[3]) + '</span></span>';
+    if (cl.kind === 'mpHall') {
+      return '<span class="rp-hall"><span class="rp-badge-mp">' + escHtml(cl.badge) + '</span><span class="rp-hall-sep">' + escHtml(cl.sep) + '</span><span class="rp-hall-name">' + escHtml(cl.hall) + '</span></span>';
     }
-    if (line === 'SP' || line === 'MP' || line === 'MP:' || line === 'SP:') {
-      return '<span class="rp-hall"><span class="' + (line.indexOf('MP') === 0 ? 'rp-badge-mp' : 'rp-badge-sp') + '">' + escHtml(line) + '</span></span>';
+    if (cl.kind === 'subhead') {
+      return '<span class="rp-hall"><span class="' + (cl.isMp ? 'rp-badge-mp' : 'rp-badge-sp') + '">' + escHtml(cl.text) + '</span></span>';
     }
-    var kvM = /^(Superintendent on [Ss]ite:\s*|Shift Time:\s*|Personnel Count:\s*|Company\/Crew:\s*|Headcount:\s*|Location:\s*|Crew Members:\s*)(.*)$/.exec(line);
-    if (kvM) {
-      return '<span class="rp-kv"><span class="rp-k">' + escHtml(kvM[1]) + '</span><strong class="rp-v">' + escHtml(kvM[2]) + '</strong></span>';
+    if (cl.kind === 'kv') {
+      return '<span class="rp-kv"><span class="rp-k">' + escHtml(cl.k) + '</span><strong class="rp-v">' + escHtml(cl.v) + '</strong></span>';
     }
-    var stBul = /^(\u2022\s*)(Ran and hung|Ran|In progress|Staged|Remediation)(:\s*)(.+)$/.exec(line);
-    if (stBul) {
-      var stKey = stBul[2].toLowerCase();
+    if (cl.kind === 'statusBullet') {
+      var stKey = cl.status.toLowerCase();
       var cls = stKey === 'ran and hung' ? 'rp-st-hung'
         : stKey === 'ran' ? 'rp-st-ran'
         : stKey === 'in progress' ? 'rp-st-prog'
         : stKey === 'staged' ? 'rp-st-staged' : 'rp-st-remed';
-      return '<span class="rp-bul ' + cls + '"><span class="rp-dot">' + escHtml(stBul[1]) + '</span><strong class="rp-st-lbl">' + escHtml(stBul[2] + stBul[3]) + '</strong><span class="rp-racks">' + escHtml(stBul[4]) + '</span></span>';
+      return '<span class="rp-bul ' + cls + '"><span class="rp-dot">' + escHtml(cl.dot) + '</span><strong class="rp-st-lbl">' + escHtml(cl.status + cl.colon) + '</strong><span class="rp-racks">' + escHtml(cl.racks) + '</span></span>';
     }
-    var mixBul = /^(\u2022\s*|-\s*)([^:]+:\s*)(.+)$/.exec(line);
-    if (mixBul) {
-      return '<span class="rp-bul rp-st-mix"><span class="rp-dot">' + escHtml(mixBul[1]) + '</span><strong class="rp-mix-lbl">' + escHtml(mixBul[2]) + '</strong><span class="rp-racks">' + escHtml(mixBul[3]) + '</span></span>';
+    if (cl.kind === 'colonBullet') {
+      return '<span class="rp-bul rp-st-mix"><span class="rp-dot">' + escHtml(cl.dot) + '</span><strong class="rp-mix-lbl">' + escHtml(cl.label) + '</strong><span class="rp-racks">' + escHtml(cl.rest) + '</span></span>';
     }
-    var anyBul = /^(\u2022\s*|-\s*)(.+)$/.exec(line);
-    if (anyBul) {
-      return '<span class="rp-bul"><span class="rp-dot">' + escHtml(anyBul[1]) + '</span><span class="rp-desc">' + escHtml(anyBul[2]) + '</span></span>';
+    if (cl.kind === 'simpleBullet') {
+      return '<span class="rp-bul"><span class="rp-dot">' + escHtml(cl.dot) + '</span><span class="rp-desc">' + escHtml(cl.rest) + '</span></span>';
     }
-    if (line === 'Team,' || line === 'Please see the shift update below.') {
-      return '<span class="rp-greet">' + escHtml(line) + '</span>';
+    if (cl.kind === 'greet') {
+      return '<span class="rp-greet">' + escHtml(cl.text) + '</span>';
     }
-    return '<span class="rp-line">' + escHtml(line) + '</span>';
+    return '<span class="rp-line">' + escHtml(cl.text) + '</span>';
   }).join('\n');
 }
 
@@ -530,27 +601,29 @@ function buildEmailHtml(reportText) {
       html.push('<div style="height:8px;"></div>');
       return;
     }
-    if (/^(SHIFT SUMMARY|WORK PERFORMED|BLOCKERS(?:\s*\u2013\s*.+)?|AREAS OF CONCERN|WRONG LABELS FOUND)$/.test(line)) {
-      html.push('<div style="margin-top:14px;margin-bottom:6px;padding-bottom:3px;border-bottom:2px solid #0284c7;font-size:12px;font-weight:800;letter-spacing:0.8px;color:#0369a1;text-transform:uppercase;">' + escHtml(line) + '</div>');
+    var cl = classifyReportLine(line);
+    if (cl.kind === 'section') {
+      html.push('<div style="margin-top:14px;margin-bottom:6px;padding-bottom:3px;border-bottom:2px solid #0284c7;font-size:12px;font-weight:800;letter-spacing:0.8px;color:#0369a1;text-transform:uppercase;">' + escHtml(cl.text) + '</div>');
       return;
     }
-    if (/^(MP \| .+|SP)$/.test(line)) {
-      html.push('<div style="margin-top:10px;margin-bottom:3px;font-size:14px;font-weight:700;color:#0f172a;">' + escHtml(line) + '</div>');
+    if (cl.kind === 'mpHall' || cl.kind === 'subhead') {
+      html.push('<div style="margin-top:10px;margin-bottom:3px;font-size:14px;font-weight:700;color:#0f172a;">' + escHtml(cl.text) + '</div>');
       return;
     }
-    var kv = /^(Superintendent on [Ss]ite:|Shift Time:|Personnel Count:|Company\/Crew:|Headcount:|Location:|Crew Members:)\s*(.*)$/.exec(line);
-    if (kv) {
-      html.push('<div style="margin:2px 0;"><span style="color:#475569;font-weight:600;">' + escHtml(kv[1]) + '</span> <strong style="color:#0f172a;">' + escHtml(kv[2]) + '</strong></div>');
+    if (cl.kind === 'kv') {
+      html.push('<div style="margin:2px 0;"><span style="color:#475569;font-weight:600;">' + escHtml(cl.k.trim()) + '</span> <strong style="color:#0f172a;">' + escHtml(cl.v) + '</strong></div>');
       return;
     }
-    var bul = /^(\u2022|-)\s*([^:]+:)\s*(.+)$/.exec(line);
-    if (bul) {
-      html.push('<div style="margin:3px 0 3px 10px;">&bull; <strong style="color:#0f172a;">' + escHtml(bul[2]) + '</strong> <span style="color:#1e293b;">' + escHtml(bul[3]) + '</span></div>');
+    if (cl.kind === 'statusBullet') {
+      html.push('<div style="margin:3px 0 3px 10px;">&bull; <strong style="color:#0f172a;">' + escHtml(cl.status + ':') + '</strong> <span style="color:#1e293b;">' + escHtml(cl.racks) + '</span></div>');
       return;
     }
-    var simpleBul = /^(\u2022|-)\s*(.+)$/.exec(line);
-    if (simpleBul) {
-      html.push('<div style="margin:3px 0 3px 10px;">&bull; <span style="color:#1e293b;">' + escHtml(simpleBul[2]) + '</span></div>');
+    if (cl.kind === 'colonBullet') {
+      html.push('<div style="margin:3px 0 3px 10px;">&bull; <strong style="color:#0f172a;">' + escHtml(cl.label.trim()) + '</strong> <span style="color:#1e293b;">' + escHtml(cl.rest) + '</span></div>');
+      return;
+    }
+    if (cl.kind === 'simpleBullet') {
+      html.push('<div style="margin:3px 0 3px 10px;">&bull; <span style="color:#1e293b;">' + escHtml(cl.rest) + '</span></div>');
       return;
     }
     html.push('<div style="margin:2px 0;">' + escHtml(line) + '</div>');
@@ -607,7 +680,7 @@ function buildEmailParts(styleOrText, ctx) {
 
   return {
     buildReport: buildReport,
-    formalHallLines: formalHallLines2,
+    formalHallLines: formalHallLines,
     effectiveHalls: effectiveHalls,
     wrongLabelLines: wrongLabelLines,
     buildEmailParts: buildEmailParts,

@@ -21,9 +21,8 @@ These rules prevent stale-code overwrites. Follow them every time, no exceptions
 6. **Before every commit**: `git pull --rebase origin main` — if there are new remote commits, rebase onto them, resolve conflicts, THEN commit.
 7. **After conflict resolution**: verify no `<<<<<<<` / `=======` / `>>>>>>>` markers remain in ANY file (`grep -r "<<<<<<" . --exclude-dir=.git`).
 8. **Commit message must say WHAT and WHY** — the other agent reads these to understand your changes.
-8b. **Bulk edits via script files, never inline shell heredocs** — and use `tools/patch_page.py` for ANY scripted splice of index.html/buf103/guide/labels JS: it asserts the anchor matches exactly, esprima-checks every script block, and refuses to write broken edits (every build incident v53-v60 was a hand-rolled splice the gates caught — this helper makes the safe path the only path). Use it in one-off scripts too: `from patch_page import Patch`.
+8b. **Bulk edits via script files, never inline shell heredocs** — write the script with the file-writing tool, run it, delete it. The shell eats backslashes (broke JS regexes three separate times) and a failed mid-write can zero the target file (`index.html` was truncated to 0 bytes once). Use `tools/patch_page.py` (`from patch_page import Patch`) for scripted splices of HTML/JS: it asserts the anchor matches exactly and esprima-checks every script block before writing. Commit first so git is the undo.
 8c. After any large change (or a "hella issues" field report): `python tools/gate.py --full` — runs `tools/full_review.py`, a real-interaction sweep of every page (stamps, undo, drill-downs, searches, destinations). Its output is a checklist: `ok` = verified, `!!` = finding with evidence. Ship nothing with an open `!!`.
- — write the script with the file-writing tool, run it, delete it. The shell eats backslashes (broke JS regexes three separate times) and a failed mid-write can zero the target file (index.html was truncated to 0 bytes once). Commit first so git is the undo.
 
 ### Before pushing
 
@@ -50,13 +49,21 @@ These rules prevent stale-code overwrites. Follow them every time, no exceptions
 19. **If the app is broken on Daniel's phone**: check the live version first, then check recent commits from both agents, then reproduce locally with `tools/shoot.py`.
 20. **If there's a merge conflict**: keep the version that preserves Daniel's explicitly requested behavior (his feedback > design principles). When in doubt, keep both changes if possible, or ask Daniel.
 
-## Map
+## Map & Context Pointers
 
-- `index.html` — the whole Kit: Home launcher, Walkthrough & Report, Data Haul Directory (search + barcode scan).
-- `guide.html` — Cable Field Guide (foreign app). Regenerate with `tools/integrate_guide.py` after editing that script — never hand-edit guide.html.
-- `data/directory.json.gz` — 28k barcodes + 192k presets, decoded in-browser (DecompressionStream, iOS 16.4+). Rebuild with `tools/build_directory_full.py` from the Downloads exports.
-- `sw.js` — precache list. `vendor/` — Leaflet + shared zxing-wasm engine (both apps use it).
-- `retro/` — session retros. `tools/` — all pipelines and gates.
+- [`CODING_STANDARDS.md`](./CODING_STANDARDS.md) — ES5 rules, deep-module boundaries (`WalkState`, `ReportEngine`, `KitData`, `Stamp`, `Sync`, `CutsheetEngine`), and UI invariants. Read before editing or running `/code-review`.
+- [`GLOSSARY.md`](./GLOSSARY.md) — ubiquitious domain language (`Row-Side`, `Cable Family`, `Stamp`, `Brush`, `Scope`, `POD`, `Baseline`, `Site Code`, `Cutsheet`, `Wrong Label`).
+- [`docs/adr/`](./docs/adr/) — architectural decisions (`0001` GitHub Contents sync, `0002` Yjs CRDT + per-cable timestamp LWW, `0003` bundled + SheetJS `.xlsx` cutsheet, `0004` `MP | <Hall>` reports strictly derived from stamps).
+- `index.html` — Home launcher, Walkthrough & Shift Report shell.
+- `walk-state.js` — `WalkState` module: state shape, `CORE_SHAPE`, `STATE_VERSION = 4` migrations, undo snapshots, `Baseline`, and backup/restore payloads.
+- `report-engine.js` — `ReportEngine` + `ReportEngine.Side`: report generation, Outlook HTML/mailto builder, live preview formatting, and `hallSummary`/`podSummary` rollups.
+- `kit-data.js` — `KitData`: `.json.gz` loader, `KitData.store` (IndexedDB + `localStorage`), `KitData.nav` (cross-page handoffs & query routing), `KitData.mislabels` (`spfg.mislabels`), `KitData.copy` / `KitData.copyRich`.
+- `stamp-engine.js` & `sync-engine.js` — `Stamp` (tap-again-to-clear + attribution) and `Sync` (Yjs CRDT + GitHub sync).
+- `cutsheet-engine.js` & `tools/cutsheet-parser.js` — `CutsheetEngine` (BUF103 index/search/rack-trace/materials) and `CutsheetParser` (browser/WebWorker/Node `.xlsx` parser).
+- `guide.html` — Cable Field Guide (`tools/guide_directory.js` + `tools/integrate_guide.py` layer checks).
+- `data/directory.json.gz` & `data/buf103.json.gz` — compressed field datasets decoded in-browser via `DecompressionStream`.
+- `sw.js` — offline service worker precache (`CORE` + `HEAVY`).
+- `retro/` — session retros. `tools/` — all pipelines and verification gates (`tools/gate.py`, `tools/verify.py`, `tools/probes.py`, `tools/test_report.py`, `tools/full_review.py`).
 
 ## Invariants — break one, break the field app
 
