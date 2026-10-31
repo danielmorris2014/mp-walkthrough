@@ -62,6 +62,8 @@ for hp in html_pages:
     if not os.path.exists(hp_path):
         continue
     hp_src = open(hp_path, encoding='utf-8').read()
+    if not hp_src.lstrip().lower().startswith('<!doctype html>'):
+        fail.append(f'BAD DOCTYPE: {hp} does not start with <!DOCTYPE html>')
     hp_markup = re.sub(r'<script\b[^>]*>.*?</script>', '', hp_src, flags=re.S | re.I)
     counts = collections.Counter(re.findall(r'\bid="([^"]+)"', hp_markup))
     for k, cnt in sorted(counts.items()):

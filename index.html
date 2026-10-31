@@ -1,4 +1,4 @@
-< +!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -711,23 +711,19 @@
     border: none; border-radius: 0;
   }
   .rp-subj {
-    display: inline-block; width: 100%; padding-bottom: 6px; margin-bottom: 2px;
-    border-bottom: 1px dashed rgba(255,255,255,0.12);
-    font-size: 14px; font-weight: 800; color: #ffffff; letter-spacing: -0.2px;
+    color: var(--sky-11); font-weight: 700; font-size: 12.5px;
   }
-  .rp-subj-k { color: var(--sky-11); font-weight: 800; }
+  .rp-subj-k { color: var(--slate-10); font-weight: 800; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.4px; }
   .rp-greet { color: var(--slate-11); font-weight: 500; }
   .rp-sec {
-    display: inline-block; width: 100%; margin-top: 4px; padding-bottom: 3px;
-    border-bottom: 1.5px solid rgba(117,199,240,0.32);
-    font-size: 11.5px; font-weight: 800; letter-spacing: 0.85px;
-    text-transform: uppercase; color: var(--sky-9);
+    color: var(--sky-9); font-size: 11.5px; font-weight: 800; letter-spacing: 0.85px;
+    text-transform: uppercase; background: rgba(117,199,240,0.10);
+    border-left: 3px solid var(--sky-9); padding: 2px 8px; border-radius: 0 5px 5px 0;
   }
   .rp-hall {
-    display: inline-flex; align-items: center; gap: 2px;
-    font-size: 13.5px; font-weight: 800; color: #ffffff;
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
-    padding: 2px 9px; border-radius: 7px; margin-top: 2px;
+    font-size: 13px; font-weight: 800; color: #ffffff;
+    background: rgba(255,255,255,0.055); border: 1px solid rgba(255,255,255,0.10);
+    padding: 1px 8px; border-radius: 6px;
   }
   .rp-badge-mp { color: var(--green-11); font-weight: 900; }
   .rp-badge-sp { color: var(--sky-9); font-weight: 900; }
@@ -1139,7 +1135,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v84';
+var APP_VERSION = 'v85';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2236,14 +2232,23 @@ function buildReport(style) {
     mislabels: readMislabels()
   });
 }
+function formatRecipientChip(addr) {
+  var m = /^([^@]+)@servicepoint\.com$/i.exec(addr || '');
+  if (m) {
+    return m[1].split('.').map(function (w) {
+      return w ? (w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()) : '';
+    }).join(' ');
+  }
+  return addr;
+}
 function renderReportEnvelope(parts) {
   var envEl = document.getElementById('reportEnvelope');
   if (!envEl || !parts) return;
   var toPills = (parts.toList || []).map(function (addr) {
-    return '<span class="re-pill to-pill">' + escapeHtml(addr) + '</span>';
+    return '<span class="re-pill to-pill" title="' + escapeAttr(addr) + '">' + escapeHtml(addr) + '</span>';
   }).join('');
   var ccPills = (parts.ccList || []).map(function (addr) {
-    return '<span class="re-pill">' + escapeHtml(addr) + '</span>';
+    return '<span class="re-pill" title="' + escapeAttr(addr) + '">' + escapeHtml(formatRecipientChip(addr)) + '</span>';
   }).join('');
   envEl.innerHTML =
     '<div class="re-row"><span class="re-lbl">To</span><div class="re-pills">' + (toPills || '<span class="muted">None</span>') + '</div></div>' +
@@ -2926,7 +2931,7 @@ initStorage();
       </div>
       <div id="syncSettingsInfo" class="muted" style="margin-top:6px;"></div>
       <div class="batch-row" style="justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
-        <span class="muted">App version: <strong style="color:var(--text);">v84</strong></span>
+        <span class="muted">App version: <strong style="color:var(--text);">v85</strong></span>
         <button class="btn btn-secondary" onclick="forceAppUpdate()">Force Update</button>
       </div>
       <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closeSettings()">Close</button>
