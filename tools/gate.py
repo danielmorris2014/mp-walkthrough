@@ -1,6 +1,7 @@
 # One-command local gate: static verify + report diff test (Playwright),
 # optionally all screenshots. Self-contained: starts its own dev server.
-#   python tools/gate.py           -> verify + report diff
+#   python tools/gate.py           -> verify + report diff + probes
+#   python tools/gate.py --full    -> also run full page-by-page review
 #   python tools/gate.py --shots   -> also regenerate every screenshot
 import subprocess, sys, os, socket, threading, time
 
@@ -46,17 +47,15 @@ if have_pw:
     if "--shots" in sys.argv:
         if not run("screenshots", [PY, os.path.join("tools", "shoot.py")]):
             fails.append("shots")
+    if "--full" in sys.argv:
+        if not run("full page-by-page review (--full)", [PY, os.path.join("tools", "full_review.py")]):
+            fails.append("full-review")
 else:
     print("\n(playwright not installed - skipped report diff + screenshots; pip install playwright)")
 
 if started:
     started.shutdown()
+    started.server_close()
 
 print("\n" + ("GATE: ALL PASS" if not fails else "GATE: FAILED - " + ", ".join(fails)))
-
-if '--full' in sys.argv:
-    print("=== full page-by-page review (--full) ===")
-    rc = subprocess.call([sys.executable, 'tools/full_review.py'])
-    if rc != 0:
-        print("GATE: FAILED - full review found issues")
 sys.exit(1 if fails else 0)

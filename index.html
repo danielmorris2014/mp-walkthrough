@@ -647,10 +647,109 @@
   .form-field label { font-size: 11px; color: var(--muted); font-weight: 700; }
   .form-field input, .form-field select { width: 100%; }
 
+  /* Executive Report Studio & Email Preview (v84) */
+  .report-actions-primary {
+    display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: 7px; margin-bottom: 7px;
+  }
+  .report-actions-secondary {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 11px;
+  }
+  .btn-outlook {
+    background: linear-gradient(180deg, #0078d4, #0062ad);
+    color: #ffffff; border: 1px solid rgba(124,196,250,0.45);
+    box-shadow: 0 4px 14px rgba(0,120,212,0.35);
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-outlook:active { filter: brightness(0.92); transform: scale(0.97); }
+  .report-doc-wrap {
+    border: 1px solid var(--border2); border-radius: 14px; overflow: hidden;
+    background: #121418; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 20px -6px rgba(0,0,0,0.45);
+  }
+  .report-envelope {
+    background: linear-gradient(180deg, rgba(0,120,212,0.10), rgba(255,255,255,0.015));
+    border-bottom: 1px solid var(--border); padding: 10px 12px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .re-row {
+    display: flex; align-items: flex-start; gap: 8px; padding: 3px 0; font-size: 12px; line-height: 1.4;
+  }
+  .re-lbl {
+    flex: 0 0 36px; font-weight: 800; font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--slate-10); padding-top: 2px;
+  }
+  .re-pills {
+    flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+  }
+  .re-pill {
+    display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 600; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.09); color: var(--slate-12);
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .re-pill.to-pill {
+    background: rgba(0,144,255,0.15); border-color: rgba(0,144,255,0.38); color: #a8eeff; font-weight: 700;
+  }
+  .re-edit-btn {
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--slate-11);
+    border-radius: 7px; padding: 2px 8px; font-size: 11px; font-weight: 700; cursor: pointer;
+    margin-left: auto; flex: 0 0 auto;
+  }
+  .re-subj-val {
+    flex: 1; min-width: 0; font-weight: 700; font-size: 12.5px; color: #ffffff;
+  }
   .report-pre {
-    background: #0e0f11; border: 1px solid var(--border); border-radius: 12px; padding: 12px;
-    color: var(--slate-12); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 12.5px; white-space: pre-wrap; word-break: break-word; line-height: 1.55;
+    margin: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent 120px), #101216;
+    border: 1px solid var(--border); border-radius: 12px; padding: 14px 14px;
+    color: #e5e7eb;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 13.5px; font-weight: 450; letter-spacing: -0.005em;
+    font-variant-numeric: tabular-nums;
+    white-space: pre-wrap; word-break: break-word; line-height: 1.62;
+  }
+  .report-doc-wrap .report-pre {
+    border: none; border-radius: 0;
+  }
+  .rp-subj {
+    display: inline-block; width: 100%; padding-bottom: 6px; margin-bottom: 2px;
+    border-bottom: 1px dashed rgba(255,255,255,0.12);
+    font-size: 14px; font-weight: 800; color: #ffffff; letter-spacing: -0.2px;
+  }
+  .rp-subj-k { color: var(--sky-11); font-weight: 800; }
+  .rp-greet { color: var(--slate-11); font-weight: 500; }
+  .rp-sec {
+    display: inline-block; width: 100%; margin-top: 4px; padding-bottom: 3px;
+    border-bottom: 1.5px solid rgba(117,199,240,0.32);
+    font-size: 11.5px; font-weight: 800; letter-spacing: 0.85px;
+    text-transform: uppercase; color: var(--sky-9);
+  }
+  .rp-hall {
+    display: inline-flex; align-items: center; gap: 2px;
+    font-size: 13.5px; font-weight: 800; color: #ffffff;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
+    padding: 2px 9px; border-radius: 7px; margin-top: 2px;
+  }
+  .rp-badge-mp { color: var(--green-11); font-weight: 900; }
+  .rp-badge-sp { color: var(--sky-9); font-weight: 900; }
+  .rp-hall-sep { color: var(--slate-8); }
+  .rp-hall-name { color: #ffffff; font-weight: 800; }
+  .rp-kv .rp-k { color: var(--slate-11); font-weight: 600; }
+  .rp-kv .rp-v { color: #ffffff; font-weight: 700; }
+  .rp-bul { display: inline; }
+  .rp-dot { color: var(--slate-9); font-weight: 900; }
+  .rp-st-lbl, .rp-mix-lbl { font-weight: 750; color: #ffffff; }
+  .rp-st-hung .rp-st-lbl, .rp-st-hung .rp-dot { color: var(--green-11); }
+  .rp-st-ran .rp-st-lbl, .rp-st-ran .rp-dot { color: var(--violet-11); }
+  .rp-st-prog .rp-st-lbl, .rp-st-prog .rp-dot { color: var(--amber-11); }
+  .rp-st-staged .rp-st-lbl, .rp-st-staged .rp-dot { color: var(--blue-11); }
+  .rp-st-remed .rp-st-lbl, .rp-st-remed .rp-dot { color: var(--red-11); }
+  .rp-racks { color: #f3f4f6; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .rp-desc { color: #e2e8f0; }
+  .row-trace-mini {
+    margin-top: 2px; padding: 1px 5px; border-radius: 5px;
+    background: rgba(117,199,240,0.14); border: 1px solid rgba(117,199,240,0.35);
+    color: var(--sky-9); font-size: 9.5px; font-weight: 800; letter-spacing: 0.2px;
+    line-height: 1.2; cursor: pointer;
   }
   .hist-entry { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; background: var(--bg2); }
   .hist-entry summary { padding: 10px 11px; font-weight: 700; font-size: 12.5px; cursor: pointer; color: var(--slate-11); }
@@ -844,7 +943,7 @@
         <button class="btn btn-secondary" id="datePickBtn" onclick="showDatePicker()" style="min-height:40px;">Date: today</button>
         <input type="text" id="blockerDate" style="width:104px; display:none;" placeholder="MM/DD/YYYY">
         <select id="blockerHall" style="width:118px;"></select>
-        <input type="text" id="blockerText" placeholder="What is blocking work" style="flex:1; min-width:130px;">
+        <input type="text" id="blockerText" placeholder="What is blocking work" style="flex:1; min-width:130px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addBlocker();}">
         <button class="btn" onclick="addBlocker()">+ Add</button>
       </div>
       <div id="blockerList"></div>
@@ -852,7 +951,7 @@
     <div class="card">
       <div class="card-title">Hall notes</div>
       <div class="batch-row">
-        <input type="text" id="noteInput" placeholder="e.g. HAC 17, Rows 33–36 – Staged (8 hrs per person)" style="flex:1; min-width:150px;">
+        <input type="text" id="noteInput" placeholder="e.g. HAC 17, Rows 33–36 – Staged (8 hrs per person)" style="flex:1; min-width:150px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addNote();}">
         <button class="btn btn-secondary" onclick="addNote()">+ Note</button>
       </div>
       <div id="notesWrap"></div>
@@ -870,12 +969,15 @@
   <!-- ===================== REPORT ===================== -->
   <div id="panel-report" class="panel">
     <div class="card">
-      <div class="card-title">Generate report</div>
+      <div class="card-title">
+        <span>Shift Report &amp; Outlook Dispatch</span>
+        <button type="button" class="re-edit-btn" onclick="toggleRecipientsEditor()">&#9998; Recipients</button>
+      </div>
       <div class="form-grid">
         <div class="form-field">
           <label>Report style</label>
           <select id="reportStyle" onchange="renderReport()">
-            <option value="formal">Team update (clean)</option>
+            <option value="formal">Team update (executive)</option>
             <option value="mine">My quick nightly report</option>
             <option value="crew">Crew / table style</option>
             <option value="boss">Boss roll-up (by hall &amp; cable)</option>
@@ -890,14 +992,33 @@
           </select>
         </div>
       </div>
-      <div class="batch-row" style="margin-bottom:10px;">
+      <div class="report-actions-primary">
+        <button class="btn btn-outlook" id="emailReportBtn" onclick="emailReport()">&#9993; Send in Outlook</button>
+        <button class="btn btn-secondary" onclick="copyReport()">Copy Report</button>
         <button class="btn" onclick="endOfNight()">End of night</button>
-        <button class="btn btn-secondary" id="emailReportBtn" onclick="emailReport()" style="background:rgba(0,144,255,.16);border-color:rgba(0,144,255,.45);color:#7cc4fa;">&#9993; Outlook</button>
-        <button class="btn btn-secondary" onclick="copyReport()">Copy</button>
-        <button class="btn btn-secondary" onclick="shareReport()">Share</button>
-        <button class="btn btn-secondary" onclick="saveReportToHistory()">Save to history</button>
       </div>
-      <pre class="report-pre" id="reportOutput"></pre>
+      <div class="report-actions-secondary">
+        <button class="btn btn-secondary" style="flex:1;" onclick="shareReport()">Share</button>
+        <button class="btn btn-secondary" style="flex:1;" onclick="saveReportToHistory()">Save to history</button>
+      </div>
+      <div id="recipientsEditor" style="display:none; margin-bottom:11px; padding:10px; border-radius:11px; background:rgba(255,255,255,0.03); border:1px solid var(--border);">
+        <div class="form-field" style="margin-bottom:8px;">
+          <label for="emailToInput">Outlook TO recipients (comma-separated)</label>
+          <input type="text" id="emailToInput" oninput="saveEmailRecipients()" placeholder="Jack.Tracy@servicepoint.com">
+        </div>
+        <div class="form-field" style="margin-bottom:8px;">
+          <label for="emailCcInput">Outlook CC recipients (comma-separated, auto-deduplicated)</label>
+          <textarea id="emailCcInput" rows="3" oninput="saveEmailRecipients()"></textarea>
+        </div>
+        <div class="batch-row" style="justify-content:space-between;">
+          <button type="button" class="btn btn-ghost" onclick="resetEmailRecipients()">Reset default ServicePoint list</button>
+          <button type="button" class="btn btn-secondary" onclick="toggleRecipientsEditor()">Done</button>
+        </div>
+      </div>
+      <div class="report-doc-wrap">
+        <div class="report-envelope" id="reportEnvelope"></div>
+        <pre class="report-pre" id="reportOutput"></pre>
+      </div>
     </div>
 
     <div class="card">
@@ -1018,7 +1139,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = 'mp_walkthrough_v1';
-var APP_VERSION = 'v83';
+var APP_VERSION = 'v84';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -1219,7 +1340,12 @@ function defaultState() {
     version: 2,
     activeHall: 'CB5_DH1',
     brush: 'hung', scope: 'ALL',
-    settings: { onboarded: false, numStyle: 'short', orientation: 'h11', signature: '', textSize: 'normal', wakeLock: true, lastBackup: 0 },
+    settings: {
+      onboarded: false, numStyle: 'short', orientation: 'h11', signature: '',
+      textSize: 'normal', wakeLock: true, lastBackup: 0,
+      emailTo: ReportEngine.DEFAULT_EMAIL_TO,
+      emailCc: ReportEngine.DEFAULT_EMAIL_CC
+    },
     meta: {
       supers: '',
       shiftTime: '2:00 PM – 2:00 AM',
@@ -1306,6 +1432,9 @@ function migrateState(s) {
     s = MIGRATIONS[v](s);
     v = s.version;
   }
+  s.settings = s.settings || {};
+  if (!s.settings.emailTo) s.settings.emailTo = ReportEngine.DEFAULT_EMAIL_TO;
+  if (!s.settings.emailCc) s.settings.emailCc = ReportEngine.DEFAULT_EMAIL_CC;
   s.version = STATE_VERSION;
   return s;
 }
@@ -1560,7 +1689,7 @@ function renderWalk() {
     ph.className = 'pod-header';
     ph.innerHTML = '<span>' + escapeHtml(g.name) + ' <span class="pod-count">' + doneCount + '/' + (existing.length * 2) + ' hung</span></span>' +
       '<div class="pod-actions">' +
-      (isBuf103 && existing.length ? '<button class="pod-btn" onclick="openBuf103Row(\'' + escapeHtml(hall.id) + '\', ' + existing[0] + ')">Cutsheet \u2197</button>' : '') +
+      (isBuf103 && existing.length ? '<button class="pod-btn" onclick="openBuf103Row(\'' + escapeHtml(hall.id) + '\', ' + existing[0] + ', \'trace\')">Trace \u2197</button>' : '') +
       '<button class="pod-btn" onclick="stampRows([' + existing.join(',') + '], \'11\')">11 side</button>' +
       '<button class="pod-btn" onclick="stampRows([' + existing.join(',') + '], \'13\')">13 side</button>' +
       '<button class="pod-btn" onclick="stampRows([' + existing.join(',') + '], \'both\')">All</button>' +
@@ -1573,9 +1702,12 @@ function renderWalk() {
       rowEl.className = 'aisle-row' + (info.vert ? ' vert' : '');
       rowEl.setAttribute('data-row', r);
       var other = info.first === '11' ? '13' : '11';
+      var tracePill = isBuf103
+        ? '<span class="row-trace-mini" onclick="event.stopPropagation(); openBuf103Row(\'' + escapeHtml(hall.id) + '\', ' + r + ', \'trace\')" title="Open Row ' + r + ' in Cutsheet Trace">Trace\u2197</span>'
+        : '';
       rowEl.innerHTML = buildSideHtml(hall, r, info.first) +
         '<div class="row-center-pill" onclick="tapBoth(' + r + ')">' +
-        '<span class="row-num">R' + r + '</span><span class="row-both-hint">BOTH</span></div>' +
+        '<span class="row-num">R' + r + '</span><span class="row-both-hint">BOTH</span>' + tracePill + '</div>' +
         buildSideHtml(hall, r, other);
       grid.appendChild(rowEl);
     });
@@ -1583,12 +1715,9 @@ function renderWalk() {
 }
 
 /* ---------------- jump to row / cutsheet deep-link ---------------- */
-function openBuf103Row(hallId, rowNum) {
+function openBuf103Row(hallId, rowNum, mode) {
   var hCode = (hallId || '').indexOf('BUF103_') === 0 ? hallId.slice(7) : hallId;
-  try {
-    sessionStorage.setItem('mp.buf103_nav', JSON.stringify({ hall: hCode, row: rowNum, mode: 'browse' }));
-  } catch (e) {}
-  location.href = './buf103.html';
+  KitData.nav.toCutsheet({ hall: hCode, row: rowNum, mode: mode || 'trace' });
 }
 function gotoRowFn() {
   var n = parseInt((document.getElementById('gotoRow') || {}).value, 10);
@@ -1847,12 +1976,23 @@ function renderCrewTab() {
   renderSettingsSheet();
 }
 
-// the blockers panel's own content: blocker list + hall notes
+// the blockers panel's own content: blocker list + hall notes + concern/tomorrow textareas
 function renderBlockersTab() {
   var dEl = document.getElementById('blockerDate');
   if (dEl && !dEl.value) dEl.value = new Date().toLocaleDateString('en-US');
+  var aocEl = document.getElementById('areasOfConcern');
+  if (aocEl && document.activeElement !== aocEl) aocEl.value = (state.meta && state.meta.areasOfConcern) || '';
+  var ttEl = document.getElementById('tasksTomorrow');
+  if (ttEl && document.activeElement !== ttEl) ttEl.value = (state.meta && state.meta.tasksTomorrow) || '';
   renderBlockers();
   renderHallNotes();
+}
+
+function flushPendingInputs() {
+  var bTxt = document.getElementById('blockerText');
+  if (bTxt && bTxt.value && bTxt.value.trim()) addBlocker();
+  var nTxt = document.getElementById('noteInput');
+  if (nTxt && nTxt.value && nTxt.value.trim()) addNote();
 }
 
 // the settings sheet's own fields
@@ -1884,14 +2024,16 @@ function saveMeta() {
   state.meta.areasOfConcern = document.getElementById('areasOfConcern').value;
   state.meta.tasksTomorrow = document.getElementById('tasksTomorrow').value;
   saveState();
+  renderHome();
 }
 function addCrewMember() {
   var n = prompt('Crew member name:');
   if (!n || !n.trim()) return;
   pushUndo();
   state.crewPool.push({ name: n.trim(), active: true });
+  state.meta._spManual = false;
   state.meta.spCount = state.crewPool.filter(function (x) { return x.active; }).length;
-  saveState(); renderCrewTab();
+  saveState(); renderCrewTab(); renderHome();
 }
 function addBlocker() {
   var dEl = document.getElementById('blockerDate');
@@ -1904,22 +2046,23 @@ function addBlocker() {
   document.getElementById('blockerText').value = '';
   dEl.style.display = 'none';
   document.getElementById('datePickBtn').style.display = '';
-  saveState(); renderBlockers();
+  saveState(); renderBlockers(); renderHome();
 }
 function removeBlocker(i) {
   pushUndo();
   state.blockers.splice(i, 1);
-  saveState(); renderBlockers();
+  saveState(); renderBlockers(); renderHome();
 }
 function renderBlockers() {
   var el = document.getElementById('blockerList');
   var sel = document.getElementById('blockerHall');
   if (sel) {
     var prev = sel.value;
+    var activeHallName = (state.halls[state.activeHall] && state.halls[state.activeHall].name) || '';
     sel.innerHTML = '<option value="">No hall</option>' + Object.values(state.halls).map(function (h) {
       return '<option value="' + escapeAttr(h.name) + '">' + escapeHtml(h.name) + '</option>';
     }).join('');
-    sel.value = prev || '';
+    sel.value = prev || activeHallName || '';
   }
   if (!el) return;
   el.innerHTML = state.blockers.length ? state.blockers.map(function (b, i) {
@@ -1937,6 +2080,7 @@ function numStyle() {
 
 /* ---------------- end of night ---------------- */
 function endOfNight() {
+  flushPendingInputs();
   pushUndo();
   var style = document.getElementById('reportStyle');
   var txt = buildReport(style.value);
@@ -1991,6 +2135,7 @@ function toggleWake() {
 function savePrefs() {
   state.settings.signature = document.getElementById('signature').value;
   saveState();
+  if (document.getElementById('panel-report').classList.contains('active')) renderReport();
 }
 function cycleTextSize() {
   state.settings.textSize = state.settings.textSize === 'normal' ? 'large' : 'normal';
@@ -2091,10 +2236,60 @@ function buildReport(style) {
     mislabels: readMislabels()
   });
 }
+function renderReportEnvelope(parts) {
+  var envEl = document.getElementById('reportEnvelope');
+  if (!envEl || !parts) return;
+  var toPills = (parts.toList || []).map(function (addr) {
+    return '<span class="re-pill to-pill">' + escapeHtml(addr) + '</span>';
+  }).join('');
+  var ccPills = (parts.ccList || []).map(function (addr) {
+    return '<span class="re-pill">' + escapeHtml(addr) + '</span>';
+  }).join('');
+  envEl.innerHTML =
+    '<div class="re-row"><span class="re-lbl">To</span><div class="re-pills">' + (toPills || '<span class="muted">None</span>') + '</div></div>' +
+    '<div class="re-row"><span class="re-lbl">CC (' + (parts.ccList ? parts.ccList.length : 0) + ')</span><div class="re-pills">' + (ccPills || '<span class="muted">None</span>') + '</div></div>' +
+    '<div class="re-row" style="padding-top:4px;margin-top:3px;border-top:1px solid rgba(255,255,255,0.06);"><span class="re-lbl">Subj</span><span class="re-subj-val">' + escapeHtml(parts.subject || '') + '</span></div>';
+}
+function toggleRecipientsEditor() {
+  var box = document.getElementById('recipientsEditor');
+  if (!box) return;
+  var open = box.style.display === 'none';
+  if (open) {
+    var toEl = document.getElementById('emailToInput');
+    var ccEl = document.getElementById('emailCcInput');
+    if (toEl) toEl.value = (state.settings && state.settings.emailTo) || ReportEngine.DEFAULT_EMAIL_TO;
+    if (ccEl) ccEl.value = (state.settings && state.settings.emailCc) || ReportEngine.DEFAULT_EMAIL_CC;
+  }
+  box.style.display = open ? 'block' : 'none';
+}
+function saveEmailRecipients() {
+  var toEl = document.getElementById('emailToInput');
+  var ccEl = document.getElementById('emailCcInput');
+  state.settings.emailTo = toEl ? toEl.value : ReportEngine.DEFAULT_EMAIL_TO;
+  state.settings.emailCc = ccEl ? ccEl.value : ReportEngine.DEFAULT_EMAIL_CC;
+  saveState();
+  renderReportEnvelope(parseReportEmailParts());
+}
+function resetEmailRecipients() {
+  state.settings.emailTo = ReportEngine.DEFAULT_EMAIL_TO;
+  state.settings.emailCc = ReportEngine.DEFAULT_EMAIL_CC;
+  var toEl = document.getElementById('emailToInput');
+  var ccEl = document.getElementById('emailCcInput');
+  if (toEl) toEl.value = state.settings.emailTo;
+  if (ccEl) ccEl.value = state.settings.emailCc;
+  saveState();
+  renderReportEnvelope(parseReportEmailParts());
+  showToast('Default ServicePoint recipients restored');
+}
 function renderReport() {
+  flushPendingInputs();
   renderBaselineInfo();
   renderBackupStatus();
-  document.getElementById('reportOutput').textContent = buildReport(document.getElementById('reportStyle').value);
+  var styleEl = document.getElementById('reportStyle');
+  var txt = buildReport(styleEl ? styleEl.value : 'formal');
+  var outEl = document.getElementById('reportOutput');
+  if (outEl) outEl.innerHTML = ReportEngine.formatPreviewHtml(txt);
+  renderReportEnvelope(ReportEngine.buildEmailParts(txt, { state: state }));
 }
 
 /* ---------------- copy / share / history / backup ---------------- */
@@ -2120,12 +2315,32 @@ function copySomething(text, successMsg) {
     navigator.clipboard.writeText(text).then(function () { showToast(successMsg); }, fb);
   } else fb();
 }
+function copyRichReport(text, html, successMsg) {
+  text = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  if (navigator.clipboard && window.ClipboardItem && navigator.clipboard.write && html) {
+    try {
+      var item = new ClipboardItem({
+        'text/plain': new Blob([text], { type: 'text/plain' }),
+        'text/html': new Blob([html], { type: 'text/html' })
+      });
+      navigator.clipboard.write([item]).then(
+        function () { showToast(successMsg); },
+        function () { copySomething(text, successMsg); }
+      );
+      return;
+    } catch (e) {}
+  }
+  copySomething(text, successMsg);
+}
 function currentReportText() {
   var el = document.getElementById('reportOutput');
   var t = el && el.textContent ? el.textContent : buildReport((document.getElementById('reportStyle') || {}).value || 'formal');
   return t.replace(/\r\n/g, '\n');
 }
-function copyReport() { copySomething(currentReportText(), 'Report copied'); }
+function copyReport() {
+  var parts = parseReportEmailParts();
+  copyRichReport(parts.fullText, parts.html, 'Report copied');
+}
 function shareReport() {
   var txt = currentReportText();
   if (navigator.share) navigator.share({ text: txt }).catch(function () {});
@@ -2136,11 +2351,8 @@ function parseReportEmailParts() {
 }
 function emailReport() {
   var parts = parseReportEmailParts();
-  var bodyCrlf = parts.body.replace(/\r?\n/g, '\r\n');
-  var outlookUrl = 'ms-outlook://compose?subject=' + encodeURIComponent(parts.subject) + '&body=' + encodeURIComponent(bodyCrlf);
-  try { copyTextFallback(parts.fullText); } catch (e) {}
-  showToast('Opening Outlook (report also copied)');
-  try { window.location.href = outlookUrl; } catch (e) {}
+  copyRichReport(parts.fullText, parts.html, 'Opening Outlook (report also copied)');
+  try { window.location.href = parts.outlookUrl; } catch (e) {}
 }
 function saveReportToHistory() {
   pushUndo();
@@ -2162,8 +2374,8 @@ function renderHistory() {
     var d = new Date(h.ts);
     var when = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return '<details class="hist-entry"><summary>' + escapeHtml(when) + ' — ' + escapeHtml(h.label) + '</summary>' +
-      '<div class="hist-body"><pre class="report-pre" style="max-height:260px; overflow:auto;">' + escapeHtml(h.text) + '</pre>' +
-      '<div class="batch-row"><button class="btn" onclick="copySomething(state.history[' + realIdx + '].text, \'Copied\')">Copy</button>' +
+      '<div class="hist-body"><pre class="report-pre" style="max-height:260px; overflow:auto;">' + ReportEngine.formatPreviewHtml(h.text) + '</pre>' +
+      '<div class="batch-row" style="margin-top:8px;"><button class="btn" onclick="copySomething(state.history[' + realIdx + '].text, \'Copied\')">Copy</button>' +
       '<button class="btn btn-danger" onclick="removeHistory(' + realIdx + ')">Delete</button></div></div></details>';
   }).join('');
   if (state.history.length > 3) {
@@ -2714,7 +2926,7 @@ initStorage();
       </div>
       <div id="syncSettingsInfo" class="muted" style="margin-top:6px;"></div>
       <div class="batch-row" style="justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
-        <span class="muted">App version: <strong style="color:var(--text);">v83</strong></span>
+        <span class="muted">App version: <strong style="color:var(--text);">v84</strong></span>
         <button class="btn btn-secondary" onclick="forceAppUpdate()">Force Update</button>
       </div>
       <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closeSettings()">Close</button>

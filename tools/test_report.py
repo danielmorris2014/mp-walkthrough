@@ -114,9 +114,45 @@ with sync_playwright() as p:
         state: snap, numStyle: 'short', scope: 'changes',
         mislabels: [{ id: 'BUF102#001', sa: 'R0101', da: 'R0102', done: false }]
       });
+      const dedup = ReportEngine.cleanEmailList('Chris.dickman@servicepoint.com, chris.dickman@servicepoint.com, John.Hott@servicepoint.com');
+      const recipientsOk = parts.toList.length === 1 &&
+                           parts.toList[0] === 'Jack.Tracy@servicepoint.com' &&
+                           parts.ccList.length === 7 &&
+                           dedup.length === 2 &&
+                           parts.outlookUrl.includes('to=Jack.Tracy%40servicepoint.com') &&
+                           parts.outlookUrl.includes('cc=John.Hott%40servicepoint.com');
+      const richPreviewOk = !!document.querySelector('#reportOutput .rp-sec') &&
+                            !!document.querySelector('#reportEnvelope .to-pill') &&
+                            typeof parts.html === 'string' && parts.html.includes('SHIFT SUMMARY');
+      // End-to-end UI input -> Report propagation check (including uncommitted blocker/note flush)
+      switchTab('crew');
+      document.getElementById('supers').value = 'Daniel Morris & Jack Tracy';
+      document.getElementById('supers').dispatchEvent(new Event('input'));
+      document.getElementById('mpCount').value = '64';
+      document.getElementById('mpCount').dispatchEvent(new Event('input'));
+      document.getElementById('spWorkNotes').value = '• Verified 144F trunks in Row 9';
+      document.getElementById('spWorkNotes').dispatchEvent(new Event('input'));
+      switchTab('blockers');
+      document.getElementById('blockerText').value = 'Pending patch panels on Row 12';
+      document.getElementById('noteInput').value = 'Completed dressing on Row 4';
+      document.getElementById('areasOfConcern').value = '- Fiber reel shortage in DH2';
+      document.getElementById('areasOfConcern').dispatchEvent(new Event('input'));
+      document.getElementById('signature').value = 'Daniel Morris – ServicePoint';
+      savePrefs();
+      switchTab('report');
+      const liveTxt = document.getElementById('reportOutput').textContent;
+      const uiFlowOk = liveTxt.includes('Daniel Morris & Jack Tracy') &&
+                       liveTxt.includes('MP \u2013 64') &&
+                       liveTxt.includes('\u2022 Verified 144F trunks in Row 9') &&
+                       !liveTxt.includes('\u2022 \u2022') &&
+                       liveTxt.includes('Pending patch panels on Row 12') &&
+                       liveTxt.includes('Completed dressing on Row 4') &&
+                       liveTxt.includes('\u2022 Fiber reel shortage in DH2') &&
+                       !liveTxt.includes('\u2022 -') &&
+                       liveTxt.includes('Daniel Morris \u2013 ServicePoint');
       return stylesOk && diffOk && wl.includes('WRONG LABELS FOUND') &&
              parts.subject.includes('Shift Update') && parts.body.includes('2001\u20132011') &&
-             parts.body.includes('WRONG LABELS FOUND');
+             parts.body.includes('WRONG LABELS FOUND') && recipientsOk && richPreviewOk && uiFlowOk;
     }""")
     print("REPORT ENGINE SEAM (styles/effectiveHalls/wrongLabels/emailParts):", "PASS" if seam_ok else "FAIL")
     if not seam_ok:

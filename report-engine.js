@@ -1,9 +1,13 @@
 /* report-engine.js - the report formatter as a deep module (architecture
-   candidate #2 & v83 deepening). The seam:
+   candidate #2 & v83-v84 deepening). The seam:
      ReportEngine.buildReport(style, ctx)
      ReportEngine.effectiveHalls(state, scope)
      ReportEngine.wrongLabelLines(mislabels)
      ReportEngine.buildEmailParts(styleOrText, ctx)
+     ReportEngine.formatPreviewHtml(reportText)
+     ReportEngine.buildEmailHtml(reportText)
+     ReportEngine.cleanEmailList(raw)
+     ReportEngine.DEFAULT_EMAIL_TO / DEFAULT_EMAIL_CC
    where ctx = { state, numStyle, halls, scope, mislabels }. No DOM reads inside this file.
    index.html supplies a thin adapter; tools/test_report.py runs this file
    headless with a plain ctx for the 21-line format diff. */
@@ -21,6 +25,41 @@ var STATUS_META = {
 };
 var CABLE_SHORT = { F144: '144F', OCS: 'OCS', CAT6: 'CAT6' };
 var ReportEngine = (function () {
+var DEFAULT_EMAIL_TO = 'Jack.Tracy@servicepoint.com';
+var DEFAULT_EMAIL_CC = [
+  'John.Hott@servicepoint.com',
+  'Chris.Dickman@servicepoint.com',
+  'Daniel.Morris@servicepoint.com',
+  'Mario.Johnson@servicepoint.com',
+  'Javier.Marvin@servicepoint.com',
+  'Steve.Maffeo@servicepoint.com',
+  'Michael.Murphy@servicepoint.com'
+].join(', ');
+
+function cleanEmailList(raw) {
+  if (!raw) return [];
+  var arr = Array.isArray(raw) ? raw : String(raw).split(/[,;\s\n]+/);
+  var seen = {};
+  var out = [];
+  arr.forEach(function (item) {
+    var trimmed = String(item || '').trim().replace(/^[<("']+|[>)"',;]+$/g, '');
+    if (!trimmed || trimmed.indexOf('@') === -1) return;
+    var key = trimmed.toLowerCase();
+    if (seen[key]) return;
+    seen[key] = true;
+    out.push(trimmed);
+  });
+  return out;
+}
+
+function escHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function runsOf(arr) {
   var runs = [];
   var i = 0;
@@ -351,11 +390,11 @@ function buildReport(style, ctx) {
       if (hl.length) blocks.push('MP | ' + h.name + '\n' + hl.join('\n'));
     });
     if (blocks.length) out += blocks.join('\n\n') + '\n\n';
-    var spLines = (m.spWorkNotes || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    var spLines = (m.spWorkNotes || '').split('\n').map(function (l) { return l.replace(/^[\s\u2022\-\*]+/, '').trim(); }).filter(Boolean);
     out += 'SP\n' + (spLines.length ? spLines.map(function (l) { return '\u2022 ' + l; }).join('\n') : '\u2022 None') + '\n\n';
     out += blockersFormal(state) + '\n\n';
     out += 'AREAS OF CONCERN\n';
-    var aoc = (m.areasOfConcern || '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    var aoc = (m.areasOfConcern || '').split('\n').map(function (l) { return l.replace(/^[\s\u2022\-\*]+/, '').trim(); }).filter(Boolean);
     out += (aoc.length ? aoc.map(function (l) { return '\u2022 ' + l; }).join('\n') : '\u2022 None') + '\n';
     if (state.settings.signature && state.settings.signature.trim()) {
       out += '\n' + state.settings.signature.trim() + '\n';
@@ -422,17 +461,142 @@ function buildReport(style, ctx) {
   return out;
 }
 
+/* Rich in-app document formatter: wraps each line in semantic spans while
+   preserving exact line characters and '\n' separators so .textContent
+   is 100% identical to the plain-text report. */
+function formatPreviewHtml(reportText) {
+  var raw = String(reportText || '').replace(/\r\n/g, '\n');
+  return raw.split('\n').map(function (line) {
+    if (!line) return '';
+    var subjM = /^(Subject:\s*)(.+)$/.exec(line);
+    if (subjM) {
+      return '<span class="rp-subj"><span class="rp-subj-k">' + escHtml(subjM[1]) + '</span><span class="rp-subj-v">' + escHtml(subjM[2]) + '</span></span>';
+    }
+    if (/^(SHIFT SUMMARY|WORK PERFORMED|BLOCKERS(?:\s*\u2013\s*.+)?|AREAS OF CONCERN|WRONG LABELS FOUND|Work Completed:|Blockers:|Areas of concern:|Work areas completed:|Blockers \/ Issues:|Tasks for tomorrow:)$/.test(line)) {
+      return '<span class="rp-sec">' + escHtml(line) + '</span>';
+    }
+    var mpHall = /^(MP)(\s*\|\s*)(.+)$/.exec(line);
+    if (mpHall) {
+      return '<span class="rp-hall"><span class="rp-badge-mp">' + escHtml(mpHall[1]) + '</span><span class="rp-hall-sep">' + escHtml(mpHall[2]) + '</span><span class="rp-hall-name">' + escHtml(mpHall[3]) + '</span></span>';
+    }
+    if (line === 'SP' || line === 'MP:' || line === 'SP:') {
+      return '<span class="rp-hall"><span class="rp-badge-sp">' + escHtml(line) + '</span></span>';
+    }
+    var kvM = /^(Superintendent on [Ss]ite:\s*|Shift Time:\s*|Personnel Count:\s*|Company\/Crew:\s*|Headcount:\s*|Location:\s*|Crew Members:\s*)(.*)$/.exec(line);
+    if (kvM) {
+      return '<span class="rp-kv"><span class="rp-k">' + escHtml(kvM[1]) + '</span><strong class="rp-v">' + escHtml(kvM[2]) + '</strong></span>';
+    }
+    var stBul = /^(\u2022\s*)(Ran and hung|Ran|In progress|Staged|Remediation)(:\s*)(.+)$/.exec(line);
+    if (stBul) {
+      var stKey = stBul[2].toLowerCase();
+      var cls = stKey === 'ran and hung' ? 'rp-st-hung'
+        : stKey === 'ran' ? 'rp-st-ran'
+        : stKey === 'in progress' ? 'rp-st-prog'
+        : stKey === 'staged' ? 'rp-st-staged' : 'rp-st-remed';
+      return '<span class="rp-bul ' + cls + '"><span class="rp-dot">' + escHtml(stBul[1]) + '</span><strong class="rp-st-lbl">' + escHtml(stBul[2] + stBul[3]) + '</strong><span class="rp-racks">' + escHtml(stBul[4]) + '</span></span>';
+    }
+    var mixBul = /^(\u2022\s*|-\s*)([^:]+:\s*)(.+)$/.exec(line);
+    if (mixBul) {
+      return '<span class="rp-bul rp-st-mix"><span class="rp-dot">' + escHtml(mixBul[1]) + '</span><strong class="rp-mix-lbl">' + escHtml(mixBul[2]) + '</strong><span class="rp-racks">' + escHtml(mixBul[3]) + '</span></span>';
+    }
+    var anyBul = /^(\u2022\s*|-\s*)(.+)$/.exec(line);
+    if (anyBul) {
+      return '<span class="rp-bul"><span class="rp-dot">' + escHtml(anyBul[1]) + '</span><span class="rp-desc">' + escHtml(anyBul[2]) + '</span></span>';
+    }
+    if (line === 'Team,' || line === 'Please see the shift update below.') {
+      return '<span class="rp-greet">' + escHtml(line) + '</span>';
+    }
+    return '<span class="rp-line">' + escHtml(line) + '</span>';
+  }).join('\n');
+}
+
+/* Rich HTML Email builder for ClipboardItem ('text/html') so pasting into
+   Outlook Desktop / Mobile / Web or Teams gives a clean executive layout. */
+function buildEmailHtml(reportText) {
+  var raw = String(reportText || '').replace(/\r\n/g, '\n');
+  var bodyTxt = raw.replace(/^Subject:\s*.+\n(?:\n)?/, '');
+  var lines = bodyTxt.split('\n');
+  var html = [
+    '<div style="font-family:\'Segoe UI\',Calibri,-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14.5px;line-height:1.55;color:#1f2937;max-width:680px;">'
+  ];
+  lines.forEach(function (line) {
+    if (!line.trim()) {
+      html.push('<div style="height:8px;"></div>');
+      return;
+    }
+    if (/^(SHIFT SUMMARY|WORK PERFORMED|BLOCKERS(?:\s*\u2013\s*.+)?|AREAS OF CONCERN|WRONG LABELS FOUND)$/.test(line)) {
+      html.push('<div style="margin-top:14px;margin-bottom:6px;padding-bottom:3px;border-bottom:2px solid #0284c7;font-size:12px;font-weight:800;letter-spacing:0.8px;color:#0369a1;text-transform:uppercase;">' + escHtml(line) + '</div>');
+      return;
+    }
+    if (/^(MP \| .+|SP)$/.test(line)) {
+      html.push('<div style="margin-top:10px;margin-bottom:3px;font-size:14px;font-weight:700;color:#0f172a;">' + escHtml(line) + '</div>');
+      return;
+    }
+    var kv = /^(Superintendent on [Ss]ite:|Shift Time:|Personnel Count:|Company\/Crew:|Headcount:|Location:|Crew Members:)\s*(.*)$/.exec(line);
+    if (kv) {
+      html.push('<div style="margin:2px 0;"><span style="color:#475569;font-weight:600;">' + escHtml(kv[1]) + '</span> <strong style="color:#0f172a;">' + escHtml(kv[2]) + '</strong></div>');
+      return;
+    }
+    var bul = /^(\u2022|-)\s*([^:]+:)\s*(.+)$/.exec(line);
+    if (bul) {
+      html.push('<div style="margin:3px 0 3px 10px;">&bull; <strong style="color:#0f172a;">' + escHtml(bul[2]) + '</strong> <span style="color:#1e293b;">' + escHtml(bul[3]) + '</span></div>');
+      return;
+    }
+    var simpleBul = /^(\u2022|-)\s*(.+)$/.exec(line);
+    if (simpleBul) {
+      html.push('<div style="margin:3px 0 3px 10px;">&bull; <span style="color:#1e293b;">' + escHtml(simpleBul[2]) + '</span></div>');
+      return;
+    }
+    html.push('<div style="margin:2px 0;">' + escHtml(line) + '</div>');
+  });
+  html.push('</div>');
+  return html.join('');
+}
+
 function buildEmailParts(styleOrText, ctx) {
-  var txt = (ctx && ctx.state) ? buildReport(styleOrText || 'formal', ctx) : String(styleOrText || '');
+  var txt = (ctx && ctx.state && (!styleOrText || styleOrText === 'formal' || styleOrText === 'mine' || styleOrText === 'crew' || styleOrText === 'boss'))
+    ? buildReport(styleOrText || 'formal', ctx)
+    : String(styleOrText || '');
   txt = txt.replace(/\r\n/g, '\n');
+  var st = (ctx && ctx.state) || {};
+  var settings = st.settings || {};
+  var rawTo = (settings.emailTo && String(settings.emailTo).trim()) ? settings.emailTo : DEFAULT_EMAIL_TO;
+  var rawCc = (settings.emailCc && String(settings.emailCc).trim()) ? settings.emailCc : DEFAULT_EMAIL_CC;
+  var toList = cleanEmailList(rawTo);
+  if (!toList.length) toList = cleanEmailList(DEFAULT_EMAIL_TO);
+  var toLower = {};
+  toList.forEach(function (e) { toLower[e.toLowerCase()] = true; });
+  var ccList = cleanEmailList(rawCc).filter(function (e) { return !toLower[e.toLowerCase()]; });
+
+  var subject = '';
+  var body = txt;
   var m = /^Subject:\s*(.+)\n(?:\n)?([\s\S]*)$/.exec(txt);
   if (m) {
-    return { subject: m[1].trim(), body: m[2], fullText: txt };
+    subject = m[1].trim();
+    body = m[2];
+  } else {
+    subject = 'Shift Update \u2013 ' + reportDateStr(st) +
+      (st.meta && st.meta.shiftTime ? ' (' + st.meta.shiftTime + ')' : '');
   }
-  var st = (ctx && ctx.state) || {};
-  var subj = 'Shift Update \u2013 ' + reportDateStr(st) +
-    (st.meta && st.meta.shiftTime ? ' (' + st.meta.shiftTime + ')' : '');
-  return { subject: subj, body: txt, fullText: txt };
+  var toStr = toList.join(', ');
+  var ccStr = ccList.join(', ');
+  var bodyCrlf = body.replace(/\r?\n/g, '\r\n');
+  var outlookUrl = 'ms-outlook://compose?to=' + encodeURIComponent(toList.join(',')) +
+    (ccList.length ? '&cc=' + encodeURIComponent(ccList.join(',')) : '') +
+    '&subject=' + encodeURIComponent(subject) +
+    '&body=' + encodeURIComponent(bodyCrlf);
+
+  return {
+    to: toStr,
+    cc: ccStr,
+    toList: toList,
+    ccList: ccList,
+    subject: subject,
+    body: body,
+    html: buildEmailHtml(txt),
+    fullText: txt,
+    outlookUrl: outlookUrl
+  };
 }
 
   return {
@@ -440,6 +604,11 @@ function buildEmailParts(styleOrText, ctx) {
     effectiveHalls: effectiveHalls,
     wrongLabelLines: wrongLabelLines,
     buildEmailParts: buildEmailParts,
+    formatPreviewHtml: formatPreviewHtml,
+    buildEmailHtml: buildEmailHtml,
+    cleanEmailList: cleanEmailList,
+    DEFAULT_EMAIL_TO: DEFAULT_EMAIL_TO,
+    DEFAULT_EMAIL_CC: DEFAULT_EMAIL_CC,
     activeHallNames: activeHallNames,
     STATUS_META: STATUS_META, STATUS_ORDER: STATUS_ORDER,
     REPORT_STATUS_ORDER: REPORT_STATUS_ORDER, CABLES: CABLES, CABLE_LABEL: CABLE_LABEL,
