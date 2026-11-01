@@ -107,20 +107,51 @@ var KitData = (function () {
 
   function copyRich(text, html, onDone) {
     var plain = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    if (html && navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
+    var richStr = html ? String(html) : '';
+    function domRichFallback() {
+      if (!richStr) return false;
+      try {
+        var box = document.createElement('div');
+        box.setAttribute('contenteditable', 'true');
+        box.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none;background:#ffffff;color:#0f172a;';
+        box.innerHTML = richStr;
+        document.body.appendChild(box);
+        var onCopy = function (e) {
+          if (e && e.clipboardData) {
+            e.clipboardData.setData('text/html', richStr);
+            e.clipboardData.setData('text/plain', plain);
+            e.preventDefault();
+          }
+        };
+        document.addEventListener('copy', onCopy);
+        var range = document.createRange();
+        range.selectNodeContents(box);
+        var sel = window.getSelection ? window.getSelection() : null;
+        if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+        var ok = document.execCommand('copy');
+        document.removeEventListener('copy', onCopy);
+        if (sel) sel.removeAllRanges();
+        box.remove();
+        return !!ok;
+      } catch (e) { return false; }
+    }
+    var syncOk = domRichFallback();
+    if (richStr && navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
       try {
         var item = new ClipboardItem({
           'text/plain': new Blob([plain], { type: 'text/plain' }),
-          'text/html': new Blob([String(html)], { type: 'text/html' })
+          'text/html': new Blob([richStr], { type: 'text/html' })
         });
         navigator.clipboard.write([item]).then(function () {
           if (onDone) onDone(true, true);
         }).catch(function () {
-          copy(plain, function (ok) { if (onDone) onDone(ok, false); });
+          if (syncOk) { if (onDone) onDone(true, true); }
+          else copy(plain, function (ok) { if (onDone) onDone(ok, false); });
         });
         return;
       } catch (e) {}
     }
+    if (syncOk) { if (onDone) onDone(true, true); return; }
     copy(plain, function (ok) { if (onDone) onDone(ok, false); });
   }
 

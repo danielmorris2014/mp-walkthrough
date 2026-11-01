@@ -587,49 +587,126 @@ function formatPreviewHtml(reportText) {
   }).join('\n');
 }
 
-/* Rich HTML Email builder for ClipboardItem ('text/html') so pasting into
-   Outlook Desktop / Mobile / Web or Teams gives a clean executive layout. */
+/* Rich HTML Email builder for ClipboardItem ('text/html') and .eml drafts so
+   pasting or opening in Outlook Desktop / Mobile / Web or Teams matches the
+   in-app executive typography, section pills, MP/SP badges, and status colors. */
+var EMAIL_FONT = "font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;";
+
 function buildEmailHtml(reportText) {
   var raw = String(reportText || '').replace(/\r\n/g, '\n');
   var bodyTxt = raw.replace(/^Subject:\s*.+\n(?:\n)?/, '');
   var lines = bodyTxt.split('\n');
   var html = [
-    '<div style="font-family:\'Segoe UI\',Calibri,-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14.5px;line-height:1.55;color:#1f2937;max-width:680px;">'
+    '<div style="' + EMAIL_FONT + 'font-size:13.5px;line-height:1.6;color:#0f172a;font-variant-numeric:tabular-nums;max-width:680px;">'
   ];
   lines.forEach(function (line) {
     if (!line.trim()) {
-      html.push('<div style="height:8px;"></div>');
+      html.push('<div style="height:8px;line-height:8px;font-size:8px;">&nbsp;</div>');
       return;
     }
     var cl = classifyReportLine(line);
     if (cl.kind === 'section') {
-      html.push('<div style="margin-top:14px;margin-bottom:6px;padding-bottom:3px;border-bottom:2px solid #0284c7;font-size:12px;font-weight:800;letter-spacing:0.8px;color:#0369a1;text-transform:uppercase;">' + escHtml(cl.text) + '</div>');
+      html.push(
+        '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:14px 0 6px 0;border-collapse:collapse;">' +
+          '<tr><td style="' + EMAIL_FONT + 'border-left:3px solid #0284c7;background-color:#e0f2fe;padding:3px 10px;border-radius:0 5px 5px 0;font-size:11.5px;font-weight:800;letter-spacing:0.85px;color:#0369a1;text-transform:uppercase;line-height:1.4;">' +
+            escHtml(cl.text) +
+          '</td></tr>' +
+        '</table>'
+      );
       return;
     }
-    if (cl.kind === 'mpHall' || cl.kind === 'subhead') {
-      html.push('<div style="margin-top:10px;margin-bottom:3px;font-size:14px;font-weight:700;color:#0f172a;">' + escHtml(cl.text) + '</div>');
+    if (cl.kind === 'mpHall') {
+      html.push(
+        '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0 4px 0;border-collapse:separate;">' +
+          '<tr><td style="' + EMAIL_FONT + 'background-color:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;padding:2px 9px;font-size:13px;font-weight:800;line-height:1.4;">' +
+            '<span style="' + EMAIL_FONT + 'color:#15803d;font-weight:900;">' + escHtml(cl.badge) + '</span>' +
+            '<span style="' + EMAIL_FONT + 'color:#64748b;font-weight:600;">' + escHtml(cl.sep) + '</span>' +
+            '<span style="' + EMAIL_FONT + 'color:#0f172a;font-weight:800;">' + escHtml(cl.hall) + '</span>' +
+          '</td></tr>' +
+        '</table>'
+      );
+      return;
+    }
+    if (cl.kind === 'subhead') {
+      var badgeColor = cl.isMp ? '#15803d' : '#0284c7';
+      html.push(
+        '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0 4px 0;border-collapse:separate;">' +
+          '<tr><td style="' + EMAIL_FONT + 'background-color:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;padding:2px 9px;font-size:13px;font-weight:900;color:' + badgeColor + ';line-height:1.4;">' +
+            escHtml(cl.text) +
+          '</td></tr>' +
+        '</table>'
+      );
       return;
     }
     if (cl.kind === 'kv') {
-      html.push('<div style="margin:2px 0;"><span style="color:#475569;font-weight:600;">' + escHtml(cl.k.trim()) + '</span> <strong style="color:#0f172a;">' + escHtml(cl.v) + '</strong></div>');
+      html.push(
+        '<div style="' + EMAIL_FONT + 'margin:2px 0;font-size:13.5px;line-height:1.6;">' +
+          '<span style="' + EMAIL_FONT + 'color:#475569;font-weight:600;">' + escHtml(cl.k) + '</span>' +
+          '<strong style="' + EMAIL_FONT + 'color:#0f172a;font-weight:700;">' + escHtml(cl.v) + '</strong>' +
+        '</div>'
+      );
       return;
     }
     if (cl.kind === 'statusBullet') {
-      html.push('<div style="margin:3px 0 3px 10px;">&bull; <strong style="color:#0f172a;">' + escHtml(cl.status + ':') + '</strong> <span style="color:#1e293b;">' + escHtml(cl.racks) + '</span></div>');
+      var stKey = cl.status.toLowerCase();
+      var stColor = stKey === 'ran and hung' ? '#15803d'
+        : stKey === 'ran' ? '#6d28d9'
+        : stKey === 'in progress' ? '#b45309'
+        : stKey === 'staged' ? '#0369a1' : '#b91c1c';
+      html.push(
+        '<div style="' + EMAIL_FONT + 'margin:3px 0 3px 6px;font-size:13.5px;line-height:1.6;font-variant-numeric:tabular-nums;">' +
+          '<span style="' + EMAIL_FONT + 'color:' + stColor + ';font-weight:900;">&bull; </span>' +
+          '<strong style="' + EMAIL_FONT + 'color:' + stColor + ';font-weight:800;">' + escHtml(cl.status + cl.colon) + '</strong>' +
+          '<span style="' + EMAIL_FONT + 'color:#0f172a;font-weight:500;font-variant-numeric:tabular-nums;">' + escHtml(cl.racks) + '</span>' +
+        '</div>'
+      );
       return;
     }
     if (cl.kind === 'colonBullet') {
-      html.push('<div style="margin:3px 0 3px 10px;">&bull; <strong style="color:#0f172a;">' + escHtml(cl.label.trim()) + '</strong> <span style="color:#1e293b;">' + escHtml(cl.rest) + '</span></div>');
+      html.push(
+        '<div style="' + EMAIL_FONT + 'margin:3px 0 3px 6px;font-size:13.5px;line-height:1.6;font-variant-numeric:tabular-nums;">' +
+          '<span style="' + EMAIL_FONT + 'color:#64748b;font-weight:900;">&bull; </span>' +
+          '<strong style="' + EMAIL_FONT + 'color:#0f172a;font-weight:750;">' + escHtml(cl.label) + '</strong>' +
+          '<span style="' + EMAIL_FONT + 'color:#1e293b;font-weight:500;font-variant-numeric:tabular-nums;">' + escHtml(cl.rest) + '</span>' +
+        '</div>'
+      );
       return;
     }
     if (cl.kind === 'simpleBullet') {
-      html.push('<div style="margin:3px 0 3px 10px;">&bull; <span style="color:#1e293b;">' + escHtml(cl.rest) + '</span></div>');
+      html.push(
+        '<div style="' + EMAIL_FONT + 'margin:3px 0 3px 6px;font-size:13.5px;line-height:1.6;">' +
+          '<span style="' + EMAIL_FONT + 'color:#64748b;font-weight:900;">&bull; </span>' +
+          '<span style="' + EMAIL_FONT + 'color:#1e293b;font-weight:500;">' + escHtml(cl.rest) + '</span>' +
+        '</div>'
+      );
       return;
     }
-    html.push('<div style="margin:2px 0;">' + escHtml(line) + '</div>');
+    html.push(
+      '<div style="' + EMAIL_FONT + 'margin:2px 0;font-size:13.5px;line-height:1.6;color:' + (cl.kind === 'greet' ? '#334155' : '#0f172a') + ';font-weight:500;">' +
+        escHtml(line) +
+      '</div>'
+    );
   });
   html.push('</div>');
   return html.join('');
+}
+
+function buildEml(parts) {
+  var p = parts || {};
+  var headers = [
+    'To: ' + (p.to || ''),
+    p.cc ? ('Cc: ' + p.cc) : '',
+    'Subject: ' + (p.subject || 'Shift Update'),
+    'X-Unsent: 1',
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset="utf-8"',
+    'Content-Transfer-Encoding: 8bit',
+    '',
+    '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:16px;background-color:#ffffff;">' +
+      (p.html || '') +
+    '</body></html>'
+  ].filter(function (line, idx) { return idx >= 7 || line !== ''; });
+  return headers.join('\r\n');
 }
 
 function buildEmailParts(styleOrText, ctx) {
@@ -660,22 +737,26 @@ function buildEmailParts(styleOrText, ctx) {
   var toStr = toList.join(', ');
   var ccStr = ccList.join(', ');
   var bodyCrlf = body.replace(/\r?\n/g, '\r\n');
-  var outlookUrl = 'ms-outlook://compose?to=' + encodeURIComponent(toList.join(',')) +
+  var baseComposeUrl = 'ms-outlook://compose?to=' + encodeURIComponent(toList.join(',')) +
     (ccList.length ? '&cc=' + encodeURIComponent(ccList.join(',')) : '') +
-    '&subject=' + encodeURIComponent(subject) +
-    '&body=' + encodeURIComponent(bodyCrlf);
-
-  return {
+    '&subject=' + encodeURIComponent(subject);
+  var outlookPlainUrl = baseComposeUrl + '&body=' + encodeURIComponent(bodyCrlf);
+  var htmlStr = buildEmailHtml(txt);
+  var out = {
     to: toStr,
     cc: ccStr,
     toList: toList,
     ccList: ccList,
     subject: subject,
     body: body,
-    html: buildEmailHtml(txt),
+    html: htmlStr,
     fullText: txt,
-    outlookUrl: outlookUrl
+    outlookUrl: baseComposeUrl,
+    outlookComposeUrl: baseComposeUrl,
+    outlookPlainUrl: outlookPlainUrl
   };
+  out.eml = buildEml(out);
+  return out;
 }
 
   return {
@@ -686,6 +767,7 @@ function buildEmailParts(styleOrText, ctx) {
     buildEmailParts: buildEmailParts,
     formatPreviewHtml: formatPreviewHtml,
     buildEmailHtml: buildEmailHtml,
+    buildEml: buildEml,
     cleanEmailList: cleanEmailList,
     DEFAULT_EMAIL_TO: DEFAULT_EMAIL_TO,
     DEFAULT_EMAIL_CC: DEFAULT_EMAIL_CC,

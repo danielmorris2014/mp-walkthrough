@@ -1013,6 +1013,7 @@
         <button class="btn" onclick="endOfNight()">End of night</button>
       </div>
       <div class="report-actions-secondary">
+        <button class="btn btn-secondary" style="flex:1;" onclick="downloadEmlDraft()">Rich .eml Draft</button>
         <button class="btn btn-secondary" style="flex:1;" onclick="shareReport()">Share</button>
         <button class="btn btn-secondary" style="flex:1;" onclick="saveReportToHistory()">Save to history</button>
       </div>
@@ -1155,7 +1156,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = WalkState.STORAGE_KEY;
-var APP_VERSION = 'v88';
+var APP_VERSION = 'v89';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2169,7 +2170,8 @@ function renderReportEnvelope(parts) {
   envEl.innerHTML =
     '<div class="re-row"><span class="re-lbl">To</span><div class="re-pills">' + (toPills || '<span class="muted">None</span>') + '</div></div>' +
     '<div class="re-row"><span class="re-lbl">CC (' + (parts.ccList ? parts.ccList.length : 0) + ')</span><div class="re-pills">' + (ccPills || '<span class="muted">None</span>') + '</div></div>' +
-    '<div class="re-row" style="padding-top:4px;margin-top:3px;border-top:1px solid rgba(255,255,255,0.06);"><span class="re-lbl">Subj</span><span class="re-subj-val">' + escapeHtml(parts.subject || '') + '</span></div>';
+    '<div class="re-row" style="padding-top:4px;margin-top:3px;border-top:1px solid rgba(255,255,255,0.06);"><span class="re-lbl">Subj</span><span class="re-subj-val">' + escapeHtml(parts.subject || '') + '</span></div>' +
+    '<div class="re-row" style="padding-top:4px;margin-top:3px;border-top:1px solid rgba(255,255,255,0.06);"><span class="re-lbl">Format</span><span class="muted" style="font-size:11px;">Send in Outlook copies rich HTML &mdash; press <b>Paste</b> in body (or tap <b>Rich .eml Draft</b> on desktop)</span></div>';
 }
 function toggleRecipientsEditor() {
   var box = document.getElementById('recipientsEditor');
@@ -2231,7 +2233,7 @@ function currentReportText() {
 }
 function copyReport() {
   var parts = parseReportEmailParts();
-  copyRichReport(parts.fullText, parts.html, 'Report copied');
+  copyRichReport(parts.body, parts.html, 'Formatted report copied (Paste into Outlook)');
 }
 function shareReport() {
   var txt = currentReportText();
@@ -2243,8 +2245,30 @@ function parseReportEmailParts() {
 }
 function emailReport() {
   var parts = parseReportEmailParts();
-  copyRichReport(parts.fullText, parts.html, 'Opening Outlook (report also copied)');
-  try { window.location.href = parts.outlookUrl; } catch (e) {}
+  KitData.copyRich(parts.body, parts.html, function (ok) {
+    showToast(ok ? 'Rich report copied \u2014 press Paste in Outlook body' : 'Opening Outlook');
+    try { window.location.href = parts.outlookComposeUrl || parts.outlookUrl; } catch (e) {}
+  });
+}
+function downloadEmlDraft() {
+  var parts = parseReportEmailParts();
+  var eml = parts.eml || (ReportEngine.buildEml ? ReportEngine.buildEml(parts) : '');
+  if (!eml) return;
+  try {
+    var blob = new Blob([eml], { type: 'message/rfc822;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var safeDate = (state.meta && state.meta.date ? state.meta.date : 'shift').replace(/[^0-9A-Za-z_-]+/g, '-');
+    a.href = url;
+    a.download = 'Shift-Update-' + safeDate + '.eml';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    showToast('Rich .eml draft downloaded \u2014 open it in Outlook');
+  } catch (e) {
+    copyReport();
+  }
 }
 function saveReportToHistory() {
   pushUndo();
@@ -2787,7 +2811,7 @@ initStorage();
       </div>
       <div id="syncSettingsInfo" class="muted" style="margin-top:6px;"></div>
       <div class="batch-row" style="justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
-        <span class="muted">App version: <strong style="color:var(--text);">v88</strong></span>
+        <span class="muted">App version: <strong style="color:var(--text);">v89</strong></span>
         <button class="btn btn-secondary" onclick="forceAppUpdate()">Force Update</button>
       </div>
       <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closeSettings()">Close</button>

@@ -122,10 +122,17 @@ with sync_playwright() as p:
                            parts.ccList.length === 7 &&
                            dedup.length === 2 &&
                            parts.outlookUrl.includes('to=Jack.Tracy%40servicepoint.com') &&
-                           parts.outlookUrl.includes('cc=John.Hott%40servicepoint.com');
+                           parts.outlookUrl.includes('cc=John.Hott%40servicepoint.com') &&
+                           !parts.outlookUrl.includes('&body=');
+      const fullHtml = ReportEngine.buildEmailHtml(document.getElementById('reportOutput').textContent);
       const richPreviewOk = !!document.querySelector('#reportOutput .rp-sec') &&
                             !!document.querySelector('#reportEnvelope .to-pill') &&
-                            typeof parts.html === 'string' && parts.html.includes('SHIFT SUMMARY');
+                            typeof parts.html === 'string' && parts.html.includes('SHIFT SUMMARY') &&
+                            fullHtml.includes('border-left:3px solid #0284c7') &&
+                            fullHtml.includes('#15803d') &&
+                            fullHtml.includes('#6d28d9') &&
+                            fullHtml.includes('#0369a1') &&
+                            typeof parts.eml === 'string' && parts.eml.includes('X-Unsent: 1');
       // End-to-end UI input -> Report propagation check (including live Walk View report preview & uncommitted blocker flush)
       document.getElementById('numStyle').value = 'short';
       state.settings.numStyle = 'short';
