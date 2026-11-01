@@ -661,6 +661,31 @@
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   }
   .btn-outlook:active { filter: brightness(0.92); transform: scale(0.97); }
+  .outlook-coach {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    margin-bottom: 11px; padding: 8px 11px; border-radius: 10px;
+    background: rgba(0,120,212,0.12); border: 1px solid rgba(117,199,240,0.32);
+    color: var(--slate-12); font-size: 12px; line-height: 1.4;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .outlook-coach.copied {
+    background: rgba(48,164,108,0.20); border-color: rgba(61,214,140,0.55); color: #ffffff;
+  }
+  .oc-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 999px;
+    background: var(--sky-9); color: #09131c; font-size: 11px; font-weight: 900;
+    flex: 0 0 18px;
+  }
+  .outlook-coach.copied .oc-badge {
+    background: var(--green-11); color: #06180e;
+  }
+  .oc-arrow { color: var(--sky-9); font-weight: 900; }
+  .outlook-coach kbd {
+    padding: 1px 5px; border-radius: 4px; font-size: 11px; font-weight: 700;
+    background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.18);
+    font-family: inherit;
+  }
   .report-doc-wrap {
     border: 1px solid var(--border2); border-radius: 14px; overflow: hidden;
     background: #121418; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 20px -6px rgba(0,0,0,0.45);
@@ -1008,7 +1033,7 @@
         </div>
       </div>
       <div class="report-actions-primary">
-        <button class="btn btn-outlook" id="emailReportBtn" onclick="emailReport()">&#9993; Send in Outlook</button>
+        <button class="btn btn-outlook" id="emailReportBtn" onclick="emailReport()">&#9993; Copy &amp; Open Outlook (Paste)</button>
         <button class="btn btn-secondary" onclick="copyReport()">Copy Report</button>
         <button class="btn" onclick="endOfNight()">End of night</button>
       </div>
@@ -1016,6 +1041,11 @@
         <button class="btn btn-secondary" style="flex:1;" onclick="downloadEmlDraft()">Rich .eml Draft</button>
         <button class="btn btn-secondary" style="flex:1;" onclick="shareReport()">Share</button>
         <button class="btn btn-secondary" style="flex:1;" onclick="saveReportToHistory()">Save to history</button>
+      </div>
+      <div class="outlook-coach" id="outlookPasteCoach">
+        <span class="oc-badge">1</span><span>Tap <b>Copy &amp; Open Outlook</b></span>
+        <span class="oc-arrow">&rarr;</span>
+        <span class="oc-badge">2</span><span><b>Paste</b> in email body (<kbd>Ctrl+V</kbd> or tap <b>Paste</b>) to keep colors &amp; badges</span>
       </div>
       <div id="recipientsEditor" style="display:none; margin-bottom:11px; padding:10px; border-radius:11px; background:rgba(255,255,255,0.03); border:1px solid var(--border);">
         <div class="form-field" style="margin-bottom:8px;">
@@ -1091,7 +1121,7 @@
     <ul id="nightChecklist"></ul>
     <div class="batch-row" style="margin-top:12px;">
       <button class="btn" onclick="copyReport()">Copy report</button>
-      <button class="btn btn-secondary" onclick="emailReport()">Open in Outlook</button>
+      <button class="btn btn-secondary" onclick="emailReport()">Copy &amp; Open Outlook (Paste)</button>
       <button class="btn btn-secondary" onclick="doBackup()">Backup file</button>
     </div>
     <button class="btn btn-ghost" style="width:100%; margin-top:8px;" onclick="closeNightOverlay()">Done</button>
@@ -1156,7 +1186,7 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = WalkState.STORAGE_KEY;
-var APP_VERSION = 'v89';
+var APP_VERSION = 'v90';
 var swReg = null;
 
 function showUpdateBanner(text, showBtn) {
@@ -2231,9 +2261,24 @@ function currentReportText() {
   var t = el && el.textContent ? el.textContent : buildReport((document.getElementById('reportStyle') || {}).value || 'formal');
   return t.replace(/\r\n/g, '\n');
 }
+function markOutlookCopiedCoach() {
+  var coach = document.getElementById('outlookPasteCoach');
+  if (coach) {
+    coach.classList.add('copied');
+    coach.innerHTML = '<span class="oc-badge">&#10003;</span><span><b>Copied to clipboard!</b> When Outlook opens, click/tap in the email body and press <b>Paste</b> (<kbd>Ctrl+V</kbd> or tap <b>Paste</b>).</span>';
+  }
+  var btn = document.getElementById('emailReportBtn');
+  if (btn) {
+    btn.innerHTML = '&#10003; Copied! Paste in Outlook Body';
+    setTimeout(function () {
+      if (btn) btn.innerHTML = '&#9993; Copy &amp; Open Outlook (Paste)';
+    }, 5000);
+  }
+}
 function copyReport() {
   var parts = parseReportEmailParts();
-  copyRichReport(parts.body, parts.html, 'Formatted report copied (Paste into Outlook)');
+  copyRichReport(parts.body, parts.html, 'Formatted report copied \u2014 Paste (Ctrl+V / Tap Paste) in Outlook');
+  markOutlookCopiedCoach();
 }
 function shareReport() {
   var txt = currentReportText();
@@ -2246,8 +2291,11 @@ function parseReportEmailParts() {
 function emailReport() {
   var parts = parseReportEmailParts();
   KitData.copyRich(parts.body, parts.html, function (ok) {
-    showToast(ok ? 'Rich report copied \u2014 press Paste in Outlook body' : 'Opening Outlook');
-    try { window.location.href = parts.outlookComposeUrl || parts.outlookUrl; } catch (e) {}
+    markOutlookCopiedCoach();
+    showToast(ok ? '\u2713 Copied! Press Paste (Ctrl+V / Tap Paste) in Outlook body' : 'Opening Outlook');
+    setTimeout(function () {
+      try { window.location.href = parts.outlookComposeUrl || parts.outlookUrl; } catch (e) {}
+    }, 500);
   });
 }
 function downloadEmlDraft() {
@@ -2811,7 +2859,7 @@ initStorage();
       </div>
       <div id="syncSettingsInfo" class="muted" style="margin-top:6px;"></div>
       <div class="batch-row" style="justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
-        <span class="muted">App version: <strong style="color:var(--text);">v89</strong></span>
+        <span class="muted">App version: <strong style="color:var(--text);">v90</strong></span>
         <button class="btn btn-secondary" onclick="forceAppUpdate()">Force Update</button>
       </div>
       <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closeSettings()">Close</button>
