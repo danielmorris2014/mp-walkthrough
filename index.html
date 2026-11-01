@@ -82,17 +82,50 @@
     display: none; align-items: center; gap: 9px;
     background: var(--amber-9); color: var(--amber-1);
     font-weight: 800; font-size: 12.5px;
-    padding: calc(9px + env(safe-area-inset-top)) 12px 9px 12px; min-height: 46px;
+    padding: calc(9px + env(safe-area-inset-top)) 12px 12px 12px; min-height: 48px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    overflow: hidden;
+  }
+  .update-banner.is-busy {
+    background: linear-gradient(90deg, #0284c7, #0369a1);
+    color: #ffffff;
   }
   .update-banner .glyph { width: 15px; height: 15px; flex: 0 0 auto; }
   .update-banner .glyph svg { width: 100%; height: 100%; display: block; }
+  @keyframes ubSpin { to { transform: rotate(360deg); } }
+  .update-banner.is-busy .glyph svg { animation: ubSpin 0.85s linear infinite; }
   .ub-btn {
     margin-left: auto; background: var(--amber-1); color: var(--amber-9);
     border: none; border-radius: 8px; font-weight: 800; font-size: 11.5px;
     padding: 7px 12px; min-height: 44px; cursor: pointer; flex: 0 0 auto;
+    transition: opacity 0.15s ease, transform 0.12s ease;
   }
   .ub-btn:active { transform: scale(0.96); }
+  .ub-btn:disabled {
+    opacity: 0.78; cursor: default; transform: none;
+    background: rgba(255,255,255,0.22); color: #ffffff;
+  }
+  .ub-progress {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
+    background: rgba(0,0,0,0.22); overflow: hidden;
+  }
+  @keyframes ubStripe {
+    0% { background-position: 0 0; }
+    100% { background-position: 28px 0; }
+  }
+  .ub-progress-fill {
+    height: 100%; width: 0%;
+    background-color: #3dd68c;
+    background-image: linear-gradient(
+      45deg,
+      rgba(255,255,255,0.35) 25%, transparent 25%,
+      transparent 50%, rgba(255,255,255,0.35) 50%,
+      rgba(255,255,255,0.35) 75%, transparent 75%, transparent
+    );
+    background-size: 28px 28px;
+    animation: ubStripe 0.6s linear infinite;
+    transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  }
   body.has-update-banner { padding-top: calc(52px + env(safe-area-inset-top)); }
   body.has-update-banner header { top: calc(52px + env(safe-area-inset-top)); }
 
@@ -848,6 +881,7 @@
   <span class="glyph"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></span>
   <span id="updateBannerText">Update ready</span>
   <button class="ub-btn" id="updateNowBtn" onclick="applyUpdateNow()">Update now</button>
+  <div class="ub-progress"><div class="ub-progress-fill" id="updateProgressFill"></div></div>
 </div>
 
 <header>
@@ -1186,37 +1220,93 @@ hallSentences = ReportEngine.hallSentences, Side = ReportEngine.Side;</script>
 <script>
 'use strict';
 var STORAGE_KEY = WalkState.STORAGE_KEY;
-var APP_VERSION = 'v90';
+var APP_VERSION = 'v91';
 var swReg = null;
+var applyingUpdate = false;
+var updateProgTimer = null;
 
+function setUpdateProgress(pct) {
+  var fill = document.getElementById('updateProgressFill');
+  if (fill) fill.style.width = Math.max(0, Math.min(100, pct || 0)) + '%';
+}
+function startUpdateProgress(startPct) {
+  if (updateProgTimer) clearInterval(updateProgTimer);
+  var cur = startPct || 18;
+  setUpdateProgress(cur);
+  updateProgTimer = setInterval(function () {
+    if (cur < 92) {
+      cur += Math.max(2, Math.round((92 - cur) * 0.22));
+      setUpdateProgress(cur);
+    }
+  }, 180);
+}
 function showUpdateBanner(text, showBtn) {
   var b = document.getElementById('updateBanner');
   if (!b) return;
   document.getElementById('updateBannerText').textContent = text;
-  document.getElementById('updateNowBtn').style.display = showBtn ? '' : 'none';
+  var btn = document.getElementById('updateNowBtn');
+  if (btn) {
+    btn.style.display = showBtn ? '' : 'none';
+    if (showBtn && !applyingUpdate) {
+      btn.disabled = false;
+      btn.textContent = 'Update now';
+    }
+  }
+  if (showBtn && !applyingUpdate) {
+    b.classList.remove('is-busy');
+    if (updateProgTimer) { clearInterval(updateProgTimer); updateProgTimer = null; }
+    setUpdateProgress(100);
+  } else {
+    b.classList.add('is-busy');
+    startUpdateProgress(22);
+  }
   Overlay.open('updateBanner');
   document.body.classList.add('has-update-banner');
 }
 function applyUpdateNow() {
+  if (applyingUpdate) return;
+  applyingUpdate = true;
+  var b = document.getElementById('updateBanner');
+  if (b) b.classList.add('is-busy');
+  var txt = document.getElementById('updateBannerText');
+  if (txt) txt.textContent = 'Applying update & reloading\u2026';
+  var btn = document.getElementById('updateNowBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Updating\u2026';
+  }
+  startUpdateProgress(35);
   try { if (swReg && swReg.waiting) swReg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
-  setTimeout(function () { location.reload(); }, 400);
+  setTimeout(function () { setUpdateProgress(100); }, 320);
+  setTimeout(function () { location.reload(); }, 450);
 }
 function forceAppUpdate() {
-  showToast('Checking for latest version\u2026');
+  if (applyingUpdate) return;
+  applyingUpdate = true;
+  closeSettings();
+  showUpdateBanner('Fetching latest update\u2026', false);
+  setUpdateProgress(25);
   var p = Promise.resolve();
   if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
     p = navigator.serviceWorker.getRegistrations().then(function (regs) {
+      setUpdateProgress(55);
       return Promise.all(regs.map(function (r) { return r.unregister(); }));
     }).catch(function () {});
   }
   p.then(function () {
+    setUpdateProgress(80);
     if ('caches' in window && caches.keys) {
       return caches.keys().then(function (keys) {
         return Promise.all(keys.map(function (k) { return caches.delete(k); }));
       }).catch(function () {});
     }
   }).then(function () {
-    location.replace(location.pathname + '?v=' + Date.now() + (location.hash || ''));
+    setUpdateProgress(100);
+    var txt = document.getElementById('updateBannerText');
+    if (txt) txt.textContent = 'Reloading latest version\u2026';
+    setTimeout(function () {
+      location.replace(location.pathname + '?v=' + Date.now() + (location.hash || ''));
+    }, 220);
   });
 }
 var BRUSH_LABEL = { hung: 'Ran & Hung', ran: 'Ran (Pulled)', prog: 'In Progress', staged: 'Staged', remed: 'Remediation', none: 'Clear' };
@@ -2859,7 +2949,7 @@ initStorage();
       </div>
       <div id="syncSettingsInfo" class="muted" style="margin-top:6px;"></div>
       <div class="batch-row" style="justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
-        <span class="muted">App version: <strong style="color:var(--text);">v90</strong></span>
+        <span class="muted">App version: <strong style="color:var(--text);">v91</strong></span>
         <button class="btn btn-secondary" onclick="forceAppUpdate()">Force Update</button>
       </div>
       <button class="btn btn-ghost" style="width:100%; margin-top:12px;" onclick="closeSettings()">Close</button>
